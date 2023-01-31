@@ -2,6 +2,7 @@ package impl.messages.requests;
 
 import api.core.Side;
 import api.messages.requests.IPlaceOrderRequest;
+import api.messages.requests.RequestType;
 
 public class PlaceOrderRequest implements IPlaceOrderRequest {
 
@@ -68,4 +69,8 @@ public class PlaceOrderRequest implements IPlaceOrderRequest {
         return filledVolume >= totalVolume;
     }
 
+    @Override
+    public RequestType getRequestType() {
+        return RequestType.PLACE;
+    }
 }

@@ -1,5 +1,7 @@
 package api.messages;
 
-public interface IMessage {
+import java.io.Serializable;
+
+public interface IMessage extends Serializable {
     // TODO add timestamp
 }

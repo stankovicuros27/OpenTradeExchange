@@ -1,6 +1,7 @@
 package impl.messages.requests;
 
 import api.messages.requests.ICancelOrderRequest;
+import api.messages.requests.RequestType;
 
 public class CancelOrderRequest implements ICancelOrderRequest {
 
@@ -20,5 +21,10 @@ public class CancelOrderRequest implements ICancelOrderRequest {
     @Override
     public int getOrderID() {
         return orderID;
+    }
+
+    @Override
+    public RequestType getRequestType() {
+        return RequestType.CANCEL;
     }
 }
