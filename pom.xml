@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>MatchingEngine</module>
+        <module>ExchangeServer</module>
     </modules>
 
     <properties>
