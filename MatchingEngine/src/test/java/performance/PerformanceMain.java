@@ -7,12 +7,12 @@ import impl.util.InstantTimestampProvider;
 
 public class PerformanceMain {
 
-    private static final int NUMBER_OF_LIQUIDITY_PROVIDERS = 10;
-    private static final double BASE_PRICE = 101;
-    private static final double PRICE_DEVIATION = 100;
+    private static final int NUMBER_OF_LIQUIDITY_PROVIDERS = 1000;
+    private static final double BASE_PRICE = 10;
+    private static final double PRICE_DEVIATION = 1;
     private static final int BASE_VOLUME = 51;
     private static final int VOLUME_DEVIATION = 50;
-    private static final int OBSERVER_WAIT_TIME_MS = 3000;
+    private static final int OBSERVER_WAIT_TIME_MS = 5000;
 
 
     public static void main(String[] args) {

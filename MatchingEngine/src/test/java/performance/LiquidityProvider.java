@@ -40,7 +40,7 @@ public class LiquidityProvider implements Runnable {
             sendRequest();
             if (++requestCnt % 1000000 == 0) {
                 requestCnt = 0;
-                System.out.println("Liquidity Provider {" + id + "} sent 1M requests!");
+                //System.out.println("Liquidity Provider {" + id + "} sent 1M requests!");
             }
         }
     }
@@ -73,11 +73,19 @@ public class LiquidityProvider implements Runnable {
 
     private double getNextPrice() {
         // Round 2 decimals
-        return Math.round((priceBase + priceDeviation * random.nextDouble() * 100)) / 100.0;
+        double priceAdjustment = priceDeviation * random.nextDouble();
+        if (random.nextBoolean()) {
+            priceAdjustment = -priceAdjustment;
+        }
+        return Math.round(((priceBase + priceAdjustment) * 100)) / 100.0;
     }
 
     private int getNextVolume() {
-        return volumeBase + (int)(volumeDeviation * random.nextDouble());
+        int volumeAdjustment = (int)(volumeDeviation * random.nextDouble());
+        if (random.nextBoolean()) {
+            volumeAdjustment = -volumeAdjustment;
+        }
+        return volumeBase + volumeAdjustment;
     }
 
 }
