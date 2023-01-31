@@ -1,10 +1,11 @@
 package server;
 
 import api.core.IOrderBook;
-import api.messages.requests.IRequest;
-import api.messages.requests.RequestType;
-import impl.messages.requests.CancelOrderRequest;
-import impl.messages.requests.PlaceOrderRequest;
+import api.core.IOrderRequestFactory;
+import api.core.Side;
+import api.messages.requests.ICancelOrderRequest;
+import api.messages.requests.IPlaceOrderRequest;
+import networking.messages.requests.*;
 
 import java.io.*;
 import java.net.Socket;
@@ -12,11 +13,13 @@ import java.net.Socket;
 public class BrokerConnectionHandler implements Runnable {
 
     private final IOrderBook orderBook;
+    private final IOrderRequestFactory orderRequestFactory;
     private final Socket brokerSocket;
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-    public BrokerConnectionHandler(IOrderBook orderBook, Socket brokerSocket) {
+    public BrokerConnectionHandler(IOrderBook orderBook, IOrderRequestFactory orderRequestFactory, Socket brokerSocket) {
+        this.orderRequestFactory = orderRequestFactory;
         this.orderBook = orderBook;
         this.brokerSocket = brokerSocket;
     }
@@ -27,14 +30,25 @@ public class BrokerConnectionHandler implements Runnable {
             in = new ObjectInputStream(brokerSocket.getInputStream());
             out = new ObjectOutputStream(brokerSocket.getOutputStream());
 
-            IRequest request = (IRequest) in.readObject();
-            while (request != null) {
-                if (request.getRequestType() == RequestType.PLACE) {
-                    orderBook.placeOrder((PlaceOrderRequest) request);
+            INetworkRequest networkRequest = (INetworkRequest) in.readObject();
+            while (networkRequest != null) {
+                if (networkRequest.getNetworkRequestType() == NetworkRequestType.PLACE) {
+                    PlaceOrderNetworkRequest placeOrderNetworkRequest = (PlaceOrderNetworkRequest) networkRequest;
+                    Side side = placeOrderNetworkRequest.getSide() == NetworkRequestSide.BUY ? Side.BUY : Side.SELL;
+                    IPlaceOrderRequest internalPlaceOrderRequest = orderRequestFactory.createPlaceOrderRequest(placeOrderNetworkRequest.getUserID(),
+                            placeOrderNetworkRequest.getPrice(),
+                            side,
+                            placeOrderNetworkRequest.getVolume());
+                    // TODO handle responses
+                    orderBook.placeOrder(internalPlaceOrderRequest);
                 } else {
-                    orderBook.cancelOrder((CancelOrderRequest) request);
+                    CancelOrderNetworkRequest cancelOrderNetworkRequest = (CancelOrderNetworkRequest) networkRequest;
+                    ICancelOrderRequest internalCancelOrderRequest = orderRequestFactory.createCancelOrderRequest(cancelOrderNetworkRequest.getUserID(),
+                            cancelOrderNetworkRequest.getOrderID());
+                    // TODO handle responses
+                    orderBook.cancelOrder(internalCancelOrderRequest);
                 }
-                request = (IRequest) in.readObject();
+                networkRequest = (INetworkRequest) in.readObject();
             }
 
 

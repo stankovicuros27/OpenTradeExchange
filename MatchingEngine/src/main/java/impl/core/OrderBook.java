@@ -11,7 +11,6 @@ import api.messages.responses.OrderResponseStatus;
 import api.util.ITimestampProvider;
 import impl.messages.info.OrderBookInfo;
 import impl.messages.responses.OrderStatusResponse;
-import impl.util.InstantTimestampProvider;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,18 +18,19 @@ import java.util.Map;
 
 public class OrderBook implements IOrderBook {
 
-    // TODO dependency injection
     private final Map<Side, ILimitCollection> limitCollections = new HashMap<>();
-    private final IOrderLookupCache orderLookupCache = new OrderLookupCache();
-    private final ITimestampProvider timestampProvider = new InstantTimestampProvider();
+    private final IOrderLookupCache orderLookupCache;
+    private final ITimestampProvider timestampProvider;
 
-    public OrderBook() {
+    public OrderBook(IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
+        this.orderLookupCache = orderLookupCache;
+        this.timestampProvider = timestampProvider;
         limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider));
         limitCollections.put(Side.SELL, new LimitCollection(Side.SELL, orderLookupCache, timestampProvider));
     }
 
     @Override
-    public List<IResponse> placeOrder(IPlaceOrderRequest orderRequest) {
+    public synchronized List<IResponse> placeOrder(IPlaceOrderRequest orderRequest) {
         ILimitCollection limitCollection = limitCollections.get((orderRequest.getSide().getCounterSide()));
         List<IResponse> responses = limitCollection.matchOrderRequest(orderRequest);
         if (!orderRequest.isMatched()) {
@@ -42,7 +42,7 @@ public class OrderBook implements IOrderBook {
     }
 
     @Override
-    public IOrderStatusResponse cancelOrder(ICancelOrderRequest cancelOrderRequest) {
+    public synchronized IOrderStatusResponse cancelOrder(ICancelOrderRequest cancelOrderRequest) {
         IOrder order = orderLookupCache.getOrder(cancelOrderRequest.getUserID(), cancelOrderRequest.getOrderID());
         if (order == null) {
             return new OrderStatusResponse(cancelOrderRequest.getUserID(), cancelOrderRequest.getOrderID(), OrderResponseStatus.NULL_ORDER);
@@ -52,7 +52,7 @@ public class OrderBook implements IOrderBook {
     }
 
     @Override
-    public IOrderBookInfo getInfo() {
+    public synchronized IOrderBookInfo getInfo() {
         ILimitCollectionInfo buySideInfo = limitCollections.get(Side.BUY).getInfo();
         ILimitCollectionInfo sellSideInfo = limitCollections.get(Side.SELL).getInfo();
         return new OrderBookInfo(buySideInfo, sellSideInfo);

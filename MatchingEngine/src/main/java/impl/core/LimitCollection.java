@@ -40,7 +40,7 @@ public class LimitCollection implements ILimitCollection {
         ILimit limit = limits.get(order.getPrice());
         IOrderStatusResponse response = limit.cancelOrder(order);
         if (limit.isEmpty()) {
-            limits.remove(limit);
+            limits.remove(limit.getPrice());
         }
         return response;
     }

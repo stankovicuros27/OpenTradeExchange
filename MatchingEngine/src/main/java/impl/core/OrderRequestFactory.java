@@ -21,7 +21,7 @@ public class OrderRequestFactory implements IOrderRequestFactory {
     }
 
     @Override
-    public IPlaceOrderRequest createPlaceOrderRequest(int userID, double price, Side side, int totalVolume) {
+    public synchronized IPlaceOrderRequest createPlaceOrderRequest(int userID, double price, Side side, int totalVolume) {
         if (!userOrderIDs.containsKey(userID)) {
             userOrderIDs.put(userID, 0);
         }
