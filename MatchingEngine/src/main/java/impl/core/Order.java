@@ -7,8 +7,6 @@ import api.messages.responses.ITradeResponse;
 import api.util.ITimestampProvider;
 import impl.messages.responses.TradeResponse;
 
-import java.time.Instant;
-
 public class Order implements IOrder {
 
     private final int userID;

@@ -1,4 +1,4 @@
-package performance.observers.participants;
+package performance.participants;
 
 import api.core.IOrderBook;
 import api.core.IOrderRequestFactory;
@@ -77,11 +77,8 @@ public class LiquidityProvider implements Runnable {
         int cancelOrderCnt = 0;
         int closedOrderCnt = 0;
         int tradeCnt = 0;
-        double lastTradePrice = -1;
         for (IResponse response : responses) {
             if (response.getType() == ResponseType.TradeResponse) {
-                ITradeResponse tradeResponse = (ITradeResponse) response;
-                lastTradePrice = tradeResponse.getPrice();
                 tradeCnt++;
             } else if (response.getType() == ResponseType.OrderStatusResponse) {
                 IOrderStatusResponse orderStatusResponse = (IOrderStatusResponse) response;
@@ -99,9 +96,6 @@ public class LiquidityProvider implements Runnable {
         performanceDataStore.recordCancelOrders(cancelOrderCnt);
         performanceDataStore.recordClosedOrders(closedOrderCnt);
         performanceDataStore.recordTrades(tradeCnt);
-        if (lastTradePrice != -1) {
-            performanceDataStore.recordLastTradePrice(lastTradePrice);
-        }
     }
 
     private List<IResponse> sendRequest() {

@@ -7,10 +7,9 @@ public class PerformanceDataStore {
     private int cancelOrderCnt = 0;
     private int closedOrderCnt = 0;
     private int tradeCnt = 0;
-    private double lastTradePrice = 0;
 
-    public synchronized void recordEvents(int numberOfEvents) {
-        eventCnt += numberOfEvents;
+    public synchronized void recordEvents(int n) {
+        eventCnt += n;
     }
 
     public synchronized int getAndResetEventCnt() {
@@ -57,14 +56,6 @@ public class PerformanceDataStore {
         int x = tradeCnt;
         tradeCnt = 0;
         return x;
-    }
-
-    public synchronized void recordLastTradePrice(double tradePrice) {
-        lastTradePrice = tradePrice;
-    }
-
-    public synchronized double getLastTradePrice() {
-        return lastTradePrice;
     }
 
 }

@@ -1,6 +1,7 @@
 package performance.observers.chart;
 
 import api.core.Side;
+import api.messages.info.IOrderBookInfo;
 import impl.core.OrderBook;
 import performance.PerformanceDataStore;
 
@@ -48,19 +49,21 @@ public class OrderBookChartObserver implements Runnable {
     }
 
     private void updateEventsPerSecondChart() {
-        float placeOrderCnt = (float) performanceDataStore.getAndResetPlaceOrderCnt();
-        float cancelOrderCnt = (float) performanceDataStore.getAndResetCancelOrderCnt();
-        float closedOrderCnt = (float) performanceDataStore.getAndResetClosedOrderCnt();
-        float tradeCnt = (float) performanceDataStore.getAndResetTradeCnt();
+        float factor = (float) (1.0 / (waitTimeMs / 1000.0));
+        float placeOrderCnt = (float) performanceDataStore.getAndResetPlaceOrderCnt() * factor;
+        float cancelOrderCnt = (float) performanceDataStore.getAndResetCancelOrderCnt() * factor;
+        float closedOrderCnt = (float) performanceDataStore.getAndResetClosedOrderCnt() * factor;
+        float tradeCnt = (float) performanceDataStore.getAndResetTradeCnt() * factor;
         eventsPerSecondChart.update(new float[] {placeOrderCnt, cancelOrderCnt, closedOrderCnt, tradeCnt});
     }
 
     private void updateTradeDataChart() {
-        float buyPrice = (float) orderBook.getInfo().getBestPrice(Side.BUY);
-        float lastTradePrice = (float) performanceDataStore.getLastTradePrice();
-        float sellPrice = (float) orderBook.getInfo().getBestPrice(Side.SELL);
-        tradeDataChart.update(new float[]{buyPrice, lastTradePrice, sellPrice});
+        IOrderBookInfo orderBookInfo = orderBook.getInfo();
+        float buyPrice = (float) orderBookInfo.getBestPrice(Side.BUY);
+        // TODO
+        //float lastTradePrice = (float) performanceDataStore.getLastTradePrice();
+        float sellPrice = (float) orderBookInfo.getBestPrice(Side.SELL);
+        tradeDataChart.update(new float[]{buyPrice, (buyPrice + sellPrice) / 2, sellPrice});
     }
-
 
 }

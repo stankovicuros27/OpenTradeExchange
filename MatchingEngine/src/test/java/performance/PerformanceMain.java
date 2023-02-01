@@ -6,13 +6,12 @@ import impl.core.OrderRequestFactory;
 import impl.util.InstantTimestampProvider;
 import performance.observers.chart.OrderBookChartObserver;
 import performance.observers.console.OrderBookConsoleObserver;
-import performance.observers.participants.LiquidityProvidersManager;
+import performance.participants.LiquidityProvidersManager;
 
 public class PerformanceMain {
 
-    private static final int OBSERVER_WAIT_TIME_MS = 1000;
-
-
+    private static final int OBSERVER_TIMEOUT_MS = 500;
+    
     public static void main(String[] args) {
         OrderLookupCache orderLookupCache = new OrderLookupCache();
         InstantTimestampProvider timestampProvider = new InstantTimestampProvider();
@@ -24,11 +23,11 @@ public class PerformanceMain {
         Thread liquidityProvidersManagerThread = new Thread(liquidityProvidersManager);
         liquidityProvidersManagerThread.start();
 
-        OrderBookConsoleObserver orderBookConsoleObserver = new OrderBookConsoleObserver(orderBook, OBSERVER_WAIT_TIME_MS);
+        OrderBookConsoleObserver orderBookConsoleObserver = new OrderBookConsoleObserver(orderBook, OBSERVER_TIMEOUT_MS * 10);
         Thread orderBookObserverThread = new Thread(orderBookConsoleObserver);
         orderBookObserverThread.start();
 
-        OrderBookChartObserver orderBookChartObserver = new OrderBookChartObserver(orderBook, performanceDataStore, OBSERVER_WAIT_TIME_MS);
+        OrderBookChartObserver orderBookChartObserver = new OrderBookChartObserver(orderBook, performanceDataStore, OBSERVER_TIMEOUT_MS);
         Thread messageChartObserverThread = new Thread(orderBookChartObserver);
         messageChartObserverThread.start();
     }

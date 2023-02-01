@@ -34,7 +34,7 @@ public class DynamicChart extends JPanel {
 
         ValueAxis axis = plot.getDomainAxis();
         axis.setAutoRange(true);
-        axis.setFixedAutoRange(50000);
+        axis.setFixedAutoRange(100000);
 
         final ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setBackground(Color.GRAY);
