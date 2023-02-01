@@ -1,19 +1,18 @@
-package performance;
+package performance.observers.console;
 
 import api.core.IOrderBook;
 import api.core.Side;
 import api.messages.info.ILimitCollectionInfo;
 import api.messages.info.ILimitInfo;
 import api.messages.info.IOrderBookInfo;
-import performance.util.ConsoleColors;
 
-public class OrderBookLogObserver implements Runnable {
+public class OrderBookConsoleObserver implements Runnable {
 
     private static final int NUMBER_OF_LIMITS_DISPLAYED = 10;
     private final IOrderBook orderBook;
     private final int waitTimeMs;
 
-    public OrderBookLogObserver(IOrderBook orderBook, int waitTimeMs) {
+    public OrderBookConsoleObserver(IOrderBook orderBook, int waitTimeMs) {
         this.orderBook = orderBook;
         this.waitTimeMs = waitTimeMs;
     }
@@ -41,6 +40,7 @@ public class OrderBookLogObserver implements Runnable {
         logSideSeparator();
         logOrderBookSide(orderBookInfo.getLimitCollectionInfo(Side.SELL));
         System.out.println(" ");
+        System.out.println("~~~~~~~~~~~~ XXXXXXXXXXXXXXX ~~~~~~~~~~~~");
     }
 
     private void logOrderBookSide(ILimitCollectionInfo limitCollectionInfo) {

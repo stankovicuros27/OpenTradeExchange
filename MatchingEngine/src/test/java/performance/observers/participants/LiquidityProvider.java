@@ -1,13 +1,12 @@
-package performance;
+package performance.observers.participants;
 
 import api.core.IOrderBook;
 import api.core.IOrderRequestFactory;
 import api.core.Side;
 import api.messages.requests.ICancelOrderRequest;
 import api.messages.requests.IPlaceOrderRequest;
-import api.messages.responses.IResponse;
-import api.messages.responses.ITradeResponse;
-import api.messages.responses.ResponseType;
+import api.messages.responses.*;
+import performance.PerformanceDataStore;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,40 +20,87 @@ public class LiquidityProvider implements Runnable {
     private final IOrderBook orderBook;
     private final IOrderRequestFactory orderRequestFactory;
     private final PerformanceDataStore performanceDataStore;
-    private final double priceBase;
+    private final double priceBaseInitial;
+    private double priceBase;
     private final double priceDeviation;
-    private final int volumeBase;
+    private final int volumeBaseInitial;
+    private int volumeBase;
     private final int volumeDeviation;
     private final Random random = new Random();
     private final List<IPlaceOrderRequest> placeOrderRequests = new ArrayList<>();
     private int requestCnt = 0;
 
-    public LiquidityProvider(IOrderBook orderBook, IOrderRequestFactory orderRequestFactory, PerformanceDataStore performanceDataStore, double priceBase, double priceDeviation, int volumeBase, int volumeDeviation) {
+    public LiquidityProvider(IOrderBook orderBook, IOrderRequestFactory orderRequestFactory, PerformanceDataStore performanceDataStore, double priceBaseInitial, double priceDeviation, int volumeBaseInitial, int volumeDeviation) {
         this.orderBook = orderBook;
         this.orderRequestFactory = orderRequestFactory;
         this.performanceDataStore = performanceDataStore;
-        this.priceBase = priceBase;
+        this.priceBaseInitial = priceBaseInitial;
         this.priceDeviation = priceDeviation;
-        this.volumeBase = volumeBase;
+        this.volumeBaseInitial = volumeBaseInitial;
         this.volumeDeviation = volumeDeviation;
+
+        this.priceBase = priceBaseInitial;
+        this.volumeBase = volumeBaseInitial;
     }
 
     @Override
     public void run() {
         while(true) {
             List<IResponse> responses = sendRequest();
-            performanceDataStore.recordEvents(responses.size());
-            for (IResponse response : responses) {
-                if (response.getType() == ResponseType.TradeResponse) {
-                    ITradeResponse tradeResponse = (ITradeResponse) response;
-                    performanceDataStore.recordLastTradePrice(tradeResponse.getPrice());
-                    break;
-                }
-            }
-            if (++requestCnt % 1000000 == 0) {
+            updatePerformanceDataStore(responses);
+            if (++requestCnt % 100000 == 0) {
                 requestCnt = 0;
                 //System.out.println("Liquidity Provider {" + id + "} sent 1M requests!");
             }
+        }
+    }
+
+    public void updatePriceBase(double priceBase) {
+        this.priceBase = priceBase;
+    }
+
+    public void updateVolumeBase(int volumeBase) {
+        this.volumeBase = volumeBase;
+    }
+
+    public double getPriceBase() {
+        return priceBase;
+    }
+
+    public int getVolumeBase() {
+        return volumeBase;
+    }
+
+    private void updatePerformanceDataStore(List<IResponse> responses) {
+        performanceDataStore.recordEvents(responses.size());
+        int placeOrderCnt = 0;
+        int cancelOrderCnt = 0;
+        int closedOrderCnt = 0;
+        int tradeCnt = 0;
+        double lastTradePrice = -1;
+        for (IResponse response : responses) {
+            if (response.getType() == ResponseType.TradeResponse) {
+                ITradeResponse tradeResponse = (ITradeResponse) response;
+                lastTradePrice = tradeResponse.getPrice();
+                tradeCnt++;
+            } else if (response.getType() == ResponseType.OrderStatusResponse) {
+                IOrderStatusResponse orderStatusResponse = (IOrderStatusResponse) response;
+                OrderResponseStatus status = orderStatusResponse.getStatus();
+                if (status == OrderResponseStatus.CANCELLED_ORDER) {
+                    cancelOrderCnt++;
+                } else if (status == OrderResponseStatus.PLACED_ORDER) {
+                    placeOrderCnt++;
+                } else if (status == OrderResponseStatus.CLOSED_ORDER) {
+                    closedOrderCnt++;
+                }
+            }
+        }
+        performanceDataStore.recordPlaceOrders(placeOrderCnt);
+        performanceDataStore.recordCancelOrders(cancelOrderCnt);
+        performanceDataStore.recordClosedOrders(closedOrderCnt);
+        performanceDataStore.recordTrades(tradeCnt);
+        if (lastTradePrice != -1) {
+            performanceDataStore.recordLastTradePrice(lastTradePrice);
         }
     }
 
