@@ -73,12 +73,18 @@ public class LimitCollection implements ILimitCollection {
         List<ILimitInfo> limitInfos = new ArrayList<>();
         int volume = 0;
         int numberOfOrders = 0;
+        double bestPrice = -1;
         for (ILimit limit : limits.values()) {
+            if (bestPrice == -1) {
+                bestPrice = limit.getPrice();
+            } else {
+                bestPrice = side == Side.BUY ? Math.max(bestPrice, limit.getPrice()) : Math.min(bestPrice, limit.getPrice());
+            }
             limitInfos.add(limit.getLimitInfo());
             volume += limit.getVolume();
             numberOfOrders += limit.getNumberOfOrders();
         }
-        return new LimitCollectionInfo(side, limitInfos, volume, numberOfOrders);
+        return new LimitCollectionInfo(side, limitInfos, volume, numberOfOrders, bestPrice);
     }
 
     private boolean canMatchOrders(IPlaceOrderRequest orderRequest) {

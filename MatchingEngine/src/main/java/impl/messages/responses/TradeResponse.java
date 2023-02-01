@@ -1,6 +1,7 @@
 package impl.messages.responses;
 
 import api.messages.responses.ITradeResponse;
+import api.messages.responses.ResponseType;
 
 import java.util.Objects;
 
@@ -57,6 +58,11 @@ public class TradeResponse implements ITradeResponse {
     @Override
     public int getTimestamp() {
         return timestamp;
+    }
+
+    @Override
+    public ResponseType getType() {
+        return ResponseType.TradeResponse;
     }
 
     @Override

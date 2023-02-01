@@ -2,6 +2,7 @@ package impl.messages.responses;
 
 import api.messages.responses.IOrderStatusResponse;
 import api.messages.responses.OrderResponseStatus;
+import api.messages.responses.ResponseType;
 
 import java.util.Objects;
 
@@ -33,6 +34,11 @@ public class OrderStatusResponse implements IOrderStatusResponse {
     }
 
     @Override
+    public ResponseType getType() {
+        return ResponseType.OrderStatusResponse;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -53,4 +59,5 @@ public class OrderStatusResponse implements IOrderStatusResponse {
                 ", status = " + status +
                 " }";
     }
+
 }

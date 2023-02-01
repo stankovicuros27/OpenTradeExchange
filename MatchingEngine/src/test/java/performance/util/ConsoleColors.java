@@ -1,4 +1,4 @@
-package performance;
+package performance.util;
 
 public class ConsoleColors {
     // Reset

@@ -20,11 +20,9 @@ public class OrderBook implements IOrderBook {
 
     private final Map<Side, ILimitCollection> limitCollections = new HashMap<>();
     private final IOrderLookupCache orderLookupCache;
-    private final ITimestampProvider timestampProvider;
 
     public OrderBook(IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
         this.orderLookupCache = orderLookupCache;
-        this.timestampProvider = timestampProvider;
         limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider));
         limitCollections.put(Side.SELL, new LimitCollection(Side.SELL, orderLookupCache, timestampProvider));
     }

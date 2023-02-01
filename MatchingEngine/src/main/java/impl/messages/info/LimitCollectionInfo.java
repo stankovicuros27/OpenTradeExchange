@@ -12,12 +12,14 @@ public class LimitCollectionInfo implements ILimitCollectionInfo {
     private final List<ILimitInfo> limitInfos;
     private final int volume;
     private final int numberOfOrders;
+    private final double bestPrice;
 
-    public LimitCollectionInfo(Side side, List<ILimitInfo> limitInfos, int volume, int numberOfOrders) {
+    public LimitCollectionInfo(Side side, List<ILimitInfo> limitInfos, int volume, int numberOfOrders, double bestPrice) {
         this.side = side;
         this.limitInfos = limitInfos;
         this.volume = volume;
         this.numberOfOrders = numberOfOrders;
+        this.bestPrice = bestPrice;
     }
 
     @Override
@@ -38,6 +40,11 @@ public class LimitCollectionInfo implements ILimitCollectionInfo {
     @Override
     public int getNumberOfOrders() {
         return numberOfOrders;
+    }
+
+    @Override
+    public double getBestPrice() {
+        return bestPrice;
     }
 
 }

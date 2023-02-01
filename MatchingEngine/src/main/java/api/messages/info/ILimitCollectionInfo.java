@@ -9,4 +9,5 @@ public interface ILimitCollectionInfo extends IInfo {
     Side getSide();
     int getVolume();
     int getNumberOfOrders();
+    double getBestPrice();
 }
