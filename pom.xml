@@ -12,6 +12,7 @@
         <module>MatchingEngine</module>
         <module>ExchangeServer</module>
         <module>ExchangeNetworking</module>
+        <module>BrokerServer</module>
     </modules>
 
     <properties>

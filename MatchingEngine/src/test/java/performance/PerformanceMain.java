@@ -11,7 +11,7 @@ import performance.participants.LiquidityProvidersManager;
 public class PerformanceMain {
 
     private static final int OBSERVER_TIMEOUT_MS = 500;
-    
+
     public static void main(String[] args) {
         OrderLookupCache orderLookupCache = new OrderLookupCache();
         InstantTimestampProvider timestampProvider = new InstantTimestampProvider();
