@@ -2,8 +2,8 @@ package performance;
 
 import impl.core.OrderBook;
 import impl.core.OrderLookupCache;
-import impl.core.OrderRequestFactory;
-import impl.util.InstantTimestampProvider;
+import impl.messages.util.OrderRequestFactory;
+import impl.time.InstantTimestampProvider;
 import performance.observers.chart.OrderBookChartObserver;
 import performance.observers.console.OrderBookConsoleObserver;
 import performance.participants.LiquidityProvidersManager;

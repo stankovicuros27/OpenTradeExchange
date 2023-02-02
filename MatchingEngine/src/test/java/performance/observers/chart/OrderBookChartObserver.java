@@ -1,7 +1,7 @@
 package performance.observers.chart;
 
-import api.core.Side;
 import api.messages.info.IOrderBookInfo;
+import api.sides.Side;
 import impl.core.OrderBook;
 import performance.PerformanceDataStore;
 

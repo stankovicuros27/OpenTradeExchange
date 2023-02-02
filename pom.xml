@@ -11,8 +11,8 @@
     <modules>
         <module>MatchingEngine</module>
         <module>ExchangeServer</module>
-        <module>ExchangeNetworking</module>
         <module>BrokerServer</module>
+        <module>Shared</module>
     </modules>
 
     <properties>

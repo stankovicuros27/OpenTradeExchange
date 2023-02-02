@@ -1,13 +1,13 @@
 package server;
 
 import api.core.IOrderBook;
-import api.core.IOrderRequestFactory;
-import api.core.Side;
-import api.messages.requests.ICancelOrderRequest;
-import api.messages.requests.IPlaceOrderRequest;
+import api.messages.IMessage;
+import api.messages.requests.IRequest;
+import api.messages.requests.RequestType;
+import api.messages.util.IOrderRequestFactory;
 import api.messages.responses.IResponse;
-import networking.messages.INetworkMessage;
-import networking.messages.requests.*;
+import impl.messages.requests.CancelOrderRequest;
+import impl.messages.requests.PlaceOrderRequest;
 import server.broadcast.ResponseBroadcastService;
 
 import java.io.*;
@@ -35,10 +35,10 @@ public class BrokerConnectionHandler implements Runnable {
         try {
             in = new ObjectInputStream(brokerClientSocket.getInputStream());
             out = new ObjectOutputStream(brokerClientSocket.getOutputStream());
-            INetworkRequest networkRequest = (INetworkRequest) in.readObject();
-            while (networkRequest != null) {
-                handleRequest(networkRequest);
-                networkRequest = (INetworkRequest) in.readObject();
+            IRequest request = (IRequest) in.readObject();
+            while (request != null && !brokerClientSocket.isClosed()) {
+                handleRequest(request);
+                request = (IRequest) in.readObject();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -49,41 +49,23 @@ public class BrokerConnectionHandler implements Runnable {
         }
     }
 
-    private void handleRequest(INetworkRequest networkRequest) {
+    private void handleRequest(IRequest request) {
         List<IResponse> responses;
-        if (networkRequest.getNetworkRequestType() == NetworkRequestType.PLACE) {
-            NetworkPlaceOrderRequest networkPlaceOrderRequest = (NetworkPlaceOrderRequest) networkRequest;
-            responses = handlePlaceOrderRequest(networkPlaceOrderRequest);
+        if (request.getRequestType() == RequestType.PLACE) {
+            System.out.println("Received place order request");   // TODO delete
+            PlaceOrderRequest placeOrderRequest = (PlaceOrderRequest) request;
+            responses = orderBook.placeOrder(placeOrderRequest);
         } else {
-            NetworkCancelOrderRequest networkCancelOrderRequest = (NetworkCancelOrderRequest) networkRequest;
-            responses = handleCancelOrderRequest(networkCancelOrderRequest);
+            System.out.println("Received cancel order request");   // TODO delete
+            CancelOrderRequest cancelOrderRequest = (CancelOrderRequest) request;
+            responses = List.of(orderBook.cancelOrder(cancelOrderRequest));
         }
-        // TODO convert to network messages
-        //responseBroadcastService.broadcastMessages(responses);
+        for (IMessage message : responses) {
+            responseBroadcastService.broadcastMessages(message);
+        }
     }
 
-    private List<IResponse> handlePlaceOrderRequest(NetworkPlaceOrderRequest networkPlaceOrderRequest) {
-
-        System.out.println("Received place order request");   // TODO delete
-
-        Side side = networkPlaceOrderRequest.getSide() == NetworkRequestSide.BUY ? Side.BUY : Side.SELL;
-        IPlaceOrderRequest internalPlaceOrderRequest = orderRequestFactory.createPlaceOrderRequest(networkPlaceOrderRequest.getUserID(),
-                networkPlaceOrderRequest.getPrice(),
-                side,
-                networkPlaceOrderRequest.getVolume());
-        return orderBook.placeOrder(internalPlaceOrderRequest);
-    }
-
-    private List<IResponse> handleCancelOrderRequest(NetworkCancelOrderRequest networkCancelOrderRequest) {
-
-        System.out.println("Received cancel order request");   // TODO delete
-
-        ICancelOrderRequest internalCancelOrderRequest = orderRequestFactory.createCancelOrderRequest(networkCancelOrderRequest.getUserID(),
-                networkCancelOrderRequest.getOrderID());
-        return List.of(orderBook.cancelOrder(internalCancelOrderRequest));
-    }
-
-    public void sendMessage(INetworkMessage message) {
+    public void sendMessage(IMessage message) {
         try {
             out.writeObject(message);
         } catch (IOException e) {

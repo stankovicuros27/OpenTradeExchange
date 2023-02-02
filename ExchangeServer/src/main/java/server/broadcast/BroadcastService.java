@@ -1,6 +1,6 @@
 package server.broadcast;
 
-import networking.messages.INetworkMessage;
+import api.messages.IMessage;
 import server.BrokerConnectionHandler;
 
 import java.util.ArrayList;
@@ -14,12 +14,10 @@ public abstract class BroadcastService {
         brokerConnectionHandlers.add(brokerConnectionHandler);
     }
 
-    public void broadcastMessages(List<INetworkMessage> messages) {
+    public void broadcastMessages(IMessage message) {
         for (BrokerConnectionHandler handler : brokerConnectionHandlers) {
             if (!handler.isClosed()) {
-                for (INetworkMessage message : messages) {
-                    handler.sendMessage(message);
-                }
+                handler.sendMessage(message);
             }
         }
     }

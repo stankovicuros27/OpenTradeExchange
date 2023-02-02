@@ -8,7 +8,8 @@ import api.messages.requests.IPlaceOrderRequest;
 import api.messages.responses.IOrderStatusResponse;
 import api.messages.responses.IResponse;
 import api.messages.responses.OrderResponseStatus;
-import api.util.ITimestampProvider;
+import api.sides.Side;
+import api.time.ITimestampProvider;
 import impl.messages.info.OrderBookInfo;
 import impl.messages.responses.OrderStatusResponse;
 
@@ -20,16 +21,18 @@ public class OrderBook implements IOrderBook {
 
     private final Map<Side, ILimitCollection> limitCollections = new HashMap<>();
     private final IOrderLookupCache orderLookupCache;
+    private final ITimestampProvider timestampProvider;
 
     public OrderBook(IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
         this.orderLookupCache = orderLookupCache;
+        this.timestampProvider = timestampProvider;
         limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider));
         limitCollections.put(Side.SELL, new LimitCollection(Side.SELL, orderLookupCache, timestampProvider));
     }
 
     @Override
     public synchronized List<IResponse> placeOrder(IPlaceOrderRequest orderRequest) {
-        ILimitCollection limitCollection = limitCollections.get((orderRequest.getSide().getCounterSide()));
+        ILimitCollection limitCollection = limitCollections.get(orderRequest.getSide().getCounterSide());
         List<IResponse> responses = limitCollection.matchOrderRequest(orderRequest);
         if (!orderRequest.isMatched()) {
             IOrder order = Order.fromRequest(orderRequest);
@@ -43,7 +46,8 @@ public class OrderBook implements IOrderBook {
     public synchronized IOrderStatusResponse cancelOrder(ICancelOrderRequest cancelOrderRequest) {
         IOrder order = orderLookupCache.getOrder(cancelOrderRequest.getUserID(), cancelOrderRequest.getOrderID());
         if (order == null) {
-            return new OrderStatusResponse(cancelOrderRequest.getUserID(), cancelOrderRequest.getOrderID(), OrderResponseStatus.NULL_ORDER);
+            int timestamp = timestampProvider.getTimestampNow();
+            return new OrderStatusResponse(cancelOrderRequest.getUserID(), cancelOrderRequest.getOrderID(), OrderResponseStatus.NULL_ORDER, timestamp);
         }
         ILimitCollection limitCollection = limitCollections.get((order.getSide()));
         return limitCollection.cancelOrder(order);
@@ -53,7 +57,8 @@ public class OrderBook implements IOrderBook {
     public synchronized IOrderBookInfo getInfo() {
         ILimitCollectionInfo buySideInfo = limitCollections.get(Side.BUY).getInfo();
         ILimitCollectionInfo sellSideInfo = limitCollections.get(Side.SELL).getInfo();
-        return new OrderBookInfo(buySideInfo, sellSideInfo);
+        int timestamp = timestampProvider.getTimestampNow();
+        return new OrderBookInfo(buySideInfo, sellSideInfo, timestamp);
     }
 
 }

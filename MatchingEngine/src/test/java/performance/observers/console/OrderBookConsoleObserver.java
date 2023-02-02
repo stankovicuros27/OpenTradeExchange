@@ -1,10 +1,10 @@
 package performance.observers.console;
 
 import api.core.IOrderBook;
-import api.core.Side;
 import api.messages.info.ILimitCollectionInfo;
 import api.messages.info.ILimitInfo;
 import api.messages.info.IOrderBookInfo;
+import api.sides.Side;
 
 public class OrderBookConsoleObserver implements Runnable {
 

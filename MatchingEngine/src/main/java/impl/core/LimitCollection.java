@@ -6,7 +6,8 @@ import api.messages.info.ILimitInfo;
 import api.messages.requests.IPlaceOrderRequest;
 import api.messages.responses.IOrderStatusResponse;
 import api.messages.responses.IResponse;
-import api.util.ITimestampProvider;
+import api.sides.Side;
+import api.time.ITimestampProvider;
 import impl.messages.info.LimitCollectionInfo;
 
 import java.util.ArrayList;
@@ -84,7 +85,8 @@ public class LimitCollection implements ILimitCollection {
             volume += limit.getVolume();
             numberOfOrders += limit.getNumberOfOrders();
         }
-        return new LimitCollectionInfo(side, limitInfos, volume, numberOfOrders, bestPrice);
+        int timestamp = timestampProvider.getTimestampNow();
+        return new LimitCollectionInfo(side, limitInfos, volume, numberOfOrders, bestPrice, timestamp);
     }
 
     private boolean canMatchOrders(IPlaceOrderRequest orderRequest) {

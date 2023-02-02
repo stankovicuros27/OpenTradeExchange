@@ -1,7 +1,7 @@
 package performance.participants;
 
 import api.core.IOrderBook;
-import api.core.IOrderRequestFactory;
+import api.messages.util.IOrderRequestFactory;
 import performance.PerformanceDataStore;
 
 import java.util.ArrayList;

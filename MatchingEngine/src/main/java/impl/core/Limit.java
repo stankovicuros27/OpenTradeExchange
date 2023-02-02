@@ -3,14 +3,14 @@ package impl.core;
 import api.core.ILimit;
 import api.core.IOrder;
 import api.core.IOrderLookupCache;
-import api.core.Side;
 import api.messages.info.ILimitInfo;
 import api.messages.requests.IPlaceOrderRequest;
 import api.messages.responses.IOrderStatusResponse;
 import api.messages.responses.IResponse;
 import api.messages.responses.ITradeResponse;
 import api.messages.responses.OrderResponseStatus;
-import api.util.ITimestampProvider;
+import api.sides.Side;
+import api.time.ITimestampProvider;
 import impl.messages.info.LimitInfo;
 import impl.messages.responses.OrderStatusResponse;
 
@@ -41,7 +41,8 @@ public class Limit implements ILimit {
         volume += order.getUnfilledVolume();
         orders.add(order);
         orderLookupCache.addOrder(order);
-        return new OrderStatusResponse(order.getUserID(), order.getOrderID(), OrderResponseStatus.PLACED_ORDER);
+        int timestamp = timestampProvider.getTimestampNow();
+        return new OrderStatusResponse(order.getUserID(), order.getOrderID(), OrderResponseStatus.PLACED_ORDER, timestamp);
     }
 
     @Override
@@ -49,12 +50,14 @@ public class Limit implements ILimit {
         volume -= order.getUnfilledVolume();
         orders.remove(order);
         orderLookupCache.removeOrder(order);
-        return new OrderStatusResponse(order.getUserID(), order.getOrderID(), OrderResponseStatus.CANCELLED_ORDER);
+        int timestamp = timestampProvider.getTimestampNow();
+        return new OrderStatusResponse(order.getUserID(), order.getOrderID(), OrderResponseStatus.CANCELLED_ORDER, timestamp);
     }
 
     @Override
     public List<IResponse> matchOrderRequest(IPlaceOrderRequest orderRequest) {
         List<IResponse> responses = new ArrayList<>();
+        int timestamp = timestampProvider.getTimestampNow();
         while(!orderRequest.isMatched() && !orders.isEmpty()) {
             IOrder matchingOrder = orders.peek();
             ITradeResponse trade = Order.matchOrderRequest(matchingOrder, orderRequest, timestampProvider);
@@ -63,11 +66,11 @@ public class Limit implements ILimit {
             if (matchingOrder.isClosed()) {
                 orders.remove(matchingOrder);
                 orderLookupCache.removeOrder(matchingOrder);
-                responses.add((new OrderStatusResponse(matchingOrder.getUserID(), matchingOrder.getOrderID(), OrderResponseStatus.CLOSED_ORDER)));
+                responses.add((new OrderStatusResponse(matchingOrder.getUserID(), matchingOrder.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
             }
         }
         if (orderRequest.isMatched()) {
-            responses.add((new OrderStatusResponse(orderRequest.getUserID(), orderRequest.getOrderID(), OrderResponseStatus.CLOSED_ORDER)));
+            responses.add((new OrderStatusResponse(orderRequest.getUserID(), orderRequest.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
         }
         return responses;
     }
@@ -104,7 +107,8 @@ public class Limit implements ILimit {
 
     @Override
     public ILimitInfo getLimitInfo() {
-        return new LimitInfo(side, price, volume, orders.size());
+        int timestamp = timestampProvider.getTimestampNow();
+        return new LimitInfo(side, price, volume, orders.size(), timestamp);
     }
 
 }

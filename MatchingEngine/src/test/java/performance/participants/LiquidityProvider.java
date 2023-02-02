@@ -1,11 +1,11 @@
 package performance.participants;
 
 import api.core.IOrderBook;
-import api.core.IOrderRequestFactory;
-import api.core.Side;
+import api.messages.util.IOrderRequestFactory;
 import api.messages.requests.ICancelOrderRequest;
 import api.messages.requests.IPlaceOrderRequest;
 import api.messages.responses.*;
+import api.sides.Side;
 import performance.PerformanceDataStore;
 
 import java.util.ArrayList;

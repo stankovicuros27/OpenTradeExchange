@@ -2,12 +2,12 @@ package server;
 
 import api.core.IOrderBook;
 import api.core.IOrderLookupCache;
-import api.core.IOrderRequestFactory;
-import api.util.ITimestampProvider;
+import api.messages.util.IOrderRequestFactory;
+import api.time.ITimestampProvider;
 import impl.core.OrderBook;
 import impl.core.OrderLookupCache;
-import impl.core.OrderRequestFactory;
-import impl.util.InstantTimestampProvider;
+import impl.messages.util.OrderRequestFactory;
+import impl.time.InstantTimestampProvider;
 import server.broadcast.InfoBroadcastService;
 import server.broadcast.ResponseBroadcastService;
 

@@ -1,6 +1,6 @@
-import networking.messages.requests.NetworkCancelOrderRequest;
-import networking.messages.requests.NetworkRequestSide;
-import networking.messages.requests.NetworkPlaceOrderRequest;
+import api.sides.Side;
+import impl.messages.util.OrderRequestFactory;
+import impl.time.InstantTimestampProvider;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -17,17 +17,26 @@ public class BrokerClient implements Runnable {
 
     @Override
     public void run() {
+
+        OrderRequestFactory orderRequestFactory = new OrderRequestFactory(new InstantTimestampProvider());
+
         try (Socket client = new Socket(EXCHANGE_SERVER_IP, EXCHANGE_SERVER_SOCKET)) {
             out = new ObjectOutputStream(client.getOutputStream());
             in = new ObjectInputStream(client.getInputStream());
 
-            out.writeObject(new NetworkPlaceOrderRequest(0, 10.0, NetworkRequestSide.BUY, 10));
-            out.writeObject(new NetworkCancelOrderRequest(0, 0));
+            out.writeObject(orderRequestFactory.createPlaceOrderRequest(0, 10.0, Side.BUY, 10));
+            out.writeObject(orderRequestFactory.createCancelOrderRequest(0, 0));
             out.flush();
+            Object obj;
+            while ((obj = in.readObject()) != null) {
+                System.out.println(obj);
+            }
 
 
 
         } catch (IOException e) {
+            throw new RuntimeException(e);
+        } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
     }
