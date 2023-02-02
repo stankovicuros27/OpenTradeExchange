@@ -9,6 +9,8 @@ import api.messages.responses.IResponse;
 import api.sides.Side;
 import api.time.ITimestampProvider;
 import impl.messages.info.LimitCollectionInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +19,15 @@ import java.util.TreeMap;
 
 public class LimitCollection implements ILimitCollection {
 
+    private static final Logger LOGGER = LogManager.getLogger(LimitCollection.class);
+
     private final Side side;
     private final IOrderLookupCache orderLookupCache;
     private final ITimestampProvider timestampProvider;
     private final SortedMap<Double, ILimit> limits = new TreeMap<>();
 
     public LimitCollection(Side side, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
+        LOGGER.info("Creating LimitCollection (" + side + ")");
         this.side = side;
         this.orderLookupCache = orderLookupCache;
         this.timestampProvider = timestampProvider;

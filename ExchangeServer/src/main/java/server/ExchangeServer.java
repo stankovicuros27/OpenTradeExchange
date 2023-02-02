@@ -8,6 +8,8 @@ import impl.core.OrderBook;
 import impl.core.OrderLookupCache;
 import impl.messages.util.OrderRequestFactory;
 import impl.time.InstantTimestampProvider;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import server.broadcast.InfoBroadcastService;
 import server.broadcast.ResponseBroadcastService;
 
@@ -19,7 +21,9 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Server implements Runnable {
+public class ExchangeServer implements Runnable {
+
+    private static final Logger LOGGER = LogManager.getLogger(ExchangeServer.class);
 
     private static final int EXCHANGE_SERVER_SOCKET = 9999;
 
@@ -32,7 +36,8 @@ public class Server implements Runnable {
     private final InfoBroadcastService infoBroadcastService = new InfoBroadcastService();
     private final List<BrokerConnectionHandler> brokerConnectionHandlers = new ArrayList<>();
 
-    public Server() {
+    public ExchangeServer() {
+        LOGGER.info("Creating ExchangeServer");
         IOrderLookupCache orderLookupCache = new OrderLookupCache();
         ITimestampProvider timestampProvider = new InstantTimestampProvider();
         orderBook = new OrderBook(orderLookupCache, timestampProvider);
@@ -41,6 +46,7 @@ public class Server implements Runnable {
 
     @Override
     public void run() {
+        LOGGER.info("Starting ExchangeServer");
         try {
             serverSocket = new ServerSocket(EXCHANGE_SERVER_SOCKET);
             threadPool = Executors.newCachedThreadPool();
@@ -81,8 +87,8 @@ public class Server implements Runnable {
     }
 
     public static void main(String[] args) {
-        Server server = new Server();
-        Thread serverThread = new Thread(server);
+        ExchangeServer exchangeServer = new ExchangeServer();
+        Thread serverThread = new Thread(exchangeServer);
         serverThread.start();
     }
 

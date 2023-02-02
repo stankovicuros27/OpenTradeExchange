@@ -27,12 +27,11 @@ public class BrokerClient implements Runnable {
             out.writeObject(orderRequestFactory.createPlaceOrderRequest(0, 10.0, Side.BUY, 10));
             out.writeObject(orderRequestFactory.createCancelOrderRequest(0, 0));
             out.flush();
+
             Object obj;
             while ((obj = in.readObject()) != null) {
                 System.out.println(obj);
             }
-
-
 
         } catch (IOException e) {
             throw new RuntimeException(e);

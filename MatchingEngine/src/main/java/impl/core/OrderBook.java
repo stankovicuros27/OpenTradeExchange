@@ -12,6 +12,8 @@ import api.sides.Side;
 import api.time.ITimestampProvider;
 import impl.messages.info.OrderBookInfo;
 import impl.messages.responses.OrderStatusResponse;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.List;
@@ -19,11 +21,14 @@ import java.util.Map;
 
 public class OrderBook implements IOrderBook {
 
+    private static final Logger LOGGER = LogManager.getLogger(OrderBook.class);
+
     private final Map<Side, ILimitCollection> limitCollections = new HashMap<>();
     private final IOrderLookupCache orderLookupCache;
     private final ITimestampProvider timestampProvider;
 
     public OrderBook(IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
+        LOGGER.info("Creating OrderBook");
         this.orderLookupCache = orderLookupCache;
         this.timestampProvider = timestampProvider;
         limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider));

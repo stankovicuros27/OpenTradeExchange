@@ -68,6 +68,7 @@ public class BrokerConnectionHandler implements Runnable {
     public void sendMessage(IMessage message) {
         try {
             out.writeObject(message);
+            out.flush();
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException(e);

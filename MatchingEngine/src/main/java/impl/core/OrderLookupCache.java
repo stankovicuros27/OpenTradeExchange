@@ -2,13 +2,21 @@ package impl.core;
 
 import api.core.IOrder;
 import api.core.IOrderLookupCache;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class OrderLookupCache implements IOrderLookupCache {
 
+    private static final Logger LOGGER = LogManager.getLogger(OrderLookupCache.class);
+
     private final Map<Integer, Map<Integer, IOrder>> userOrderCache = new HashMap<>();
+
+    public OrderLookupCache() {
+        LOGGER.info("Creating OrderLookupCache");
+    }
 
     @Override
     public synchronized void addOrder(IOrder order) {
