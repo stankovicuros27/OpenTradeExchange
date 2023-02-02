@@ -1,6 +1,6 @@
-import networking.messages.requests.CancelOrderNetworkRequest;
+import networking.messages.requests.NetworkCancelOrderRequest;
 import networking.messages.requests.NetworkRequestSide;
-import networking.messages.requests.PlaceOrderNetworkRequest;
+import networking.messages.requests.NetworkPlaceOrderRequest;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -21,8 +21,8 @@ public class BrokerClient implements Runnable {
             out = new ObjectOutputStream(client.getOutputStream());
             in = new ObjectInputStream(client.getInputStream());
 
-            out.writeObject(new PlaceOrderNetworkRequest(0, 10.0, NetworkRequestSide.BUY, 10));
-            out.writeObject(new CancelOrderNetworkRequest(0, 0));
+            out.writeObject(new NetworkPlaceOrderRequest(0, 10.0, NetworkRequestSide.BUY, 10));
+            out.writeObject(new NetworkCancelOrderRequest(0, 0));
             out.flush();
 
 

@@ -16,8 +16,10 @@ public abstract class BroadcastService {
 
     public void broadcastMessages(List<INetworkMessage> messages) {
         for (BrokerConnectionHandler handler : brokerConnectionHandlers) {
-            for (INetworkMessage message : messages) {
-                handler.sendMessage(message);
+            if (!handler.isClosed()) {
+                for (INetworkMessage message : messages) {
+                    handler.sendMessage(message);
+                }
             }
         }
     }

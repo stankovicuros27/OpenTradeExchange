@@ -1,12 +1,12 @@
 package networking.messages.requests;
 
-public class PlaceOrderNetworkRequest implements INetworkRequest {
+public class NetworkPlaceOrderRequest implements INetworkRequest {
     private final int userID;
     private final double price;
     private final NetworkRequestSide side;
     private final int volume;
 
-    public PlaceOrderNetworkRequest(int userID, double price, NetworkRequestSide side, int volume) {
+    public NetworkPlaceOrderRequest(int userID, double price, NetworkRequestSide side, int volume) {
         this.userID = userID;
         this.price = price;
         this.side = side;

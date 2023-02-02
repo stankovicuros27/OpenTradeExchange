@@ -1,11 +1,11 @@
 package networking.messages.requests;
 
-public class CancelOrderNetworkRequest implements INetworkRequest {
+public class NetworkCancelOrderRequest implements INetworkRequest {
 
     private final int userID;
     private final int orderID;
 
-    public CancelOrderNetworkRequest(int userID, int orderID) {
+    public NetworkCancelOrderRequest(int userID, int orderID) {
         this.userID = userID;
         this.orderID = orderID;
     }
