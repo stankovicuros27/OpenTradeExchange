@@ -1,95 +1,50 @@
 package server;
 
 import api.core.IOrderBook;
-import api.core.IOrderLookupCache;
-import api.messages.util.IOrderRequestFactory;
-import api.time.ITimestampProvider;
-import impl.core.OrderBook;
-import impl.core.OrderLookupCache;
-import impl.messages.util.OrderRequestFactory;
-import impl.time.InstantTimestampProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import server.broadcast.InfoBroadcastService;
-import server.broadcast.ResponseBroadcastService;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public class ExchangeServer implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(ExchangeServer.class);
 
-    private static final int EXCHANGE_SERVER_SOCKET = 9999;
-
-    private final IOrderRequestFactory orderRequestFactory;
     private final IOrderBook orderBook;
-    private ServerSocket serverSocket;
-    private ExecutorService threadPool;
+    private final ExecutorService threadPool;
+    private final int port;
+    private final BroadcastService broadcastService;
 
-    private final ResponseBroadcastService responseBroadcastService = new ResponseBroadcastService();
-    private final InfoBroadcastService infoBroadcastService = new InfoBroadcastService();
-    private final List<BrokerConnectionHandler> brokerConnectionHandlers = new ArrayList<>();
-
-    public ExchangeServer() {
-        LOGGER.info("Creating ExchangeServer");
-        IOrderLookupCache orderLookupCache = new OrderLookupCache();
-        ITimestampProvider timestampProvider = new InstantTimestampProvider();
-        orderBook = new OrderBook(orderLookupCache, timestampProvider);
-        orderRequestFactory = new OrderRequestFactory(timestampProvider);
+    public ExchangeServer(IOrderBook orderBook, ExecutorService threadPool, int port, BroadcastService broadcastService) {
+        LOGGER.info("Creating ExchangeServer at port: " + port);
+        this.orderBook = orderBook;
+        this.threadPool = threadPool;
+        this.port = port;
+        this.broadcastService = broadcastService;
     }
 
     @Override
     public void run() {
-        LOGGER.info("Starting ExchangeServer");
-        try {
-            serverSocket = new ServerSocket(EXCHANGE_SERVER_SOCKET);
-            threadPool = Executors.newCachedThreadPool();
-            while(!serverSocket.isClosed()) {
+        LOGGER.info("Starting ExchangeServer at port: " + port);
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            while(true) {
                 Socket brokerSocket = serverSocket.accept();
-
-                System.out.println("ACCEPTED BROKER CONNECTION");   // TODO delete
-
-                BrokerConnectionHandler handler = new BrokerConnectionHandler(orderBook, orderRequestFactory, brokerSocket, responseBroadcastService);
-                brokerConnectionHandlers.add(handler);
-                responseBroadcastService.registerBrokerConnectionHandler(handler);
-                infoBroadcastService.registerBrokerConnectionHandler(handler);
+                InetSocketAddress brokerSocketAddress = (InetSocketAddress) brokerSocket.getRemoteSocketAddress();
+                String brokerIpAddress = brokerSocketAddress.getAddress().getHostAddress();
+                LOGGER.info("Accepting broker connection at IP address: " + brokerIpAddress);
+                BrokerConnectionHandler handler = new BrokerConnectionHandler(orderBook, brokerSocket, brokerIpAddress, broadcastService);
+                broadcastService.registerBrokerConnectionHandler(handler);
                 threadPool.execute(handler);
             }
         } catch (IOException e) {
-            e.printStackTrace();
-            shutdownServer();
+            LOGGER.error(e);
+        } finally {
+            LOGGER.info("Closing ExchangeServer at port: " + port);
+            threadPool.shutdown();
         }
     }
-
-    private void shutdownServer() {
-        try {
-            if (!serverSocket.isClosed()) {
-                serverSocket.close();
-            }
-            for (BrokerConnectionHandler brokerConnectionHandler : brokerConnectionHandlers) {
-                if (!brokerConnectionHandler.isClosed()) {
-                    brokerConnectionHandler.shutdown();
-                }
-            }
-            if (!threadPool.isShutdown()) {
-                threadPool.shutdown();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
-    }
-
-    public static void main(String[] args) {
-        ExchangeServer exchangeServer = new ExchangeServer();
-        Thread serverThread = new Thread(exchangeServer);
-        serverThread.start();
-    }
-
 }
