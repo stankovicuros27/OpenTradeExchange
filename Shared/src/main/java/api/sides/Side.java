@@ -1,5 +1,7 @@
 package api.sides;
 
+import java.io.IOException;
+
 public enum Side {
 
     BUY {
@@ -26,4 +28,14 @@ public enum Side {
     };
 
     public abstract Side getCounterSide();
+
+    public static Side fromString(String sideString) throws IOException {
+        if (sideString.equals("BUY")) {
+            return Side.BUY;
+        } else if (sideString.equals("SELL")) {
+            return Side.SELL;
+        } else {
+            throw new IOException();
+        }
+    }
 }

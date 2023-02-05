@@ -8,27 +8,46 @@
         <artifactId>OpenTradeExchange</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
-    <artifactId>BrokerServer</artifactId>
+    <packaging>war</packaging>
+    <artifactId>BrokerWebServer</artifactId>
 
     <properties>
         <maven.compiler.source>18</maven.compiler.source>
         <maven.compiler.target>18</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
+
     <dependencies>
-        <dependency>
-            <groupId>opentradeexchange</groupId>
-            <artifactId>ExchangeNetworking</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
+        <!-- INTERNAL -->
         <dependency>
             <groupId>opentradeexchange</groupId>
             <artifactId>Shared</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+
+        <!--JETTY SERVER-->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <configuration>
+                    <scan>10</scan>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
