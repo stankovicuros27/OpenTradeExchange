@@ -7,7 +7,7 @@ import api.messages.requests.IRequest;
 import api.messages.util.IOrderRequestFactory;
 import api.sides.Side;
 import api.time.ITimestampProvider;
-import client.ExchangeConnection;
+import client.ExchangeClientConnection;
 import impl.messages.util.OrderRequestFactory;
 import impl.time.InstantTimestampProvider;
 import jakarta.servlet.annotation.WebServlet;
@@ -41,7 +41,7 @@ public class BrokerWebServlet extends HttpServlet {
             // TODO handle
             throw new IOException();
         }
-        ExchangeConnection.getInstance().sendRequest(exchangeRequest);
+        ExchangeClientConnection.getInstance().sendRequest(exchangeRequest);
     }
 
 }

@@ -45,7 +45,7 @@ public class BrokerConnectionHandler implements Runnable {
         } catch (IOException e) {
             LOGGER.info(e);
         } catch (ClassNotFoundException e) {
-            LOGGER.warn(e);
+            LOGGER.info(e);
         } finally {
             LOGGER.info("Closing broker connection at IP address: " + ipAddress);
             broadcastService.removeBrokerConnectionHandler(this);
@@ -78,8 +78,7 @@ public class BrokerConnectionHandler implements Runnable {
             out.writeObject(message);
             out.flush();
         } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            LOGGER.info(e);
         }
     }
 

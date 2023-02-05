@@ -49,4 +49,15 @@ public class OrderBookInfo implements IOrderBookInfo {
     public int getTimestamp() {
         return timestamp;
     }
+
+    @Override
+    public String toString() {
+        return "OrderBookInfo{" +
+                "limitDataMessages=" + limitDataMessages +
+                ", volume=" + volume +
+                ", numberOfOrders=" + numberOfOrders +
+                ", bestPrices=" + bestPrices +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }
