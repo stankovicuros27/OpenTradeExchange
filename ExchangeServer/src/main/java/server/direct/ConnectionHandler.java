@@ -2,11 +2,11 @@ package server.direct;
 
 import api.core.IMatchingEngine;
 import api.messages.IMessage;
+import api.messages.requests.ICancelOrderRequest;
+import api.messages.requests.IPlaceOrderRequest;
 import api.messages.requests.IRequest;
 import api.messages.requests.RequestType;
 import api.messages.responses.IResponse;
-import impl.messages.requests.CancelOrderRequest;
-import impl.messages.requests.PlaceOrderRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -62,10 +62,11 @@ public class ConnectionHandler implements Runnable {
     private void handleRequest(IRequest request) {
         List<IResponse> responses;
         if (request.getRequestType() == RequestType.PLACE) {
-            PlaceOrderRequest placeOrderRequest = (PlaceOrderRequest) request;
+            IPlaceOrderRequest placeOrderRequest = (IPlaceOrderRequest) request;
+
             responses = matchingEngine.getOrderBook().placeOrder(placeOrderRequest);
         } else {
-            CancelOrderRequest cancelOrderRequest = (CancelOrderRequest) request;
+            ICancelOrderRequest cancelOrderRequest = (ICancelOrderRequest) request;
             responses = List.of(matchingEngine.getOrderBook().cancelOrder(cancelOrderRequest));
         }
         for (IMessage message : responses) {
