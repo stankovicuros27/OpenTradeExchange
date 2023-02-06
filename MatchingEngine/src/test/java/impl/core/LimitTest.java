@@ -1,5 +1,6 @@
 package impl.core;
 
+import api.core.IEventDataStore;
 import api.core.ILimit;
 import api.core.IOrderLookupCache;
 import api.messages.responses.IResponse;
@@ -23,8 +24,9 @@ import static org.mockito.Mockito.verify;
 public class LimitTest {
 
     private static final int DUMMY_TIMESTAMP_SECONDS = 1002;
-    private final ITimestampProvider mockTimestampProvider = Mockito.mock(InstantTimestampProvider.class);
-    private final IOrderLookupCache mockOrderLookupCache = Mockito.mock(OrderLookupCache.class);
+    private final ITimestampProvider mockTimestampProvider = Mockito.mock(ITimestampProvider.class);
+    private final IOrderLookupCache mockOrderLookupCache = Mockito.mock(IOrderLookupCache.class);
+    private final IEventDataStore eventDataStore = Mockito.mock(IEventDataStore.class);
 
     @Before
     public void setupTests() {
@@ -33,7 +35,7 @@ public class LimitTest {
 
     @Test
     public void testAddOrder() {
-        ILimit limit = new Limit(Side.BUY, 10, mockOrderLookupCache, mockTimestampProvider);
+        ILimit limit = new Limit(Side.BUY, 10, mockOrderLookupCache, mockTimestampProvider, eventDataStore);
         assertTrue(limit.isEmpty());
         assertEquals(limit.getVolume(), 0);
 
@@ -63,7 +65,7 @@ public class LimitTest {
 
     @Test
     public void testCancelOrder() {
-        ILimit limit = new Limit(Side.SELL, 10, mockOrderLookupCache, mockTimestampProvider);
+        ILimit limit = new Limit(Side.SELL, 10, mockOrderLookupCache, mockTimestampProvider, eventDataStore);
         assertTrue(limit.isEmpty());
         assertEquals(limit.getVolume(), 0);
 
@@ -111,7 +113,7 @@ public class LimitTest {
 
     @Test
     public void testMatchCounterOrder() {
-        ILimit limit = new Limit(Side.BUY, 10, mockOrderLookupCache, mockTimestampProvider);
+        ILimit limit = new Limit(Side.BUY, 10, mockOrderLookupCache, mockTimestampProvider, eventDataStore);
 
         Order firstBuyOrder = new Order(0, 0, 10, 1000, Side.BUY, 20, 0);
         limit.addOrder(firstBuyOrder);

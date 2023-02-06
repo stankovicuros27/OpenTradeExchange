@@ -12,6 +12,7 @@
         <module>MatchingEngine</module>
         <module>ExchangeServer</module>
         <module>Shared</module>
+        <module>Analytics</module>
     </modules>
 
     <properties>

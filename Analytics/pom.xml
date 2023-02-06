@@ -8,8 +8,8 @@
         <artifactId>OpenTradeExchange</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <packaging>war</packaging>
-    <artifactId>ExchangeServer</artifactId>
+
+    <artifactId>Analytics</artifactId>
 
     <properties>
         <maven.compiler.source>18</maven.compiler.source>
@@ -18,42 +18,25 @@
     </properties>
 
     <dependencies>
-        <!-- INTERNAL -->
+        <!--INTERNAL-->
+        <dependency>
+            <groupId>opentradeexchange</groupId>
+            <artifactId>Shared</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
         <dependency>
             <groupId>opentradeexchange</groupId>
             <artifactId>MatchingEngine</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
-        <dependency>
-            <groupId>opentradeexchange</groupId>
-            <artifactId>Analytics</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
-        </dependency>
 
-        <!--JETTY SERVER-->
+        <!--CHARTS-->
         <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <scope>provided</scope>
+            <groupId>org.jfree</groupId>
+            <artifactId>jfreechart</artifactId>
         </dependency>
     </dependencies>
-
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.eclipse.jetty</groupId>
-                <artifactId>jetty-maven-plugin</artifactId>
-                <configuration>
-                    <scan>10</scan>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

@@ -7,4 +7,5 @@ public interface IOrderBookInfo extends IInfo {
     int getVolume();
     int getNumberOfOrders();
     double getBestPrice(Side side);
+    double getLastTradePrice();
 }

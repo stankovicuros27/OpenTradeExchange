@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class OrderTest {
 
     private static final int DUMMY_TIMESTAMP_SECONDS = 1002;
-    private final ITimestampProvider mockTimestampProvider = Mockito.mock(InstantTimestampProvider.class);
+    private final ITimestampProvider mockTimestampProvider = Mockito.mock(ITimestampProvider.class);
 
     @Before
     public void setupTests() {

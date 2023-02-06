@@ -1,5 +1,6 @@
 package impl.core;
 
+import api.core.IEventDataStore;
 import api.core.ILimit;
 import api.core.IOrder;
 import api.core.IOrderLookupCache;
@@ -24,16 +25,18 @@ public class Limit implements ILimit {
     private final double price;
     private final IOrderLookupCache orderLookupCache;
     private final ITimestampProvider timestampProvider;
+    private final IEventDataStore eventDataStore;
 
 
     private int volume = 0;
     private final Queue<IOrder> orders = new LinkedList<>();
 
-    Limit(Side side, double price, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
+    Limit(Side side, double price, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider, IEventDataStore eventDataStore) {
         this.side = side;
         this.price = price;
         this.orderLookupCache = orderLookupCache;
         this.timestampProvider = timestampProvider;
+        this.eventDataStore = eventDataStore;
     }
 
     @Override
@@ -41,6 +44,7 @@ public class Limit implements ILimit {
         volume += order.getUnfilledVolume();
         orders.add(order);
         orderLookupCache.addOrder(order);
+        eventDataStore.incPlaceOrderCnt();
         int timestamp = timestampProvider.getTimestampNow();
         return new OrderStatusResponse(order.getUserID(), order.getOrderID(), OrderResponseStatus.PLACED_ORDER, timestamp);
     }
@@ -50,6 +54,7 @@ public class Limit implements ILimit {
         volume -= order.getUnfilledVolume();
         orders.remove(order);
         orderLookupCache.removeOrder(order);
+        eventDataStore.incCancelOrderCnt();
         int timestamp = timestampProvider.getTimestampNow();
         return new OrderStatusResponse(order.getUserID(), order.getOrderID(), OrderResponseStatus.CANCELLED_ORDER, timestamp);
     }
@@ -62,14 +67,17 @@ public class Limit implements ILimit {
             IOrder matchingOrder = orders.peek();
             ITradeResponse trade = Order.matchOrderRequest(matchingOrder, orderRequest, timestampProvider);
             volume -= trade.getVolume();
+            eventDataStore.incTradeCnt();
             responses.add(trade);
             if (matchingOrder.isClosed()) {
                 orders.remove(matchingOrder);
                 orderLookupCache.removeOrder(matchingOrder);
+                eventDataStore.incCancelOrderCnt();
                 responses.add((new OrderStatusResponse(matchingOrder.getUserID(), matchingOrder.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
             }
         }
         if (orderRequest.isMatched()) {
+            eventDataStore.incCancelOrderCnt();
             responses.add((new OrderStatusResponse(orderRequest.getUserID(), orderRequest.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
         }
         return responses;

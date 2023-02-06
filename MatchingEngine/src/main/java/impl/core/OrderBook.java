@@ -26,13 +26,15 @@ public class OrderBook implements IOrderBook {
     private final Map<Side, ILimitCollection> limitCollections = new HashMap<>();
     private final IOrderLookupCache orderLookupCache;
     private final ITimestampProvider timestampProvider;
+    private final IEventDataStore eventDataStore;
 
-    public OrderBook(IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
+    public OrderBook(IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider, IEventDataStore eventDataStore) {
         LOGGER.info("Creating OrderBook");
         this.orderLookupCache = orderLookupCache;
         this.timestampProvider = timestampProvider;
-        limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider));
-        limitCollections.put(Side.SELL, new LimitCollection(Side.SELL, orderLookupCache, timestampProvider));
+        this.eventDataStore = eventDataStore;
+        limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider, eventDataStore));
+        limitCollections.put(Side.SELL, new LimitCollection(Side.SELL, orderLookupCache, timestampProvider, eventDataStore));
     }
 
     @Override
@@ -63,7 +65,7 @@ public class OrderBook implements IOrderBook {
         ILimitCollectionInfo buySideInfo = limitCollections.get(Side.BUY).getInfo();
         ILimitCollectionInfo sellSideInfo = limitCollections.get(Side.SELL).getInfo();
         int timestamp = timestampProvider.getTimestampNow();
-        return new OrderBookInfo(buySideInfo, sellSideInfo, timestamp);
+        return new OrderBookInfo(buySideInfo, sellSideInfo, eventDataStore.getLastTradePrice(), timestamp);
     }
 
 }

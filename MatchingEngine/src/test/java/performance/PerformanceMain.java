@@ -1,5 +1,6 @@
 package performance;
 
+import impl.core.EventDataStore;
 import impl.core.OrderBook;
 import impl.core.OrderLookupCache;
 import impl.messages.util.OrderRequestFactory;
@@ -15,7 +16,7 @@ public class PerformanceMain {
     public static void main(String[] args) {
         OrderLookupCache orderLookupCache = new OrderLookupCache();
         InstantTimestampProvider timestampProvider = new InstantTimestampProvider();
-        OrderBook orderBook = new OrderBook(orderLookupCache, timestampProvider);
+        OrderBook orderBook = new OrderBook(orderLookupCache, timestampProvider, new EventDataStore());
         OrderRequestFactory orderRequestFactory = new OrderRequestFactory(timestampProvider);
         PerformanceDataStore performanceDataStore = new PerformanceDataStore();
 

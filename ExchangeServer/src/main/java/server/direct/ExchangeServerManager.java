@@ -1,6 +1,7 @@
 package server.direct;
 
 import api.core.IMatchingEngine;
+import charts.MatchingEngineChartAnalytics;
 import server.ExchangeServerContext;
 
 import java.util.concurrent.ExecutorService;
@@ -13,6 +14,7 @@ public class ExchangeServerManager {
 
     private final ExchangeServer exchangeServer;
     private final ExchangeInfoPublisher exchangeInfoPublisher;
+    private final MatchingEngineChartAnalytics matchingEngineChartAnalytics;
 
     public ExchangeServerManager(ExchangeServerContext exchangeServerContext) {
         IMatchingEngine matchingEngine = exchangeServerContext.getMatchingEngine();
@@ -20,6 +22,8 @@ public class ExchangeServerManager {
         BroadcastService broadcastService = new BroadcastService();
         exchangeServer = new ExchangeServer(matchingEngine, threadPool, EXCHANGE_SERVER_PORT, broadcastService);
         exchangeInfoPublisher = new ExchangeInfoPublisher(matchingEngine, broadcastService, INFO_BROADCAST_TIMEOUT_MS);
+        matchingEngineChartAnalytics = new MatchingEngineChartAnalytics(ExchangeServerContext.getInstance().getMatchingEngine());
+
     }
 
     public void startDirectExchangeServer() {
@@ -27,6 +31,8 @@ public class ExchangeServerManager {
         exchangeServerThread.start();
         Thread exchangeInfoPublisherThread = new Thread(exchangeInfoPublisher);
         exchangeInfoPublisherThread.start();
+        Thread matchingEngineChartAnalyticsThread = new Thread(matchingEngineChartAnalytics);
+        matchingEngineChartAnalyticsThread.start();
     }
 
 }

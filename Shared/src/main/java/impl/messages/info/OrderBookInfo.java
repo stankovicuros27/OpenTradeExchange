@@ -12,16 +12,18 @@ public class OrderBookInfo implements IOrderBookInfo {
     private final int volume;
     private final int numberOfOrders;
     private final HashMap<Side, Double> bestPrices = new HashMap<>();
+    private final double lastTradePrice;
     private final int timestamp;
 
 
-    public OrderBookInfo(ILimitCollectionInfo buySide, ILimitCollectionInfo sellSide, int timestamp) {
+    public OrderBookInfo(ILimitCollectionInfo buySide, ILimitCollectionInfo sellSide, double lastTradePrice, int timestamp) {
         limitDataMessages.put(Side.BUY, buySide);
         limitDataMessages.put(Side.SELL, sellSide);
         bestPrices.put(Side.BUY, buySide.getBestPrice());
         bestPrices.put(Side.SELL, sellSide.getBestPrice());
         volume = buySide.getVolume() + sellSide.getVolume();
         numberOfOrders = buySide.getNumberOfOrders() + sellSide.getNumberOfOrders();
+        this.lastTradePrice = lastTradePrice;
         this.timestamp = timestamp;
     }
 
@@ -46,6 +48,11 @@ public class OrderBookInfo implements IOrderBookInfo {
     }
 
     @Override
+    public double getLastTradePrice() {
+        return lastTradePrice;
+    }
+
+    @Override
     public int getTimestamp() {
         return timestamp;
     }
@@ -57,6 +64,7 @@ public class OrderBookInfo implements IOrderBookInfo {
                 ", volume=" + volume +
                 ", numberOfOrders=" + numberOfOrders +
                 ", bestPrices=" + bestPrices +
+                ", lastTradePrice=" + lastTradePrice +
                 ", timestamp=" + timestamp +
                 '}';
     }
