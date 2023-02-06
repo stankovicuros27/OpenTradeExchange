@@ -1,6 +1,6 @@
-package server;
+package server.direct;
 
-import api.core.IOrderBook;
+import api.core.IMatchingEngine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -14,14 +14,14 @@ public class ExchangeServer implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(ExchangeServer.class);
 
-    private final IOrderBook orderBook;
+    private final IMatchingEngine matchingEngine;
     private final ExecutorService threadPool;
     private final int port;
     private final BroadcastService broadcastService;
 
-    public ExchangeServer(IOrderBook orderBook, ExecutorService threadPool, int port, BroadcastService broadcastService) {
+    public ExchangeServer(IMatchingEngine matchingEngine, ExecutorService threadPool, int port, BroadcastService broadcastService) {
         LOGGER.info("Creating ExchangeServer at port: " + port);
-        this.orderBook = orderBook;
+        this.matchingEngine = matchingEngine;
         this.threadPool = threadPool;
         this.port = port;
         this.broadcastService = broadcastService;
@@ -36,7 +36,7 @@ public class ExchangeServer implements Runnable {
                 InetSocketAddress brokerSocketAddress = (InetSocketAddress) brokerSocket.getRemoteSocketAddress();
                 String brokerIpAddress = brokerSocketAddress.getAddress().getHostAddress();
                 LOGGER.info("Accepting broker connection at IP address: " + brokerIpAddress);
-                BrokerConnectionHandler handler = new BrokerConnectionHandler(orderBook, brokerSocket, brokerIpAddress, broadcastService);
+                ConnectionHandler handler = new ConnectionHandler(matchingEngine, brokerSocket, brokerIpAddress, broadcastService);
                 broadcastService.registerBrokerConnectionHandler(handler);
                 threadPool.execute(handler);
             }

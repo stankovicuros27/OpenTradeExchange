@@ -8,7 +8,7 @@
         <artifactId>OpenTradeExchange</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-
+    <packaging>war</packaging>
     <artifactId>ExchangeServer</artifactId>
 
     <properties>
@@ -18,12 +18,36 @@
     </properties>
 
     <dependencies>
+        <!-- INTERNAL -->
         <dependency>
             <groupId>opentradeexchange</groupId>
             <artifactId>MatchingEngine</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+
+        <!--JETTY SERVER-->
+        <dependency>
+            <groupId>jakarta.servlet</groupId>
+            <artifactId>jakarta.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <configuration>
+                    <scan>10</scan>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

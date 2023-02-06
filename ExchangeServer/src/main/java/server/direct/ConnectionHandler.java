@@ -1,6 +1,6 @@
-package server;
+package server.direct;
 
-import api.core.IOrderBook;
+import api.core.IMatchingEngine;
 import api.messages.IMessage;
 import api.messages.requests.IRequest;
 import api.messages.requests.RequestType;
@@ -14,19 +14,19 @@ import java.io.*;
 import java.net.Socket;
 import java.util.List;
 
-public class BrokerConnectionHandler implements Runnable {
+public class ConnectionHandler implements Runnable {
 
-    private static final Logger LOGGER = LogManager.getLogger(BrokerConnectionHandler.class);
+    private static final Logger LOGGER = LogManager.getLogger(ConnectionHandler.class);
 
-    private final IOrderBook orderBook;
+    private final IMatchingEngine matchingEngine;
     private final Socket brokerClientSocket;
     private final String ipAddress;
     private final BroadcastService broadcastService;
     private ObjectInputStream in;
     private ObjectOutputStream out;
 
-    public BrokerConnectionHandler(IOrderBook orderBook, Socket brokerClientSocket, String ipAddress, BroadcastService broadcastService) {
-        this.orderBook = orderBook;
+    public ConnectionHandler(IMatchingEngine matchingEngine, Socket brokerClientSocket, String ipAddress, BroadcastService broadcastService) {
+        this.matchingEngine = matchingEngine;
         this.brokerClientSocket = brokerClientSocket;
         this.ipAddress = ipAddress;
         this.broadcastService = broadcastService;
@@ -63,10 +63,10 @@ public class BrokerConnectionHandler implements Runnable {
         List<IResponse> responses;
         if (request.getRequestType() == RequestType.PLACE) {
             PlaceOrderRequest placeOrderRequest = (PlaceOrderRequest) request;
-            responses = orderBook.placeOrder(placeOrderRequest);
+            responses = matchingEngine.getOrderBook().placeOrder(placeOrderRequest);
         } else {
             CancelOrderRequest cancelOrderRequest = (CancelOrderRequest) request;
-            responses = List.of(orderBook.cancelOrder(cancelOrderRequest));
+            responses = List.of(matchingEngine.getOrderBook().cancelOrder(cancelOrderRequest));
         }
         for (IMessage message : responses) {
             broadcastService.broadcastMessages(message);

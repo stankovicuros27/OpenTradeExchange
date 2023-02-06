@@ -1,16 +1,16 @@
-package server;
+package server.direct;
 
-import api.core.IOrderBook;
+import api.core.IMatchingEngine;
 import api.messages.info.IOrderBookInfo;
 
 public class ExchangeInfoPublisher implements Runnable {
 
-    private final IOrderBook orderBook;
+    private final IMatchingEngine matchingEngine;
     private final BroadcastService broadcastService;
     private final int timeoutMs;
 
-    public ExchangeInfoPublisher(IOrderBook orderBook, BroadcastService broadcastService, int timeoutMs) {
-        this.orderBook = orderBook;
+    public ExchangeInfoPublisher(IMatchingEngine matchingEngine, BroadcastService broadcastService, int timeoutMs) {
+        this.matchingEngine = matchingEngine;
         this.broadcastService = broadcastService;
         this.timeoutMs = timeoutMs;
     }
@@ -19,7 +19,7 @@ public class ExchangeInfoPublisher implements Runnable {
     public void run() {
         while(true) {
             try {
-                IOrderBookInfo orderBookInfo = orderBook.getInfo();
+                IOrderBookInfo orderBookInfo = matchingEngine.getOrderBook().getInfo();
                 broadcastService.broadcastMessages(orderBookInfo);
                 Thread.sleep(timeoutMs);
             } catch (InterruptedException e) {

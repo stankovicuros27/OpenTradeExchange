@@ -1,13 +1,9 @@
-package servlets;
-
-import java.io.IOException;
-import java.io.PrintWriter;
+package server.web;
 
 import api.messages.requests.IRequest;
 import api.messages.util.IOrderRequestFactory;
 import api.sides.Side;
 import api.time.ITimestampProvider;
-import client.ExchangeClientConnection;
 import impl.messages.util.OrderRequestFactory;
 import impl.time.InstantTimestampProvider;
 import jakarta.servlet.annotation.WebServlet;
@@ -15,8 +11,11 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+
 @WebServlet("/sendRequest")
-public class BrokerWebServlet extends HttpServlet {
+public class SendRequestWebServlet extends HttpServlet {
 
     private final ITimestampProvider timestampProvider = new InstantTimestampProvider();
     private final IOrderRequestFactory orderRequestFactory = new OrderRequestFactory(timestampProvider);
@@ -41,7 +40,7 @@ public class BrokerWebServlet extends HttpServlet {
             // TODO handle
             throw new IOException();
         }
-        ExchangeClientConnection.getInstance().sendRequest(exchangeRequest);
+        // TODO
     }
 
 }
