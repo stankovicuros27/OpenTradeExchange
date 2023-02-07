@@ -1,8 +1,9 @@
-package trader.agents;
+package trader.agents.controlled;
 
-import trader.agents.messages.CancelOrderRequestInfo;
-import trader.agents.messages.ITraderRequestInfo;
-import trader.agents.messages.PlaceOrderRequestInfo;
+import trader.agents.controlled.ControlledTraderAgent;
+import trader.messages.CancelOrderRequestInfo;
+import trader.messages.ITraderRequestInfo;
+import trader.messages.PlaceOrderRequestInfo;
 import api.messages.responses.IResponse;
 import api.messages.responses.ResponseType;
 import api.sides.Side;

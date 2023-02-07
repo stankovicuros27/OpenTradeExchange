@@ -1,6 +1,6 @@
 package trader.agents;
 
-import trader.agents.messages.ITraderRequestInfo;
+import trader.messages.ITraderRequestInfo;
 import api.messages.responses.IResponse;
 
 import java.util.List;

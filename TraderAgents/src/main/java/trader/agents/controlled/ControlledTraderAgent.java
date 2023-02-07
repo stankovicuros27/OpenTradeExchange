@@ -1,4 +1,6 @@
-package trader.agents;
+package trader.agents.controlled;
+
+import trader.agents.ITraderAgent;
 
 public abstract class ControlledTraderAgent implements ITraderAgent {
 

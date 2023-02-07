@@ -1,4 +1,4 @@
-package trader.agents.messages;
+package trader.messages;
 
 public interface ITraderRequestInfo {
     public TraderRequestInfoType getType();

@@ -2,12 +2,11 @@ package trader.runners;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import trader.TraderAgentManager;
 import trader.agents.ITraderAgent;
-import trader.agents.messages.CancelOrderRequestInfo;
-import trader.agents.messages.ITraderRequestInfo;
-import trader.agents.messages.PlaceOrderRequestInfo;
-import trader.agents.messages.TraderRequestInfoType;
+import trader.messages.CancelOrderRequestInfo;
+import trader.messages.ITraderRequestInfo;
+import trader.messages.PlaceOrderRequestInfo;
+import trader.messages.TraderRequestInfoType;
 import api.core.IMatchingEngine;
 import api.core.IOrderBook;
 import api.messages.requests.ICancelOrderRequest;

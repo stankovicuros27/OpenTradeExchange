@@ -1,4 +1,4 @@
-package trader.agents.messages;
+package trader.messages;
 
 public enum TraderRequestInfoType {
     PLACE,
