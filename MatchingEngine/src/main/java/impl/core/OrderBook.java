@@ -33,8 +33,8 @@ public class OrderBook implements IOrderBook {
         this.orderLookupCache = orderLookupCache;
         this.timestampProvider = timestampProvider;
         this.eventDataStore = eventDataStore;
-        limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider, eventDataStore));
-        limitCollections.put(Side.SELL, new LimitCollection(Side.SELL, orderLookupCache, timestampProvider, eventDataStore));
+        limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider));
+        limitCollections.put(Side.SELL, new LimitCollection(Side.SELL, orderLookupCache, timestampProvider));
     }
 
     @Override
@@ -46,6 +46,7 @@ public class OrderBook implements IOrderBook {
             IOrderStatusResponse placedOrderResponse = limitCollections.get(order.getSide()).addOrder(order);
             responses.add(placedOrderResponse);
         }
+        eventDataStore.registerResponseEvents(responses);
         return responses;
     }
 
@@ -57,7 +58,9 @@ public class OrderBook implements IOrderBook {
             return new OrderStatusResponse(cancelOrderRequest.getUserID(), cancelOrderRequest.getOrderID(), OrderResponseStatus.NULL_ORDER, timestamp);
         }
         ILimitCollection limitCollection = limitCollections.get((order.getSide()));
-        return limitCollection.cancelOrder(order);
+        IOrderStatusResponse response = limitCollection.cancelOrder(order);
+        eventDataStore.registerResponseEvents(List.of(response));
+        return response;
     }
 
     @Override
@@ -66,6 +69,11 @@ public class OrderBook implements IOrderBook {
         ILimitCollectionInfo sellSideInfo = limitCollections.get(Side.SELL).getInfo();
         int timestamp = timestampProvider.getTimestampNow();
         return new OrderBookInfo(buySideInfo, sellSideInfo, eventDataStore.getLastTradePrice(), timestamp);
+    }
+
+    @Override
+    public synchronized IEventDataStore getEventDataStore() {
+        return eventDataStore;
     }
 
 }

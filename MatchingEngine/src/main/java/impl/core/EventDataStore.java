@@ -1,6 +1,9 @@
 package impl.core;
 
 import api.core.IEventDataStore;
+import api.messages.responses.*;
+
+import java.util.List;
 
 public class EventDataStore implements IEventDataStore {
 
@@ -11,52 +14,55 @@ public class EventDataStore implements IEventDataStore {
     private double lastTradePrice = -1;
 
     @Override
-    public void incPlaceOrderCnt() {
-        placeOrderCnt++;
+    public synchronized void registerResponseEvents(List<IResponse> responses) {
+        for (IResponse response : responses) {
+            if (response.getType() == ResponseType.OrderStatusResponse) {
+                IOrderStatusResponse orderStatusResponse = (IOrderStatusResponse) response;
+                registerOrderStatusResponse(orderStatusResponse);
+            } else if (response.getType() == ResponseType.TradeResponse) {
+                ITradeResponse tradeResponse = (ITradeResponse) response;
+                registerTradeResponse(tradeResponse);
+            }
+        }
+    }
+
+    private void registerOrderStatusResponse(IOrderStatusResponse orderStatusResponse) {
+        if (orderStatusResponse.getStatus() == OrderResponseStatus.PLACED_ORDER) {
+            placeOrderCnt++;
+        } else if (orderStatusResponse.getStatus() == OrderResponseStatus.CANCELLED_ORDER) {
+            cancelOrderCnt++;
+        } else if (orderStatusResponse.getStatus() == OrderResponseStatus.CLOSED_ORDER) {
+            closedOrderCnt++;
+        }
+    }
+
+    private void registerTradeResponse(ITradeResponse tradeResponse) {
+        tradeCnt++;
+        lastTradePrice = tradeResponse.getPrice();
     }
 
     @Override
-    public long getPlaceOrderCnt() {
+    public synchronized long getPlaceOrderCnt() {
         return placeOrderCnt;
     }
 
     @Override
-    public void incCancelOrderCnt() {
-        cancelOrderCnt++;
-    }
-
-    @Override
-    public long getCancelOrderCnt() {
+    public synchronized long getCancelOrderCnt() {
         return cancelOrderCnt;
     }
 
     @Override
-    public void incClosedOrderCnt() {
-        closedOrderCnt++;
-    }
-
-    @Override
-    public long getClosedOrderCnt() {
+    public synchronized long getClosedOrderCnt() {
         return closedOrderCnt;
     }
 
     @Override
-    public void incTradeCnt() {
-        tradeCnt++;
-    }
-
-    @Override
-    public long getTradeCnt() {
+    public synchronized long getTradeCnt() {
         return tradeCnt;
     }
 
     @Override
-    public void setLastTradePrice(double price) {
-        lastTradePrice = price;
-    }
-
-    @Override
-    public double getLastTradePrice() {
+    public synchronized double getLastTradePrice() {
         return lastTradePrice;
     }
 }

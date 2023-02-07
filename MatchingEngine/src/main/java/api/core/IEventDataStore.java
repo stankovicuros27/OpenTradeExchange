@@ -1,15 +1,14 @@
 package api.core;
 
-public interface IEventDataStore {
-    public void incPlaceOrderCnt();
-    public long getPlaceOrderCnt();
-    public void incCancelOrderCnt();
-    public long getCancelOrderCnt();
-    public void incClosedOrderCnt();
-    public long getClosedOrderCnt();
-    public void incTradeCnt();
-    public long getTradeCnt();
-    public void setLastTradePrice(double price);
-    public double getLastTradePrice();
+import api.messages.responses.IResponse;
 
+import java.util.List;
+
+public interface IEventDataStore {
+    public void registerResponseEvents(List<IResponse> responses);
+    public long getPlaceOrderCnt();
+    public long getCancelOrderCnt();
+    public long getClosedOrderCnt();
+    public long getTradeCnt();
+    public double getLastTradePrice();
 }

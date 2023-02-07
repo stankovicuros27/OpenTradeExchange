@@ -12,4 +12,5 @@ public interface IOrderBook {
     public List<IResponse> placeOrder(IPlaceOrderRequest placeOrderRequest);
     public IOrderStatusResponse cancelOrder(ICancelOrderRequest cancelOrderRequest);
     public IOrderBookInfo getInfo();
+    public IEventDataStore getEventDataStore();
 }

@@ -1,6 +1,5 @@
 package impl.core;
 
-import api.core.IEventDataStore;
 import api.core.IMatchingEngine;
 import api.core.IOrderBook;
 import api.core.IOrderLookupCache;
@@ -17,14 +16,13 @@ public class MatchingEngine implements IMatchingEngine {
 
     private final IOrderBook orderBook;
     private final IOrderRequestFactory orderRequestFactory;
-    private final IEventDataStore eventDataStore;
 
     public MatchingEngine() {
         LOGGER.info("Initializing Matching Engine");
         IOrderLookupCache orderLookupCache = new OrderLookupCache();
         ITimestampProvider timestampProvider = new InstantTimestampProvider();
+        EventDataStore eventDataStore = new EventDataStore();
         orderRequestFactory = new OrderRequestFactory(timestampProvider);
-        eventDataStore = new EventDataStore();
         orderBook = new OrderBook(orderLookupCache, timestampProvider, eventDataStore);
     }
 
@@ -36,11 +34,6 @@ public class MatchingEngine implements IMatchingEngine {
     @Override
     public IOrderRequestFactory getOrderRequestFactory() {
         return orderRequestFactory;
-    }
-
-    @Override
-    public IEventDataStore getEventDataStore() {
-        return eventDataStore;
     }
 
 }

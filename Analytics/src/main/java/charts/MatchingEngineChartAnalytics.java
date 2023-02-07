@@ -1,5 +1,6 @@
 package charts;
 
+import api.core.IEventDataStore;
 import api.core.IMatchingEngine;
 import api.messages.info.IOrderBookInfo;
 import api.sides.Side;
@@ -51,15 +52,16 @@ public class MatchingEngineChartAnalytics implements Runnable {
 
     private void updateEventDataChart() {
         // New cnts
-        int deltaPlaceOrderCnt = (int) (matchingEngine.getEventDataStore().getPlaceOrderCnt() - placeOrderCnt);
-        int deltaCancelOrderCnt = (int) (matchingEngine.getEventDataStore().getCancelOrderCnt() - cancelOrderCnt);
-        int deltaCloseOrderCnt = (int) (matchingEngine.getEventDataStore().getClosedOrderCnt() - closedOrderCnt);
-        int deltaTradeCnt = (int) (matchingEngine.getEventDataStore().getTradeCnt() - tradeCnt);
+        IEventDataStore eventDataStore = matchingEngine.getOrderBook().getEventDataStore();
+        int deltaPlaceOrderCnt = (int) (eventDataStore.getPlaceOrderCnt() - placeOrderCnt);
+        int deltaCancelOrderCnt = (int) (eventDataStore.getCancelOrderCnt() - cancelOrderCnt);
+        int deltaCloseOrderCnt = (int) (eventDataStore.getClosedOrderCnt() - closedOrderCnt);
+        int deltaTradeCnt = (int) (eventDataStore.getTradeCnt() - tradeCnt);
         // Update old cnts
-        placeOrderCnt = (int) (matchingEngine.getEventDataStore().getPlaceOrderCnt());
-        cancelOrderCnt = (int) (matchingEngine.getEventDataStore().getCancelOrderCnt());
-        closedOrderCnt = (int) (matchingEngine.getEventDataStore().getClosedOrderCnt());
-        tradeCnt = (int) (matchingEngine.getEventDataStore().getTradeCnt());
+        placeOrderCnt = (int) (eventDataStore.getPlaceOrderCnt());
+        cancelOrderCnt = (int) (eventDataStore.getCancelOrderCnt());
+        closedOrderCnt = (int) (eventDataStore.getClosedOrderCnt());
+        tradeCnt = (int) (eventDataStore.getTradeCnt());
         // Publish
         eventDataChart.update(new float[] {deltaPlaceOrderCnt, deltaCancelOrderCnt, deltaCloseOrderCnt, deltaTradeCnt});
     }

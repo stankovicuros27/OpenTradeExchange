@@ -26,7 +26,6 @@ public class LimitTest {
     private static final int DUMMY_TIMESTAMP_SECONDS = 1002;
     private final ITimestampProvider mockTimestampProvider = Mockito.mock(ITimestampProvider.class);
     private final IOrderLookupCache mockOrderLookupCache = Mockito.mock(IOrderLookupCache.class);
-    private final IEventDataStore eventDataStore = Mockito.mock(IEventDataStore.class);
 
     @Before
     public void setupTests() {
@@ -35,7 +34,7 @@ public class LimitTest {
 
     @Test
     public void testAddOrder() {
-        ILimit limit = new Limit(Side.BUY, 10, mockOrderLookupCache, mockTimestampProvider, eventDataStore);
+        ILimit limit = new Limit(Side.BUY, 10, mockOrderLookupCache, mockTimestampProvider);
         assertTrue(limit.isEmpty());
         assertEquals(limit.getVolume(), 0);
 
@@ -65,7 +64,7 @@ public class LimitTest {
 
     @Test
     public void testCancelOrder() {
-        ILimit limit = new Limit(Side.SELL, 10, mockOrderLookupCache, mockTimestampProvider, eventDataStore);
+        ILimit limit = new Limit(Side.SELL, 10, mockOrderLookupCache, mockTimestampProvider);
         assertTrue(limit.isEmpty());
         assertEquals(limit.getVolume(), 0);
 
@@ -113,7 +112,7 @@ public class LimitTest {
 
     @Test
     public void testMatchCounterOrder() {
-        ILimit limit = new Limit(Side.BUY, 10, mockOrderLookupCache, mockTimestampProvider, eventDataStore);
+        ILimit limit = new Limit(Side.BUY, 10, mockOrderLookupCache, mockTimestampProvider);
 
         Order firstBuyOrder = new Order(0, 0, 10, 1000, Side.BUY, 20, 0);
         limit.addOrder(firstBuyOrder);

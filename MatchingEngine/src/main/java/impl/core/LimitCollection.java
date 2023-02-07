@@ -24,21 +24,19 @@ public class LimitCollection implements ILimitCollection {
     private final Side side;
     private final IOrderLookupCache orderLookupCache;
     private final ITimestampProvider timestampProvider;
-    private final IEventDataStore eventDataStore;
     private final SortedMap<Double, ILimit> limits = new TreeMap<>();
 
-    public LimitCollection(Side side, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider, IEventDataStore eventDataStore) {
+    public LimitCollection(Side side, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
         LOGGER.info("Creating LimitCollection (" + side + ")");
         this.side = side;
         this.orderLookupCache = orderLookupCache;
         this.timestampProvider = timestampProvider;
-        this.eventDataStore = eventDataStore;
     }
 
     @Override
     public IOrderStatusResponse addOrder(IOrder order) {
         if (!limits.containsKey(order.getPrice())) {
-            limits.put(order.getPrice(), new Limit(side, order.getPrice(), orderLookupCache, timestampProvider, eventDataStore));
+            limits.put(order.getPrice(), new Limit(side, order.getPrice(), orderLookupCache, timestampProvider));
         }
         return limits.get(order.getPrice()).addOrder(order);
     }
