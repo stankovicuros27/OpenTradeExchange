@@ -1,5 +1,6 @@
 package trader.runners;
 
+import api.messages.IMessage;
 import api.messages.external.ExternalRequestType;
 import api.messages.external.IExternalCancelOrderRequest;
 import api.messages.external.IExternalPlaceOrderRequest;
@@ -13,7 +14,6 @@ import api.messages.internal.requests.ICancelOrderRequest;
 import api.messages.internal.requests.IPlaceOrderRequest;
 import api.messages.internal.responses.ICancelOrderAckResponse;
 import api.messages.internal.responses.IPlaceOrderAckResponse;
-import api.messages.internal.responses.IResponse;
 import api.messages.internal.util.IOrderRequestFactory;
 
 import java.util.ArrayList;
@@ -45,11 +45,16 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
                 IExternalCancelOrderRequest externalCancelOrderRequest = (IExternalCancelOrderRequest) externalRequest;
                 sendCancelOrderRequest(externalCancelOrderRequest);
             }
+            try {
+                Thread.sleep((long) (Math.random() * SLEEP_TIME_MS));
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
     private void sendPlaceOrderRequest(IExternalPlaceOrderRequest externalPlaceOrderRequest) {
-        List<IResponse> responses = new ArrayList<>();
+        List<IMessage> responses = new ArrayList<>();
         IPlaceOrderRequest placeOrderRequest = orderRequestFactory.createPlaceOrderRequest(externalPlaceOrderRequest.getUserID(),
                 externalPlaceOrderRequest.getPrice(),
                 externalPlaceOrderRequest.getSide(),
@@ -57,17 +62,17 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
         IPlaceOrderAckResponse placeOrderAckResponse = orderRequestFactory.createPlaceOrderAckResponse(placeOrderRequest);
         responses.add(placeOrderAckResponse);
         responses.addAll(orderBook.placeOrder(placeOrderRequest));
-        traderAgent.registerResponses(responses);
+        traderAgent.registerMessages(responses);
     }
 
     private void sendCancelOrderRequest(IExternalCancelOrderRequest externalCancelOrderRequest) {
-        List<IResponse> responses = new ArrayList<>();
+        List<IMessage> responses = new ArrayList<>();
         ICancelOrderRequest cancelOrderRequest = orderRequestFactory.createCancelOrderRequest(externalCancelOrderRequest.getUserID(),
                 externalCancelOrderRequest.getOrderID());
         ICancelOrderAckResponse cancelOrderAckResponse = orderRequestFactory.createCancelOrderAckResponse(cancelOrderRequest);
         responses.add(cancelOrderAckResponse);
         responses.add(orderBook.cancelOrder(cancelOrderRequest));
-        traderAgent.registerResponses(responses);
+        traderAgent.registerMessages(responses);
     }
 
 }

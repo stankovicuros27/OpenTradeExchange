@@ -3,6 +3,8 @@ package trader.agents.controlled;
 import api.messages.external.IExternalCancelOrderRequest;
 import api.messages.external.IExternalPlaceOrderRequest;
 import api.messages.external.IExternalRequest;
+import api.messages.IMessage;
+import api.messages.MessageType;
 import api.messages.internal.responses.IResponse;
 import api.messages.internal.responses.ResponseType;
 import api.sides.Side;
@@ -38,8 +40,12 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
     }
 
     @Override
-    public void registerResponses(List<IResponse> responses) {
-        for (IResponse response : responses) {
+    public void registerMessages(List<IMessage> messages) {
+        for (IMessage message : messages) {
+            if (message.getMessageType() != MessageType.RESPONSE) {
+                continue;
+            }
+            IResponse response = (IResponse) message;
             if (response.getType() == ResponseType.PlaceOrderAckResponse) {
                 PlaceOrderAckResponse placeOrderAckResponse = (PlaceOrderAckResponse) response;
                 activeOrderIDs.add(placeOrderAckResponse.getOrderID());
@@ -47,6 +53,21 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
                 CancelOrderAckResponse cancelOrderAckResponse = (CancelOrderAckResponse) response;
                 activeOrderIDs.remove(Integer.valueOf(cancelOrderAckResponse.getOrderID()));
             }
+        }
+    }
+
+    @Override
+    public void registerMessage(IMessage message) {
+        if (message.getMessageType() != MessageType.RESPONSE) {
+            return;
+        }
+        IResponse response = (IResponse) message;
+        if (response.getType() == ResponseType.PlaceOrderAckResponse) {
+            PlaceOrderAckResponse placeOrderAckResponse = (PlaceOrderAckResponse) response;
+            activeOrderIDs.add(placeOrderAckResponse.getOrderID());
+        } else if (response.getType() == ResponseType.CancelOrderAckResponse) {
+            CancelOrderAckResponse cancelOrderAckResponse = (CancelOrderAckResponse) response;
+            activeOrderIDs.remove(Integer.valueOf(cancelOrderAckResponse.getOrderID()));
         }
     }
 

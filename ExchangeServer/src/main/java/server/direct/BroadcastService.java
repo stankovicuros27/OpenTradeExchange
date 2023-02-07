@@ -1,6 +1,6 @@
 package server.direct;
 
-import api.messages.internal.IMessage;
+import api.messages.IMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +25,7 @@ public class BroadcastService {
 
     public synchronized void broadcastMessages(IMessage message) {
         for (ConnectionHandler handler : connectionHandlers) {
-            handler.sendMessage(message);
+            //handler.sendMessage(message);
         }
     }
 

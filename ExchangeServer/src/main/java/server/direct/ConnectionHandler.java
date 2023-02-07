@@ -5,7 +5,7 @@ import api.messages.external.ExternalRequestType;
 import api.messages.external.IExternalCancelOrderRequest;
 import api.messages.external.IExternalPlaceOrderRequest;
 import api.messages.external.IExternalRequest;
-import api.messages.internal.IMessage;
+import api.messages.IMessage;
 import api.messages.internal.requests.ICancelOrderRequest;
 import api.messages.internal.requests.IPlaceOrderRequest;
 import api.messages.internal.responses.ICancelOrderAckResponse;
