@@ -1,7 +1,7 @@
 package server.direct;
 
 import api.core.IMatchingEngine;
-import api.messages.info.IOrderBookInfo;
+import api.messages.internal.info.IOrderBookInfo;
 
 public class ExchangeInfoPublisher implements Runnable {
 

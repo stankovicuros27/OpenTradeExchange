@@ -1,6 +1,6 @@
 package server.direct;
 
-import api.messages.IMessage;
+import api.messages.internal.IMessage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

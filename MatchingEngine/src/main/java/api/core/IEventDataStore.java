@@ -1,6 +1,6 @@
 package api.core;
 
-import api.messages.responses.IResponse;
+import api.messages.internal.responses.IResponse;
 
 import java.util.List;
 

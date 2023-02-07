@@ -1,20 +1,20 @@
 package trader.runners;
 
+import api.messages.external.ExternalRequestType;
+import api.messages.external.IExternalCancelOrderRequest;
+import api.messages.external.IExternalPlaceOrderRequest;
+import api.messages.external.IExternalRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import trader.agents.ITraderAgent;
-import trader.messages.CancelOrderRequestInfo;
-import trader.messages.ITraderRequestInfo;
-import trader.messages.PlaceOrderRequestInfo;
-import trader.messages.TraderRequestInfoType;
 import api.core.IMatchingEngine;
 import api.core.IOrderBook;
-import api.messages.requests.ICancelOrderRequest;
-import api.messages.requests.IPlaceOrderRequest;
-import api.messages.responses.ICancelOrderAckResponse;
-import api.messages.responses.IPlaceOrderAckResponse;
-import api.messages.responses.IResponse;
-import api.messages.util.IOrderRequestFactory;
+import api.messages.internal.requests.ICancelOrderRequest;
+import api.messages.internal.requests.IPlaceOrderRequest;
+import api.messages.internal.responses.ICancelOrderAckResponse;
+import api.messages.internal.responses.IPlaceOrderAckResponse;
+import api.messages.internal.responses.IResponse;
+import api.messages.internal.util.IOrderRequestFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,6 @@ import java.util.List;
 public class LocalTraderAgentRunner implements ITraderAgentRunner {
 
     private static final Logger LOGGER = LogManager.getLogger(LocalTraderAgentRunner.class);
-
 
     private final ITraderAgent traderAgent;
     private final IOrderRequestFactory orderRequestFactory;
@@ -38,38 +37,36 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
     public void run() {
         LOGGER.info("Starting LocalTradeAgentRunner");
         while(true) {
-            ITraderRequestInfo traderRequestInfo = traderAgent.getNextRequest();
-            if (traderRequestInfo.getType() == TraderRequestInfoType.PLACE) {
-                PlaceOrderRequestInfo placeOrderRequestInfo = (PlaceOrderRequestInfo) traderRequestInfo;
-                sendPlaceOrderRequest(placeOrderRequestInfo);
+            IExternalRequest externalRequest = traderAgent.getNextRequest();
+            if (externalRequest.getExternalRequestType() == ExternalRequestType.PLACE) {
+                IExternalPlaceOrderRequest externalPlaceOrderRequest = (IExternalPlaceOrderRequest) externalRequest;
+                sendPlaceOrderRequest(externalPlaceOrderRequest);
             } else {
-                CancelOrderRequestInfo cancelOrderRequestInfo = (CancelOrderRequestInfo) traderRequestInfo;
-                sendCancelOrderRequest(cancelOrderRequestInfo);
+                IExternalCancelOrderRequest externalCancelOrderRequest = (IExternalCancelOrderRequest) externalRequest;
+                sendCancelOrderRequest(externalCancelOrderRequest);
             }
         }
     }
 
-    private void sendPlaceOrderRequest(PlaceOrderRequestInfo placeOrderRequestInfo) {
+    private void sendPlaceOrderRequest(IExternalPlaceOrderRequest externalPlaceOrderRequest) {
         List<IResponse> responses = new ArrayList<>();
-        IPlaceOrderRequest placeOrderRequest = orderRequestFactory.createPlaceOrderRequest(placeOrderRequestInfo.getUserID(),
-                placeOrderRequestInfo.getPrice(),
-                placeOrderRequestInfo.getSide(),
-                placeOrderRequestInfo.getVolume());
+        IPlaceOrderRequest placeOrderRequest = orderRequestFactory.createPlaceOrderRequest(externalPlaceOrderRequest.getUserID(),
+                externalPlaceOrderRequest.getPrice(),
+                externalPlaceOrderRequest.getSide(),
+                externalPlaceOrderRequest.getVolume());
         IPlaceOrderAckResponse placeOrderAckResponse = orderRequestFactory.createPlaceOrderAckResponse(placeOrderRequest);
         responses.add(placeOrderAckResponse);
-        orderBook.placeOrder(placeOrderRequest);
-        //responses.addAll(orderBook.placeOrder(placeOrderRequest));
+        responses.addAll(orderBook.placeOrder(placeOrderRequest));
         traderAgent.registerResponses(responses);
     }
 
-    private void sendCancelOrderRequest(CancelOrderRequestInfo cancelOrderRequestInfo) {
+    private void sendCancelOrderRequest(IExternalCancelOrderRequest externalCancelOrderRequest) {
         List<IResponse> responses = new ArrayList<>();
-        ICancelOrderRequest cancelOrderRequest = orderRequestFactory.createCancelOrderRequest(cancelOrderRequestInfo.getUserID(),
-                cancelOrderRequestInfo.getOrderID());
+        ICancelOrderRequest cancelOrderRequest = orderRequestFactory.createCancelOrderRequest(externalCancelOrderRequest.getUserID(),
+                externalCancelOrderRequest.getOrderID());
         ICancelOrderAckResponse cancelOrderAckResponse = orderRequestFactory.createCancelOrderAckResponse(cancelOrderRequest);
         responses.add(cancelOrderAckResponse);
-        orderBook.cancelOrder(cancelOrderRequest);
-        //responses.add(orderBook.cancelOrder(cancelOrderRequest));
+        responses.add(orderBook.cancelOrder(cancelOrderRequest));
         traderAgent.registerResponses(responses);
     }
 

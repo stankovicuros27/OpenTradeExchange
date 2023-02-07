@@ -2,7 +2,7 @@ package charts;
 
 import api.core.IEventDataStore;
 import api.core.IMatchingEngine;
-import api.messages.info.IOrderBookInfo;
+import api.messages.internal.info.IOrderBookInfo;
 import api.sides.Side;
 
 import javax.swing.*;

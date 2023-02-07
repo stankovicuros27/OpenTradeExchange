@@ -1,14 +1,14 @@
 package impl.core;
 
 import api.core.*;
-import api.messages.info.ILimitCollectionInfo;
-import api.messages.info.ILimitInfo;
-import api.messages.requests.IPlaceOrderRequest;
-import api.messages.responses.IOrderStatusResponse;
-import api.messages.responses.IResponse;
+import api.messages.internal.info.ILimitCollectionInfo;
+import api.messages.internal.info.ILimitInfo;
+import api.messages.internal.requests.IPlaceOrderRequest;
+import api.messages.internal.responses.IOrderStatusResponse;
+import api.messages.internal.responses.IResponse;
 import api.sides.Side;
 import api.time.ITimestampProvider;
-import impl.messages.info.LimitCollectionInfo;
+import impl.messages.internal.info.LimitCollectionInfo;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -1,9 +1,9 @@
 package api.core;
 
-import api.messages.info.ILimitInfo;
-import api.messages.requests.IPlaceOrderRequest;
-import api.messages.responses.IOrderStatusResponse;
-import api.messages.responses.IResponse;
+import api.messages.internal.info.ILimitInfo;
+import api.messages.internal.requests.IPlaceOrderRequest;
+import api.messages.internal.responses.IOrderStatusResponse;
+import api.messages.internal.responses.IResponse;
 import api.sides.Side;
 
 import java.util.List;

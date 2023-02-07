@@ -1,11 +1,11 @@
 package server.web;
 
-import api.messages.requests.ICancelOrderRequest;
-import api.messages.requests.IPlaceOrderRequest;
-import api.messages.util.IOrderRequestFactory;
+import api.messages.internal.requests.ICancelOrderRequest;
+import api.messages.internal.requests.IPlaceOrderRequest;
+import api.messages.internal.util.IOrderRequestFactory;
 import api.sides.Side;
 import api.time.ITimestampProvider;
-import impl.messages.util.OrderRequestFactory;
+import impl.messages.internal.util.OrderRequestFactory;
 import impl.time.InstantTimestampProvider;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;

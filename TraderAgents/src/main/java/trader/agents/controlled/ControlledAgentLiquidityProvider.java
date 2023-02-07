@@ -1,14 +1,17 @@
 package trader.agents.controlled;
 
-import trader.agents.controlled.ControlledTraderAgent;
-import trader.messages.CancelOrderRequestInfo;
-import trader.messages.ITraderRequestInfo;
-import trader.messages.PlaceOrderRequestInfo;
-import api.messages.responses.IResponse;
-import api.messages.responses.ResponseType;
+import api.messages.external.IExternalCancelOrderRequest;
+import api.messages.external.IExternalPlaceOrderRequest;
+import api.messages.external.IExternalRequest;
+import api.messages.internal.responses.IResponse;
+import api.messages.internal.responses.ResponseType;
 import api.sides.Side;
-import impl.messages.responses.CancelOrderAckResponse;
-import impl.messages.responses.PlaceOrderAckResponse;
+import api.time.ITimestampProvider;
+import impl.messages.external.ExternalCancelOrderRequest;
+import impl.messages.external.ExternalPlaceOrderRequest;
+import impl.messages.internal.responses.CancelOrderAckResponse;
+import impl.messages.internal.responses.PlaceOrderAckResponse;
+import impl.time.InstantTimestampProvider;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,18 +21,19 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
 
     private final Random random = new Random();
     private final List<Integer> activeOrderIDs = new ArrayList<>();
+    private final ITimestampProvider timestampProvider = new InstantTimestampProvider();
 
     public ControlledAgentLiquidityProvider(double priceBase, double priceDeviation, int volumeBase, int volumeDeviation, int maxOrders) {
         super(priceBase, priceDeviation, volumeBase, volumeDeviation, maxOrders);
     }
 
     @Override
-    public ITraderRequestInfo getNextRequest() {
+    public IExternalRequest getNextRequest() {
         int randInt = random.nextInt(maxOrders) + 1;
         if (randInt > activeOrderIDs.size()) {
-            return getPlaceOrderRequestInfo();
+            return getExternalPlaceOrderRequest();
         } else {
-            return getCancelOrderRequestInfo();
+            return getExternalCancelOrderRequest();
         }
     }
 
@@ -46,17 +50,17 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
         }
     }
 
-    private PlaceOrderRequestInfo getPlaceOrderRequestInfo() {
+    private IExternalPlaceOrderRequest getExternalPlaceOrderRequest() {
         double price = getNextPrice();
         Side side = getNextSide();
         int volume = getNextVolume();
-        return new PlaceOrderRequestInfo(id, price, side, volume);
+        return new ExternalPlaceOrderRequest(id, price, side, volume, timestampProvider.getTimestampNow());
     }
 
-    private CancelOrderRequestInfo getCancelOrderRequestInfo() {
+    private IExternalCancelOrderRequest getExternalCancelOrderRequest() {
         int randIndex = random.nextInt(activeOrderIDs.size());
         int orderID = activeOrderIDs.get(randIndex);
-        return new CancelOrderRequestInfo(id, orderID);
+        return new ExternalCancelOrderRequest(id, orderID, timestampProvider.getTimestampNow());
     }
 
     private Side getNextSide() {

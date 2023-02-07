@@ -1,16 +1,14 @@
 package impl.core;
 
-import api.core.IEventDataStore;
 import api.core.ILimit;
 import api.core.IOrderLookupCache;
-import api.messages.responses.IResponse;
-import api.messages.responses.OrderResponseStatus;
+import api.messages.internal.responses.IResponse;
+import api.messages.internal.responses.OrderResponseStatus;
 import api.sides.Side;
 import api.time.ITimestampProvider;
-import impl.messages.requests.PlaceOrderRequest;
-import impl.messages.responses.OrderStatusResponse;
-import impl.messages.responses.TradeResponse;
-import impl.time.InstantTimestampProvider;
+import impl.messages.internal.requests.PlaceOrderRequest;
+import impl.messages.internal.responses.OrderStatusResponse;
+import impl.messages.internal.responses.TradeResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
