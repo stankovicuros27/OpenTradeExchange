@@ -31,7 +31,7 @@ public class EventDataStore implements IEventDataStore {
     }
 
     @Override
-    public void intClosedOrderCnt() {
+    public void incClosedOrderCnt() {
         closedOrderCnt++;
     }
 

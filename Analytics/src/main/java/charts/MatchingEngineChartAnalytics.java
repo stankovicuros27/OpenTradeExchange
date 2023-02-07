@@ -67,7 +67,7 @@ public class MatchingEngineChartAnalytics implements Runnable {
     private void updateTradeDataChart() {
         IOrderBookInfo orderBookInfo = matchingEngine.getOrderBook().getInfo();
         float buyPrice = (float) orderBookInfo.getBestPrice(Side.BUY);
-        float lastTradePrice = (float) matchingEngine.getEventDataStore().getLastTradePrice();
+        float lastTradePrice = (float) orderBookInfo.getLastTradePrice();
         float sellPrice = (float) orderBookInfo.getBestPrice(Side.SELL);
         tradeDataChart.update(new float[]{buyPrice, lastTradePrice, sellPrice});
     }

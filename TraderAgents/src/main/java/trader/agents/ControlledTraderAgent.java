@@ -1,6 +1,6 @@
-package agents;
+package trader.agents;
 
-public abstract class TradeAgent {
+public abstract class ControlledTraderAgent implements ITraderAgent {
 
     private static int GLOBAL_ID = 0;
 
@@ -11,15 +11,13 @@ public abstract class TradeAgent {
     protected int volumeDeviation;
     protected int maxOrders;
 
-    public TradeAgent(double priceBase, double priceDeviation, int volumeBase, int volumeDeviation, int maxOrders) {
+    public ControlledTraderAgent(double priceBase, double priceDeviation, int volumeBase, int volumeDeviation, int maxOrders) {
         this.priceBase = priceBase;
         this.priceDeviation = priceDeviation;
         this.volumeBase = volumeBase;
         this.volumeDeviation = volumeDeviation;
         this.maxOrders = maxOrders;
     }
-
-    public abstract void placeOrder();
 
     public double getPriceBase() {
         return priceBase;

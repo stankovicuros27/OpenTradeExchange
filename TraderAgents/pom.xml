@@ -27,7 +27,7 @@
         </dependency>
         <dependency>
             <groupId>opentradeexchange</groupId>
-            <artifactId>Shared</artifactId>
+            <artifactId>MatchingEngine</artifactId>
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

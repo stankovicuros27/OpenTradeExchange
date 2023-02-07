@@ -5,7 +5,7 @@ public interface IEventDataStore {
     public long getPlaceOrderCnt();
     public void incCancelOrderCnt();
     public long getCancelOrderCnt();
-    public void intClosedOrderCnt();
+    public void incClosedOrderCnt();
     public long getClosedOrderCnt();
     public void incTradeCnt();
     public long getTradeCnt();

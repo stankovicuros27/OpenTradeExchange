@@ -67,17 +67,18 @@ public class Limit implements ILimit {
             IOrder matchingOrder = orders.peek();
             ITradeResponse trade = Order.matchOrderRequest(matchingOrder, orderRequest, timestampProvider);
             volume -= trade.getVolume();
+            eventDataStore.setLastTradePrice(trade.getPrice());
             eventDataStore.incTradeCnt();
             responses.add(trade);
             if (matchingOrder.isClosed()) {
                 orders.remove(matchingOrder);
                 orderLookupCache.removeOrder(matchingOrder);
-                eventDataStore.incCancelOrderCnt();
+                eventDataStore.incClosedOrderCnt();
                 responses.add((new OrderStatusResponse(matchingOrder.getUserID(), matchingOrder.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
             }
         }
         if (orderRequest.isMatched()) {
-            eventDataStore.incCancelOrderCnt();
+            eventDataStore.incClosedOrderCnt();
             responses.add((new OrderStatusResponse(orderRequest.getUserID(), orderRequest.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
         }
         return responses;

@@ -23,7 +23,6 @@ public class ExchangeServerManager {
         exchangeServer = new ExchangeServer(matchingEngine, threadPool, EXCHANGE_SERVER_PORT, broadcastService);
         exchangeInfoPublisher = new ExchangeInfoPublisher(matchingEngine, broadcastService, INFO_BROADCAST_TIMEOUT_MS);
         matchingEngineChartAnalytics = new MatchingEngineChartAnalytics(ExchangeServerContext.getInstance().getMatchingEngine());
-
     }
 
     public void startDirectExchangeServer() {
