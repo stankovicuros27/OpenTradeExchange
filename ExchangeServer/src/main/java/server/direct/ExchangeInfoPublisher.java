@@ -1,6 +1,7 @@
 package server.direct;
 
 import api.core.IMatchingEngine;
+import api.core.IOrderBook;
 import api.messages.internal.info.IOrderBookInfo;
 
 public class ExchangeInfoPublisher implements Runnable {
@@ -19,8 +20,10 @@ public class ExchangeInfoPublisher implements Runnable {
     public void run() {
         while(true) {
             try {
-                IOrderBookInfo orderBookInfo = matchingEngine.getOrderBook().getInfo();
-                broadcastService.broadcastMessages(orderBookInfo);
+                for (IOrderBook orderBook : matchingEngine.getAllOrderBooks()) {
+                    IOrderBookInfo orderBookInfo = orderBook.getInfo();
+                    broadcastService.broadcastMessages(orderBookInfo);
+                }
                 Thread.sleep(timeoutMs);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);

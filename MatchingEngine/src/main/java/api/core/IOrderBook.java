@@ -5,12 +5,15 @@ import api.messages.internal.requests.ICancelOrderRequest;
 import api.messages.internal.requests.IPlaceOrderRequest;
 import api.messages.internal.responses.IOrderStatusResponse;
 import api.messages.internal.responses.IResponse;
+import api.messages.internal.util.IOrderRequestFactory;
 
 import java.util.List;
 
 public interface IOrderBook {
+    public String getBookID();
     public List<IResponse> placeOrder(IPlaceOrderRequest placeOrderRequest);
     public IOrderStatusResponse cancelOrder(ICancelOrderRequest cancelOrderRequest);
     public IOrderBookInfo getInfo();
+    public IOrderRequestFactory getOrderRequestFactory();
     public IEventDataStore getEventDataStore();
 }

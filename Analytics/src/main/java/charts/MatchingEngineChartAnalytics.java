@@ -2,39 +2,48 @@ package charts;
 
 import api.core.IEventDataStore;
 import api.core.IMatchingEngine;
+import api.core.IOrderBook;
 import api.messages.internal.info.IOrderBookInfo;
 import api.sides.Side;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MatchingEngineChartAnalytics implements Runnable {
 
     private static final int REFRESH_RATE_MS = 1000;
 
     private final IMatchingEngine matchingEngine;
-    private final DynamicChart eventDataChart, tradeDataChart;
-    private int placeOrderCnt = 0;
-    private int cancelOrderCnt = 0;
-    private int closedOrderCnt = 0;
-    private int tradeCnt = 0;
+    private final Map<String, JFrame> frames = new HashMap<>();
+    private final Map<String, DynamicChart> eventDataCharts = new HashMap<>();
+    private final Map<String, DynamicChart> tradeDataCharts = new HashMap<>();
 
     public MatchingEngineChartAnalytics(IMatchingEngine matchingEngine) {
         this.matchingEngine = matchingEngine;
 
-        JFrame frame = new JFrame("MatchingEngine Analytics");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setBackground(Color.DARK_GRAY);
-        frame.setLayout(new GridLayout(1, 2));
+        for (IOrderBook orderBook : matchingEngine.getAllOrderBooks()) {
+            String bookID = orderBook.getBookID();
+            JFrame frame = new JFrame(bookID);
+            frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+            frame.setBackground(Color.DARK_GRAY);
+            frame.setLayout(new GridLayout(1, 2));
 
-        eventDataChart = new DynamicChart("Events per Second", new String[]{"PlaceOrder", "CancelOrder", "ClosedOrder", "Trade"});
-        frame.add(eventDataChart);
+            DynamicChart eventDataChart = new DynamicChart("Events per Second", new String[]{"PlaceOrder", "CancelOrder", "ClosedOrder", "Trade"});
+            frame.add(eventDataChart);
 
-        tradeDataChart = new DynamicChart("Trade Data", new String[]{"Buy", "Trade", "Sell"});
-        frame.add(tradeDataChart);
+            DynamicChart tradeDataChart = new DynamicChart("Trade Data", new String[]{"Buy", "Trade", "Sell"});
+            frame.add(tradeDataChart);
 
-        frame.pack();
-        frame.setVisible(true);
+            frame.pack();
+            frame.setSize(700, 400);
+            frame.setVisible(true);
+
+            frames.put(bookID, frame);
+            eventDataCharts.put(bookID, eventDataChart);
+            tradeDataCharts.put(bookID, tradeDataChart);
+        }
     }
 
     @Override
@@ -42,36 +51,38 @@ public class MatchingEngineChartAnalytics implements Runnable {
         while(true) {
             try {
                 Thread.sleep(REFRESH_RATE_MS);
-                updateEventDataChart();
-                updateTradeDataChart();
+                updateEventDataCharts();
+                updateTradeDataCharts();
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    private void updateEventDataChart() {
-        // New cnts
-        IEventDataStore eventDataStore = matchingEngine.getOrderBook().getEventDataStore();
-        int deltaPlaceOrderCnt = (int) (eventDataStore.getPlaceOrderCnt() - placeOrderCnt);
-        int deltaCancelOrderCnt = (int) (eventDataStore.getCancelOrderCnt() - cancelOrderCnt);
-        int deltaCloseOrderCnt = (int) (eventDataStore.getClosedOrderCnt() - closedOrderCnt);
-        int deltaTradeCnt = (int) (eventDataStore.getTradeCnt() - tradeCnt);
-        // Update old cnts
-        placeOrderCnt = (int) (eventDataStore.getPlaceOrderCnt());
-        cancelOrderCnt = (int) (eventDataStore.getCancelOrderCnt());
-        closedOrderCnt = (int) (eventDataStore.getClosedOrderCnt());
-        tradeCnt = (int) (eventDataStore.getTradeCnt());
-        // Publish
-        eventDataChart.update(new float[] {deltaPlaceOrderCnt, deltaCancelOrderCnt, deltaCloseOrderCnt, deltaTradeCnt});
+    private void updateEventDataCharts() {
+        for (IOrderBook orderBook : matchingEngine.getAllOrderBooks()) {
+            String bookID = orderBook.getBookID();
+            IEventDataStore eventDataStore = orderBook.getEventDataStore();
+            DynamicChart eventDataChart = eventDataCharts.get(bookID);
+            eventDataChart.update(
+                    new float[] {eventDataStore.getAndResetPlaceOrderCnt(),
+                            eventDataStore.getAndResetCancelOrderCnt(),
+                            eventDataStore.getAndResetClosedOrderCnt(),
+                            eventDataStore.getAndResetTradeCnt()}
+            );
+        }
     }
 
-    private void updateTradeDataChart() {
-        IOrderBookInfo orderBookInfo = matchingEngine.getOrderBook().getInfo();
-        float buyPrice = (float) orderBookInfo.getBestPrice(Side.BUY);
-        float lastTradePrice = (float) orderBookInfo.getLastTradePrice();
-        float sellPrice = (float) orderBookInfo.getBestPrice(Side.SELL);
-        tradeDataChart.update(new float[]{buyPrice, lastTradePrice, sellPrice});
+    private void updateTradeDataCharts() {
+        for (IOrderBook orderBook : matchingEngine.getAllOrderBooks()) {
+            String bookID = orderBook.getBookID();
+            IOrderBookInfo orderBookInfo = orderBook.getInfo();
+            DynamicChart tradeDataChart = tradeDataCharts.get(bookID);
+            float buyPrice = (float) orderBookInfo.getBestPrice(Side.BUY);
+            float lastTradePrice = (float) orderBookInfo.getLastTradePrice();
+            float sellPrice = (float) orderBookInfo.getBestPrice(Side.SELL);
+            tradeDataChart.update(new float[]{buyPrice, lastTradePrice, sellPrice});
+        }
     }
 
 }

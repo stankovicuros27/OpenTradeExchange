@@ -1,5 +1,6 @@
 package server;
 
+import api.core.IMatchingEngineConfiguration;
 import impl.core.MatchingEngine;
 
 public class ExchangeServerContext {
@@ -8,11 +9,11 @@ public class ExchangeServerContext {
 
     private final MatchingEngine matchingEngine;
 
-    public static void initialize() {
+    public static void initialize(IMatchingEngineConfiguration matchingEngineConfiguration) {
         if (instance != null) {
             throw new IllegalStateException();
         }
-        instance = new ExchangeServerContext();
+        instance = new ExchangeServerContext(matchingEngineConfiguration);
     }
 
     public static ExchangeServerContext getInstance() {
@@ -22,8 +23,8 @@ public class ExchangeServerContext {
         return instance;
     }
 
-    private ExchangeServerContext() {
-        matchingEngine = new MatchingEngine();
+    private ExchangeServerContext(IMatchingEngineConfiguration matchingEngineConfiguration) {
+        matchingEngine = new MatchingEngine(matchingEngineConfiguration);
     }
 
     public MatchingEngine getMatchingEngine() {

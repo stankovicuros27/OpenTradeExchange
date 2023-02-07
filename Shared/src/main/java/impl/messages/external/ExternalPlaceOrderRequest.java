@@ -6,18 +6,25 @@ import api.sides.Side;
 
 public class ExternalPlaceOrderRequest implements IExternalPlaceOrderRequest {
 
+    private final String bookID;
     private final int userID;
     private final double price;
     private final Side side;
     private final int volume;
     private final int timestamp;
 
-    public ExternalPlaceOrderRequest(int userID, double price, Side side, int volume, int timestamp) {
+    public ExternalPlaceOrderRequest(String bookID, int userID, double price, Side side, int volume, int timestamp) {
+        this.bookID = bookID;
         this.userID = userID;
         this.price = price;
         this.side = side;
         this.volume = volume;
         this.timestamp = timestamp;
+    }
+
+    @Override
+    public String getBookID() {
+        return bookID;
     }
 
     @Override
@@ -50,4 +57,15 @@ public class ExternalPlaceOrderRequest implements IExternalPlaceOrderRequest {
         return timestamp;
     }
 
+    @Override
+    public String toString() {
+        return "ExternalPlaceOrderRequest{" +
+                "bookID='" + bookID + '\'' +
+                ", userID=" + userID +
+                ", price=" + price +
+                ", side=" + side +
+                ", volume=" + volume +
+                ", timestamp=" + timestamp +
+                '}';
+    }
 }

@@ -29,8 +29,9 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
 
     public LocalTraderAgentRunner(ITraderAgent traderAgent, IMatchingEngine matchingEngine) {
         this.traderAgent = traderAgent;
-        orderRequestFactory = matchingEngine.getOrderRequestFactory();
-        orderBook = matchingEngine.getOrderBook();
+        // TODO CHANGE
+        orderRequestFactory = matchingEngine.getOrderBook("Test1").getOrderRequestFactory();
+        orderBook = matchingEngine.getOrderBook("Test1");
     }
 
     @Override

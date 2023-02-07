@@ -1,8 +1,10 @@
 package api.core;
 
-import api.messages.internal.util.IOrderRequestFactory;
+import java.util.List;
 
 public interface IMatchingEngine {
-    public IOrderBook getOrderBook();
-    public IOrderRequestFactory getOrderRequestFactory();
+    public void registerOrderBook(IOrderBookConfiguration orderBookConfiguration);
+    public boolean containsOrderBook(String bookID);
+    public IOrderBook getOrderBook(String bookID);
+    public List<IOrderBook> getAllOrderBooks();
 }

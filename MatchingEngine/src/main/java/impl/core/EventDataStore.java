@@ -42,23 +42,31 @@ public class EventDataStore implements IEventDataStore {
     }
 
     @Override
-    public synchronized long getPlaceOrderCnt() {
-        return placeOrderCnt;
+    public synchronized long getAndResetPlaceOrderCnt() {
+        long ret = placeOrderCnt;
+        placeOrderCnt = 0;
+        return ret;
     }
 
     @Override
-    public synchronized long getCancelOrderCnt() {
-        return cancelOrderCnt;
+    public synchronized long getAndResetCancelOrderCnt() {
+        long ret = cancelOrderCnt;
+        cancelOrderCnt = 0;
+        return ret;
     }
 
     @Override
-    public synchronized long getClosedOrderCnt() {
-        return closedOrderCnt;
+    public synchronized long getAndResetClosedOrderCnt() {
+        long ret = closedOrderCnt;
+        closedOrderCnt = 0;
+        return ret;
     }
 
     @Override
-    public synchronized long getTradeCnt() {
-        return tradeCnt;
+    public synchronized long getAndResetTradeCnt() {
+        long ret = tradeCnt;
+        tradeCnt = 0;
+        return ret;
     }
 
     @Override

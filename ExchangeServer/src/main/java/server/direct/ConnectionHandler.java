@@ -1,6 +1,7 @@
 package server.direct;
 
 import api.core.IMatchingEngine;
+import api.core.IOrderBook;
 import api.messages.external.ExternalRequestType;
 import api.messages.external.IExternalCancelOrderRequest;
 import api.messages.external.IExternalPlaceOrderRequest;
@@ -78,25 +79,37 @@ public class ConnectionHandler implements Runnable {
     }
 
     private List<IResponse> handleExternalPlaceOrderRequest(IExternalPlaceOrderRequest externalPlaceOrderRequest) {
-        IPlaceOrderRequest placeOrderRequest = matchingEngine.getOrderRequestFactory().createPlaceOrderRequest(
+        String bookID = externalPlaceOrderRequest.getBookID();
+        if (!matchingEngine.containsOrderBook(bookID)) {
+            // TODO send error response
+            return List.of();
+        }
+        IOrderBook orderBook = matchingEngine.getOrderBook(bookID);
+        IPlaceOrderRequest placeOrderRequest = orderBook.getOrderRequestFactory().createPlaceOrderRequest(
                 externalPlaceOrderRequest.getUserID(),
                 externalPlaceOrderRequest.getPrice(),
                 externalPlaceOrderRequest.getSide(),
                 externalPlaceOrderRequest.getVolume()
         );
-        IPlaceOrderAckResponse placeOrderAckResponse = matchingEngine.getOrderRequestFactory().createPlaceOrderAckResponse(placeOrderRequest);
+        IPlaceOrderAckResponse placeOrderAckResponse = orderBook.getOrderRequestFactory().createPlaceOrderAckResponse(placeOrderRequest);
         sendMessage(placeOrderAckResponse);
-        return matchingEngine.getOrderBook().placeOrder(placeOrderRequest);
+        return orderBook.placeOrder(placeOrderRequest);
     }
 
     private List<IResponse> handleExternalCancelOrderRequest(IExternalCancelOrderRequest externalCancelOrderRequest) {
-        ICancelOrderRequest cancelOrderRequest = matchingEngine.getOrderRequestFactory().createCancelOrderRequest(
+        String bookID = externalCancelOrderRequest.getBookID();
+        if (!matchingEngine.containsOrderBook(bookID)) {
+            // TODO send error response
+            return List.of();
+        }
+        IOrderBook orderBook = matchingEngine.getOrderBook(bookID);
+        ICancelOrderRequest cancelOrderRequest = orderBook.getOrderRequestFactory().createCancelOrderRequest(
                 externalCancelOrderRequest.getUserID(),
                 externalCancelOrderRequest.getOrderID()
         );
-        ICancelOrderAckResponse cancelOrderAckResponse = matchingEngine.getOrderRequestFactory().createCancelOrderAckResponse(cancelOrderRequest);
+        ICancelOrderAckResponse cancelOrderAckResponse = orderBook.getOrderRequestFactory().createCancelOrderAckResponse(cancelOrderRequest);
         sendMessage(cancelOrderAckResponse);
-        return List.of(matchingEngine.getOrderBook().cancelOrder(cancelOrderRequest));
+        return List.of(orderBook.cancelOrder(cancelOrderRequest));
     }
 
     public void sendMessage(IMessage message) {

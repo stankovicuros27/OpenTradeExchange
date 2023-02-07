@@ -8,6 +8,7 @@ import api.messages.internal.requests.IPlaceOrderRequest;
 import api.messages.internal.responses.IOrderStatusResponse;
 import api.messages.internal.responses.IResponse;
 import api.messages.internal.responses.OrderResponseStatus;
+import api.messages.internal.util.IOrderRequestFactory;
 import api.sides.Side;
 import api.time.ITimestampProvider;
 import impl.messages.internal.info.OrderBookInfo;
@@ -24,17 +25,26 @@ public class OrderBook implements IOrderBook {
     private static final Logger LOGGER = LogManager.getLogger(OrderBook.class);
 
     private final Map<Side, ILimitCollection> limitCollections = new HashMap<>();
+    private final String bookID;
+    private final IOrderRequestFactory orderRequestFactory;
     private final IOrderLookupCache orderLookupCache;
     private final ITimestampProvider timestampProvider;
     private final IEventDataStore eventDataStore;
 
-    public OrderBook(IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider, IEventDataStore eventDataStore) {
+    public OrderBook(String bookID, IOrderRequestFactory orderRequestFactory, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider, IEventDataStore eventDataStore) {
         LOGGER.info("Creating OrderBook");
+        this.bookID = bookID;
+        this.orderRequestFactory = orderRequestFactory;
         this.orderLookupCache = orderLookupCache;
         this.timestampProvider = timestampProvider;
         this.eventDataStore = eventDataStore;
         limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider));
         limitCollections.put(Side.SELL, new LimitCollection(Side.SELL, orderLookupCache, timestampProvider));
+    }
+
+    @Override
+    public String getBookID() {
+        return bookID;
     }
 
     @Override
@@ -69,6 +79,11 @@ public class OrderBook implements IOrderBook {
         ILimitCollectionInfo sellSideInfo = limitCollections.get(Side.SELL).getInfo();
         int timestamp = timestampProvider.getTimestampNow();
         return new OrderBookInfo(buySideInfo, sellSideInfo, eventDataStore.getLastTradePrice(), timestamp);
+    }
+
+    @Override
+    public synchronized IOrderRequestFactory getOrderRequestFactory() {
+        return orderRequestFactory;
     }
 
     @Override

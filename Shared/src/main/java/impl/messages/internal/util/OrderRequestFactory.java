@@ -17,13 +17,13 @@ import java.util.Map;
 
 public class OrderRequestFactory implements IOrderRequestFactory {
 
-    private static final int NUMBER_OF_DECIMAL_PLACES = 2;
-
     private final ITimestampProvider timestampProvider;
+    private final int roundDecimalPlaces;
     private final Map<Integer, Integer> userOrderIDs = new HashMap<>();
 
-    public OrderRequestFactory(ITimestampProvider timestampProvider) {
+    public OrderRequestFactory(ITimestampProvider timestampProvider, int roundDecimalPlaces) {
         this.timestampProvider = timestampProvider;
+        this.roundDecimalPlaces = roundDecimalPlaces;
     }
 
     @Override
@@ -40,7 +40,7 @@ public class OrderRequestFactory implements IOrderRequestFactory {
     }
 
     private double roundPrice(double price) {
-        double roundFactor = Math.pow(10, NUMBER_OF_DECIMAL_PLACES);
+        double roundFactor = Math.pow(10, roundDecimalPlaces);
         return Math.round(price * roundFactor) / roundFactor;
     }
 

@@ -25,6 +25,10 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
     private final List<Integer> activeOrderIDs = new ArrayList<>();
     private final ITimestampProvider timestampProvider = new InstantTimestampProvider();
 
+    // TODO CHANGE
+    private static final String[] bookIDs = {"Test1", "Test2"};
+    private static long bookIDCnt = 0;
+
     public ControlledAgentLiquidityProvider(double priceBase, double priceDeviation, int volumeBase, int volumeDeviation, int maxOrders) {
         super(priceBase, priceDeviation, volumeBase, volumeDeviation, maxOrders);
     }
@@ -75,13 +79,15 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
         double price = getNextPrice();
         Side side = getNextSide();
         int volume = getNextVolume();
-        return new ExternalPlaceOrderRequest(id, price, side, volume, timestampProvider.getTimestampNow());
+        String bookID = bookIDs[(int) (++bookIDCnt % 2)];
+        return new ExternalPlaceOrderRequest(bookID, id, price, side, volume, timestampProvider.getTimestampNow());
     }
 
     private IExternalCancelOrderRequest getExternalCancelOrderRequest() {
         int randIndex = random.nextInt(activeOrderIDs.size());
         int orderID = activeOrderIDs.get(randIndex);
-        return new ExternalCancelOrderRequest(id, orderID, timestampProvider.getTimestampNow());
+        String bookID = bookIDs[(int) (++bookIDCnt % 2)];
+        return new ExternalCancelOrderRequest(bookID, id, orderID, timestampProvider.getTimestampNow());
     }
 
     private Side getNextSide() {
