@@ -1,6 +1,6 @@
 package trader.runners;
 
-import api.core.IMatchingEngine;
+import api.core.IOrderBook;
 import api.messages.IMessage;
 import api.messages.external.IExternalRequest;
 import org.apache.logging.log4j.LogManager;
@@ -21,19 +21,21 @@ public class TCPTraderAgentRunner implements ITraderAgentRunner {
     private static final int EXCHANGE_SERVER_SOCKET = 9999;
 
     private final ITraderAgent traderAgent;
+    private final IOrderBook orderBook;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private ResponseListenerThread responseListenerThread;
 
-    public TCPTraderAgentRunner(ITraderAgent traderAgent, IMatchingEngine matchingEngine) {
+    public TCPTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook) {
         this.traderAgent = traderAgent;
+        this.orderBook = orderBook;
     }
 
     @Override
     public void run() {
-        LOGGER.info("Starting TCPTraderAgentRunner");
+        LOGGER.info("Starting TCPTraderAgentRunner for book: " + orderBook.getBookID());
         try (Socket client = new Socket(EXCHANGE_SERVER_IP, EXCHANGE_SERVER_SOCKET)) {
             out = new ObjectOutputStream(client.getOutputStream());
             in = new ObjectInputStream(client.getInputStream());

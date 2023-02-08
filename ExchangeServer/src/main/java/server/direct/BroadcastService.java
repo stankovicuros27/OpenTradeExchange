@@ -14,12 +14,12 @@ public class BroadcastService {
     private final List<ConnectionHandler> connectionHandlers = new ArrayList<>();
 
     public synchronized void registerBrokerConnectionHandler(ConnectionHandler connectionHandler) {
-        LOGGER.info("Register BrokerConnectionHandler at IP address: " + connectionHandler.getIpAddress());
+        LOGGER.info("Register BrokerConnectionHandler at IP address: " + connectionHandler.getClientIpAddress());
         connectionHandlers.add(connectionHandler);
     }
 
     public synchronized void removeBrokerConnectionHandler(ConnectionHandler connectionHandler) {
-        LOGGER.info("Remove BrokerConnectionHandler at IP address: " + connectionHandler.getIpAddress());
+        LOGGER.info("Remove BrokerConnectionHandler at IP address: " + connectionHandler.getClientIpAddress());
         connectionHandlers.remove(connectionHandler);
     }
 

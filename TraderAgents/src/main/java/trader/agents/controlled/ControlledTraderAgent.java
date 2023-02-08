@@ -7,13 +7,15 @@ public abstract class ControlledTraderAgent implements ITraderAgent {
     private static int GLOBAL_ID = 0;
 
     protected final int id = GLOBAL_ID++;
+    protected final String bookID;
     protected double priceBase;
     protected double priceDeviation;
     protected int volumeBase;
     protected int volumeDeviation;
     protected int maxOrders;
 
-    public ControlledTraderAgent(double priceBase, double priceDeviation, int volumeBase, int volumeDeviation, int maxOrders) {
+    public ControlledTraderAgent(String bookID, double priceBase, double priceDeviation, int volumeBase, int volumeDeviation, int maxOrders) {
+        this.bookID = bookID;
         this.priceBase = priceBase;
         this.priceDeviation = priceDeviation;
         this.volumeBase = volumeBase;

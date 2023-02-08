@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.Queue;
 
 public class Limit implements ILimit {
+
+    private final String bookID;
     private final Side side;
     private final double price;
     private final IOrderLookupCache orderLookupCache;
@@ -28,7 +30,8 @@ public class Limit implements ILimit {
     private int volume = 0;
     private final Queue<IOrder> orders = new LinkedList<>();
 
-    Limit(Side side, double price, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
+    Limit(String bookID, Side side, double price, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
+        this.bookID = bookID;
         this.side = side;
         this.price = price;
         this.orderLookupCache = orderLookupCache;
@@ -41,7 +44,7 @@ public class Limit implements ILimit {
         orders.add(order);
         orderLookupCache.addOrder(order);
         int timestamp = timestampProvider.getTimestampNow();
-        return new OrderStatusResponse(order.getUserID(), order.getOrderID(), OrderResponseStatus.PLACED_ORDER, timestamp);
+        return new OrderStatusResponse(bookID, order.getUserID(), order.getOrderID(), OrderResponseStatus.PLACED_ORDER, timestamp);
     }
 
     @Override
@@ -50,7 +53,7 @@ public class Limit implements ILimit {
         orders.remove(order);
         orderLookupCache.removeOrder(order);
         int timestamp = timestampProvider.getTimestampNow();
-        return new OrderStatusResponse(order.getUserID(), order.getOrderID(), OrderResponseStatus.CANCELLED_ORDER, timestamp);
+        return new OrderStatusResponse(bookID, order.getUserID(), order.getOrderID(), OrderResponseStatus.CANCELLED_ORDER, timestamp);
     }
 
     @Override
@@ -65,11 +68,11 @@ public class Limit implements ILimit {
             if (matchingOrder.isClosed()) {
                 orders.remove(matchingOrder);
                 orderLookupCache.removeOrder(matchingOrder);
-                responses.add((new OrderStatusResponse(matchingOrder.getUserID(), matchingOrder.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
+                responses.add((new OrderStatusResponse(bookID, matchingOrder.getUserID(), matchingOrder.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
             }
         }
         if (orderRequest.isMatched()) {
-            responses.add((new OrderStatusResponse(orderRequest.getUserID(), orderRequest.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
+            responses.add((new OrderStatusResponse(bookID, orderRequest.getUserID(), orderRequest.getOrderID(), OrderResponseStatus.CLOSED_ORDER, timestamp)));
         }
         return responses;
     }
@@ -107,7 +110,7 @@ public class Limit implements ILimit {
     @Override
     public ILimitInfo getLimitInfo() {
         int timestamp = timestampProvider.getTimestampNow();
-        return new LimitInfo(side, price, volume, orders.size(), timestamp);
+        return new LimitInfo(bookID, side, price, volume, orders.size(), timestamp);
     }
 
 }

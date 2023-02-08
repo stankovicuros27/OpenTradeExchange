@@ -1,12 +1,14 @@
-package impl.messages.internal.util;
+package impl.core;
 
+import api.core.IOrderRequestFactory;
 import api.messages.internal.responses.ICancelOrderAckResponse;
+import api.messages.internal.responses.IErrorAckResponse;
 import api.messages.internal.responses.IPlaceOrderAckResponse;
-import api.messages.internal.util.IOrderRequestFactory;
 import api.messages.internal.requests.ICancelOrderRequest;
 import api.messages.internal.requests.IPlaceOrderRequest;
 import api.sides.Side;
 import api.time.ITimestampProvider;
+import impl.messages.internal.responses.ErrorAckResponse;
 import impl.messages.internal.responses.PlaceOrderAckResponse;
 import impl.messages.internal.requests.CancelOrderRequest;
 import impl.messages.internal.requests.PlaceOrderRequest;
@@ -17,11 +19,13 @@ import java.util.Map;
 
 public class OrderRequestFactory implements IOrderRequestFactory {
 
+    private final String bookID;
     private final ITimestampProvider timestampProvider;
     private final int roundDecimalPlaces;
     private final Map<Integer, Integer> userOrderIDs = new HashMap<>();
 
-    public OrderRequestFactory(ITimestampProvider timestampProvider, int roundDecimalPlaces) {
+    public OrderRequestFactory(String bookID, ITimestampProvider timestampProvider, int roundDecimalPlaces) {
+        this.bookID = bookID;
         this.timestampProvider = timestampProvider;
         this.roundDecimalPlaces = roundDecimalPlaces;
     }
@@ -34,7 +38,7 @@ public class OrderRequestFactory implements IOrderRequestFactory {
         int orderID = userOrderIDs.get(userID);
         int timestamp = timestampProvider.getTimestampNow();
         double roundedPrice = roundPrice(price);
-        PlaceOrderRequest orderRequest = new PlaceOrderRequest(userID, orderID, roundedPrice, side, totalVolume, 0, timestamp);
+        PlaceOrderRequest orderRequest = new PlaceOrderRequest(bookID, userID, orderID, roundedPrice, side, totalVolume, 0, timestamp);
         userOrderIDs.put(userID, ++orderID);
         return orderRequest;
     }
@@ -45,26 +49,31 @@ public class OrderRequestFactory implements IOrderRequestFactory {
     }
 
     @Override
-    public synchronized IPlaceOrderAckResponse createPlaceOrderAckResponse(IPlaceOrderRequest placeOrderRequest) {
-        return new PlaceOrderAckResponse(placeOrderRequest.getUserID(),
+    public synchronized IPlaceOrderAckResponse createPlaceOrderAckResponse(IPlaceOrderRequest placeOrderRequest, int clientMessageTimestamp) {
+        return new PlaceOrderAckResponse(bookID, placeOrderRequest.getUserID(),
                 placeOrderRequest.getOrderID(),
                 placeOrderRequest.getPrice(),
                 placeOrderRequest.getSide(),
                 placeOrderRequest.getTotalVolume(),
-                placeOrderRequest.getTimestamp());
+                clientMessageTimestamp);
     }
 
     @Override
     public synchronized ICancelOrderRequest createCancelOrderRequest(int userID, int orderID) {
         int timestamp = timestampProvider.getTimestampNow();
-        return new CancelOrderRequest(userID, orderID, timestamp);
+        return new CancelOrderRequest(bookID, userID, orderID, timestamp);
     }
 
     @Override
-    public synchronized ICancelOrderAckResponse createCancelOrderAckResponse(ICancelOrderRequest cancelOrderRequest) {
-        return new CancelOrderAckResponse(cancelOrderRequest.getUserID(),
+    public synchronized ICancelOrderAckResponse createCancelOrderAckResponse(ICancelOrderRequest cancelOrderRequest, int clientMessageTimestamp) {
+        return new CancelOrderAckResponse(bookID, cancelOrderRequest.getUserID(),
                 cancelOrderRequest.getOrderID(),
-                cancelOrderRequest.getTimestamp());
+                clientMessageTimestamp);
+    }
+
+    @Override
+    public synchronized IErrorAckResponse createErrorAckResponse(String bookID, int userID, int clientMessageTimestamp) {
+        return new ErrorAckResponse(bookID, userID, clientMessageTimestamp);
     }
 
 }

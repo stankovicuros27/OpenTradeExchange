@@ -7,6 +7,7 @@ import java.util.Objects;
 
 public class TradeResponse implements ITradeResponse {
 
+    private final String bookID;
     private final int buyUserID;
     private final int buyOrderID;
     private final int sellUserID;
@@ -15,7 +16,8 @@ public class TradeResponse implements ITradeResponse {
     private final int volume;
     private final int timestamp;
 
-    public TradeResponse(int buyUserID, int buyOrderID, int sellUserID, int sellOrderID, double price, int volume, int timestamp) {
+    public TradeResponse(String bookID, int buyUserID, int buyOrderID, int sellUserID, int sellOrderID, double price, int volume, int timestamp) {
+        this.bookID = bookID;
         this.buyUserID = buyUserID;
         this.buyOrderID = buyOrderID;
         this.sellUserID = sellUserID;
@@ -53,6 +55,11 @@ public class TradeResponse implements ITradeResponse {
     @Override
     public int getVolume() {
         return volume;
+    }
+
+    @Override
+    public String getBookID() {
+        return bookID;
     }
 
     @Override

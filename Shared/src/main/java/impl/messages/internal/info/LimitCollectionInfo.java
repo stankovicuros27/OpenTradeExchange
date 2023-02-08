@@ -8,6 +8,7 @@ import java.util.List;
 
 public class LimitCollectionInfo implements ILimitCollectionInfo {
 
+    private final String bookID;
     private final Side side;
     private final List<ILimitInfo> limitInfos;
     private final int volume;
@@ -15,7 +16,8 @@ public class LimitCollectionInfo implements ILimitCollectionInfo {
     private final double bestPrice;
     private final int timestamp;
 
-    public LimitCollectionInfo(Side side, List<ILimitInfo> limitInfos, int volume, int numberOfOrders, double bestPrice, int timestamp) {
+    public LimitCollectionInfo(String bookID, Side side, List<ILimitInfo> limitInfos, int volume, int numberOfOrders, double bestPrice, int timestamp) {
+        this.bookID = bookID;
         this.side = side;
         this.limitInfos = limitInfos;
         this.volume = volume;
@@ -47,6 +49,11 @@ public class LimitCollectionInfo implements ILimitCollectionInfo {
     @Override
     public double getBestPrice() {
         return bestPrice;
+    }
+
+    @Override
+    public String getBookID() {
+        return bookID;
     }
 
     @Override

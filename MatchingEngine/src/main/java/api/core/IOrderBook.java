@@ -5,7 +5,6 @@ import api.messages.internal.requests.ICancelOrderRequest;
 import api.messages.internal.requests.IPlaceOrderRequest;
 import api.messages.internal.responses.IOrderStatusResponse;
 import api.messages.internal.responses.IResponse;
-import api.messages.internal.util.IOrderRequestFactory;
 
 import java.util.List;
 

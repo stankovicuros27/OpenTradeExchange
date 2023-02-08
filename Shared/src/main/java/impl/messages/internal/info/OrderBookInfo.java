@@ -8,6 +8,7 @@ import java.util.HashMap;
 
 public class OrderBookInfo implements IOrderBookInfo {
 
+    private final String bookID;
     private final HashMap<Side, ILimitCollectionInfo> limitDataMessages = new HashMap<>();
     private final int volume;
     private final int numberOfOrders;
@@ -16,13 +17,14 @@ public class OrderBookInfo implements IOrderBookInfo {
     private final int timestamp;
 
 
-    public OrderBookInfo(ILimitCollectionInfo buySide, ILimitCollectionInfo sellSide, double lastTradePrice, int timestamp) {
+    public OrderBookInfo(String bookID, ILimitCollectionInfo buySide, ILimitCollectionInfo sellSide, double lastTradePrice, int timestamp) {
         limitDataMessages.put(Side.BUY, buySide);
         limitDataMessages.put(Side.SELL, sellSide);
         bestPrices.put(Side.BUY, buySide.getBestPrice());
         bestPrices.put(Side.SELL, sellSide.getBestPrice());
         volume = buySide.getVolume() + sellSide.getVolume();
         numberOfOrders = buySide.getNumberOfOrders() + sellSide.getNumberOfOrders();
+        this.bookID = bookID;
         this.lastTradePrice = lastTradePrice;
         this.timestamp = timestamp;
     }
@@ -50,6 +52,11 @@ public class OrderBookInfo implements IOrderBookInfo {
     @Override
     public double getLastTradePrice() {
         return lastTradePrice;
+    }
+
+    @Override
+    public String getBookID() {
+        return bookID;
     }
 
     @Override

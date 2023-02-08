@@ -9,6 +9,7 @@ import impl.messages.internal.responses.TradeResponse;
 
 public class Order implements IOrder {
 
+    private final String bookID;
     private final int userID;
     private final int orderID;
     private final double price;
@@ -17,7 +18,8 @@ public class Order implements IOrder {
     private final int totalVolume;
     private int filledVolume;
 
-    public Order(int userID, int orderID, double price, int timestamp, Side side, int totalVolume, int filledVolume) {
+    public Order(String bookID, int userID, int orderID, double price, int timestamp, Side side, int totalVolume, int filledVolume) {
+        this.bookID = bookID;
         this.userID = userID;
         this.orderID = orderID;
         this.price = price;
@@ -33,13 +35,19 @@ public class Order implements IOrder {
         orderRequest.fillVolume(volume);
         int timestamp = timestampProvider.getTimestampNow();
         double price;
+        String bookID = order.getBookID();
         if (orderRequest.getSide() == Side.BUY) {
             price = Math.min(order.getPrice(), orderRequest.getPrice());
-            return new TradeResponse(orderRequest.getUserID(), orderRequest.getOrderID(), order.getUserID(), order.getOrderID(), price, volume, timestamp);
+            return new TradeResponse(bookID, orderRequest.getUserID(), orderRequest.getOrderID(), order.getUserID(), order.getOrderID(), price, volume, timestamp);
         } else {
             price = Math.max(order.getPrice(), orderRequest.getPrice());
-            return new TradeResponse(order.getUserID(), order.getOrderID(), orderRequest.getUserID(), orderRequest.getOrderID(), price, volume, timestamp);
+            return new TradeResponse(bookID, order.getUserID(), order.getOrderID(), orderRequest.getUserID(), orderRequest.getOrderID(), price, volume, timestamp);
         }
+    }
+
+    @Override
+    public String getBookID() {
+        return bookID;
     }
 
     @Override
@@ -88,7 +96,8 @@ public class Order implements IOrder {
     }
 
     public static IOrder fromRequest(IPlaceOrderRequest orderRequest) {
-        return new Order(orderRequest.getUserID(),
+        return new Order(orderRequest.getBookID(),
+                orderRequest.getUserID(),
                 orderRequest.getOrderID(),
                 orderRequest.getPrice(),
                 orderRequest.getTimestamp(),

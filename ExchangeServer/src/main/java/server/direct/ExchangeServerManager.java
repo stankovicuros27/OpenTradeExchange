@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 
 public class ExchangeServerManager {
 
+    // TODO move port, broadcast and other properties to ExchangeServerContext
     private static final int EXCHANGE_SERVER_PORT = 9999;
     private static final int INFO_BROADCAST_TIMEOUT_MS = 1000;
 

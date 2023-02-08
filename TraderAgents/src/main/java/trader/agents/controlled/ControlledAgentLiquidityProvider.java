@@ -21,16 +21,12 @@ import java.util.Random;
 
 public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
 
-    private final Random random = new Random();
+    private final Random random = new Random(System.currentTimeMillis());
     private final List<Integer> activeOrderIDs = new ArrayList<>();
     private final ITimestampProvider timestampProvider = new InstantTimestampProvider();
 
-    // TODO CHANGE
-    private static final String[] bookIDs = {"Test1", "Test2"};
-    private static long bookIDCnt = 0;
-
-    public ControlledAgentLiquidityProvider(double priceBase, double priceDeviation, int volumeBase, int volumeDeviation, int maxOrders) {
-        super(priceBase, priceDeviation, volumeBase, volumeDeviation, maxOrders);
+    public ControlledAgentLiquidityProvider(String bookID, double priceBase, double priceDeviation, int volumeBase, int volumeDeviation, int maxOrders) {
+        super(bookID, priceBase, priceDeviation, volumeBase, volumeDeviation, maxOrders);
     }
 
     @Override
@@ -46,17 +42,7 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
     @Override
     public void registerMessages(List<IMessage> messages) {
         for (IMessage message : messages) {
-            if (message.getMessageType() != MessageType.RESPONSE) {
-                continue;
-            }
-            IResponse response = (IResponse) message;
-            if (response.getType() == ResponseType.PlaceOrderAckResponse) {
-                PlaceOrderAckResponse placeOrderAckResponse = (PlaceOrderAckResponse) response;
-                activeOrderIDs.add(placeOrderAckResponse.getOrderID());
-            } else if (response.getType() == ResponseType.CancelOrderAckResponse) {
-                CancelOrderAckResponse cancelOrderAckResponse = (CancelOrderAckResponse) response;
-                activeOrderIDs.remove(Integer.valueOf(cancelOrderAckResponse.getOrderID()));
-            }
+            registerMessage(message);
         }
     }
 
@@ -68,9 +54,15 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
         IResponse response = (IResponse) message;
         if (response.getType() == ResponseType.PlaceOrderAckResponse) {
             PlaceOrderAckResponse placeOrderAckResponse = (PlaceOrderAckResponse) response;
+            if (placeOrderAckResponse.getUserID() != id) {
+                return;
+            }
             activeOrderIDs.add(placeOrderAckResponse.getOrderID());
         } else if (response.getType() == ResponseType.CancelOrderAckResponse) {
             CancelOrderAckResponse cancelOrderAckResponse = (CancelOrderAckResponse) response;
+            if (cancelOrderAckResponse.getUserID() != id) {
+                return;
+            }
             activeOrderIDs.remove(Integer.valueOf(cancelOrderAckResponse.getOrderID()));
         }
     }
@@ -79,14 +71,12 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
         double price = getNextPrice();
         Side side = getNextSide();
         int volume = getNextVolume();
-        String bookID = bookIDs[(int) (++bookIDCnt % 2)];
         return new ExternalPlaceOrderRequest(bookID, id, price, side, volume, timestampProvider.getTimestampNow());
     }
 
     private IExternalCancelOrderRequest getExternalCancelOrderRequest() {
         int randIndex = random.nextInt(activeOrderIDs.size());
         int orderID = activeOrderIDs.get(randIndex);
-        String bookID = bookIDs[(int) (++bookIDCnt % 2)];
         return new ExternalCancelOrderRequest(bookID, id, orderID, timestampProvider.getTimestampNow());
     }
 

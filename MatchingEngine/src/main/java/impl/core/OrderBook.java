@@ -8,7 +8,7 @@ import api.messages.internal.requests.IPlaceOrderRequest;
 import api.messages.internal.responses.IOrderStatusResponse;
 import api.messages.internal.responses.IResponse;
 import api.messages.internal.responses.OrderResponseStatus;
-import api.messages.internal.util.IOrderRequestFactory;
+import api.core.IOrderRequestFactory;
 import api.sides.Side;
 import api.time.ITimestampProvider;
 import impl.messages.internal.info.OrderBookInfo;
@@ -24,22 +24,22 @@ public class OrderBook implements IOrderBook {
 
     private static final Logger LOGGER = LogManager.getLogger(OrderBook.class);
 
-    private final Map<Side, ILimitCollection> limitCollections = new HashMap<>();
     private final String bookID;
     private final IOrderRequestFactory orderRequestFactory;
     private final IOrderLookupCache orderLookupCache;
     private final ITimestampProvider timestampProvider;
     private final IEventDataStore eventDataStore;
+    private final Map<Side, ILimitCollection> limitCollections = new HashMap<>();
 
     public OrderBook(String bookID, IOrderRequestFactory orderRequestFactory, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider, IEventDataStore eventDataStore) {
-        LOGGER.info("Creating OrderBook");
+        LOGGER.info("Creating OrderBook: " + bookID);
         this.bookID = bookID;
         this.orderRequestFactory = orderRequestFactory;
         this.orderLookupCache = orderLookupCache;
         this.timestampProvider = timestampProvider;
         this.eventDataStore = eventDataStore;
-        limitCollections.put(Side.BUY, new LimitCollection(Side.BUY, orderLookupCache, timestampProvider));
-        limitCollections.put(Side.SELL, new LimitCollection(Side.SELL, orderLookupCache, timestampProvider));
+        limitCollections.put(Side.BUY, new LimitCollection(bookID, Side.BUY, orderLookupCache, timestampProvider));
+        limitCollections.put(Side.SELL, new LimitCollection(bookID, Side.SELL, orderLookupCache, timestampProvider));
     }
 
     @Override
@@ -65,7 +65,7 @@ public class OrderBook implements IOrderBook {
         IOrder order = orderLookupCache.getOrder(cancelOrderRequest.getUserID(), cancelOrderRequest.getOrderID());
         if (order == null) {
             int timestamp = timestampProvider.getTimestampNow();
-            return new OrderStatusResponse(cancelOrderRequest.getUserID(), cancelOrderRequest.getOrderID(), OrderResponseStatus.NULL_ORDER, timestamp);
+            return new OrderStatusResponse(bookID, cancelOrderRequest.getUserID(), cancelOrderRequest.getOrderID(), OrderResponseStatus.NULL_ORDER, timestamp);
         }
         ILimitCollection limitCollection = limitCollections.get((order.getSide()));
         IOrderStatusResponse response = limitCollection.cancelOrder(order);
@@ -78,7 +78,7 @@ public class OrderBook implements IOrderBook {
         ILimitCollectionInfo buySideInfo = limitCollections.get(Side.BUY).getInfo();
         ILimitCollectionInfo sellSideInfo = limitCollections.get(Side.SELL).getInfo();
         int timestamp = timestampProvider.getTimestampNow();
-        return new OrderBookInfo(buySideInfo, sellSideInfo, eventDataStore.getLastTradePrice(), timestamp);
+        return new OrderBookInfo(bookID, buySideInfo, sellSideInfo, eventDataStore.getLastTradePrice(), timestamp);
     }
 
     @Override

@@ -8,13 +8,15 @@ import java.util.Objects;
 
 public class OrderStatusResponse implements IOrderStatusResponse {
 
+    private final String bookID;
     private final int userID;
     private final int orderID;
     private final OrderResponseStatus status;
     private final int timestamp;
 
 
-    public OrderStatusResponse(int userID, int orderID, OrderResponseStatus status, int timestamp) {
+    public OrderStatusResponse(String bookID, int userID, int orderID, OrderResponseStatus status, int timestamp) {
+        this.bookID = bookID;
         this.userID = userID;
         this.orderID = orderID;
         this.status = status;
@@ -61,6 +63,11 @@ public class OrderStatusResponse implements IOrderStatusResponse {
                 ", orderID = " + orderID +
                 ", status = " + status +
                 " }";
+    }
+
+    @Override
+    public String getBookID() {
+        return bookID;
     }
 
     @Override

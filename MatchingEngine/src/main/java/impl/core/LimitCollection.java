@@ -21,13 +21,15 @@ public class LimitCollection implements ILimitCollection {
 
     private static final Logger LOGGER = LogManager.getLogger(LimitCollection.class);
 
+    private final String bookID;
     private final Side side;
     private final IOrderLookupCache orderLookupCache;
     private final ITimestampProvider timestampProvider;
     private final SortedMap<Double, ILimit> limits = new TreeMap<>();
 
-    public LimitCollection(Side side, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
+    public LimitCollection(String bookID, Side side, IOrderLookupCache orderLookupCache, ITimestampProvider timestampProvider) {
         LOGGER.info("Creating LimitCollection (" + side + ")");
+        this.bookID = bookID;
         this.side = side;
         this.orderLookupCache = orderLookupCache;
         this.timestampProvider = timestampProvider;
@@ -36,7 +38,7 @@ public class LimitCollection implements ILimitCollection {
     @Override
     public IOrderStatusResponse addOrder(IOrder order) {
         if (!limits.containsKey(order.getPrice())) {
-            limits.put(order.getPrice(), new Limit(side, order.getPrice(), orderLookupCache, timestampProvider));
+            limits.put(order.getPrice(), new Limit(bookID, side, order.getPrice(), orderLookupCache, timestampProvider));
         }
         return limits.get(order.getPrice()).addOrder(order);
     }
@@ -91,7 +93,7 @@ public class LimitCollection implements ILimitCollection {
             numberOfOrders += limit.getNumberOfOrders();
         }
         int timestamp = timestampProvider.getTimestampNow();
-        return new LimitCollectionInfo(side, limitInfos, volume, numberOfOrders, bestPrice, timestamp);
+        return new LimitCollectionInfo(bookID, side, limitInfos, volume, numberOfOrders, bestPrice, timestamp);
     }
 
     private boolean canMatchOrders(IPlaceOrderRequest orderRequest) {

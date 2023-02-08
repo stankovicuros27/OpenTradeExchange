@@ -1,9 +1,8 @@
 package impl.core;
 
 import api.core.*;
-import api.messages.internal.util.IOrderRequestFactory;
+import api.core.IOrderRequestFactory;
 import api.time.ITimestampProvider;
-import impl.messages.internal.util.OrderRequestFactory;
 import impl.time.InstantTimestampProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +32,7 @@ public class MatchingEngine implements IMatchingEngine {
     @Override
     public synchronized void registerOrderBook(IOrderBookConfiguration orderBookConfiguration) {
         ITimestampProvider timestampProvider = new InstantTimestampProvider();
-        IOrderRequestFactory orderRequestFactory = new OrderRequestFactory(timestampProvider, orderBookConfiguration.getRoundDecimalPlaces());
+        IOrderRequestFactory orderRequestFactory = new OrderRequestFactory(orderBookConfiguration.getOrderBookID(), timestampProvider, orderBookConfiguration.getRoundDecimalPlaces());
         IOrderLookupCache orderLookupCache = new OrderLookupCache();
         EventDataStore eventDataStore = new EventDataStore();
         IOrderBook orderBook = new OrderBook(orderBookConfiguration.getOrderBookID(), orderRequestFactory, orderLookupCache, timestampProvider, eventDataStore);
@@ -41,7 +40,7 @@ public class MatchingEngine implements IMatchingEngine {
     }
 
     @Override
-    public boolean containsOrderBook(String bookID) {
+    public synchronized boolean containsOrderBook(String bookID) {
         return orderBooks.containsKey(bookID);
     }
 
@@ -51,7 +50,7 @@ public class MatchingEngine implements IMatchingEngine {
     }
 
     @Override
-    public List<IOrderBook> getAllOrderBooks() {
+    public synchronized List<IOrderBook> getAllOrderBooks() {
         return new ArrayList<>(orderBooks.values());
     }
 

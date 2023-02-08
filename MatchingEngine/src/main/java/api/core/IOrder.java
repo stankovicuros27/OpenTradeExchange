@@ -3,6 +3,7 @@ package api.core;
 import api.sides.Side;
 
 public interface IOrder {
+    public String getBookID();
     public int getUserID();
     public int getOrderID();
     public double getPrice();

@@ -5,6 +5,7 @@ import api.sides.Side;
 
 public class LimitInfo implements ILimitInfo {
 
+    private final String bookID;
     private final Side side;
     private final double price;
     private final int volume;
@@ -12,7 +13,8 @@ public class LimitInfo implements ILimitInfo {
     private final int timestamp;
 
 
-    public LimitInfo(Side side, double price, int volume, int numberOfOrders, int timestamp) {
+    public LimitInfo(String bookID, Side side, double price, int volume, int numberOfOrders, int timestamp) {
+        this.bookID = bookID;
         this.side = side;
         this.price = price;
         this.volume = volume;
@@ -38,6 +40,11 @@ public class LimitInfo implements ILimitInfo {
     @Override
     public int getNumberOfOrders() {
         return numberOfOrders;
+    }
+
+    @Override
+    public String getBookID() {
+        return bookID;
     }
 
     @Override

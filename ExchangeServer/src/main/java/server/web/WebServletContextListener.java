@@ -3,7 +3,7 @@ package server.web;
 import jakarta.servlet.ServletContextEvent;
 import jakarta.servlet.ServletContextListener;
 import jakarta.servlet.annotation.WebListener;
-import server.ExchangeServerInitializator;
+import server.ExchangeServerInitializer;
 
 @WebListener
 public class WebServletContextListener implements ServletContextListener {
@@ -11,7 +11,7 @@ public class WebServletContextListener implements ServletContextListener {
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         ServletContextListener.super.contextInitialized(sce);
-        ExchangeServerInitializator.initialize();
+        ExchangeServerInitializer.initialize();
     }
 
     @Override

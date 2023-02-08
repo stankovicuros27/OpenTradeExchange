@@ -8,13 +8,12 @@ import api.messages.external.IExternalRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import trader.agents.ITraderAgent;
-import api.core.IMatchingEngine;
 import api.core.IOrderBook;
 import api.messages.internal.requests.ICancelOrderRequest;
 import api.messages.internal.requests.IPlaceOrderRequest;
 import api.messages.internal.responses.ICancelOrderAckResponse;
 import api.messages.internal.responses.IPlaceOrderAckResponse;
-import api.messages.internal.util.IOrderRequestFactory;
+import api.core.IOrderRequestFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,19 +23,18 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
     private static final Logger LOGGER = LogManager.getLogger(LocalTraderAgentRunner.class);
 
     private final ITraderAgent traderAgent;
-    private final IOrderRequestFactory orderRequestFactory;
     private final IOrderBook orderBook;
+    private final IOrderRequestFactory orderRequestFactory;
 
-    public LocalTraderAgentRunner(ITraderAgent traderAgent, IMatchingEngine matchingEngine) {
+    public LocalTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook) {
         this.traderAgent = traderAgent;
-        // TODO CHANGE
-        orderRequestFactory = matchingEngine.getOrderBook("Test1").getOrderRequestFactory();
-        orderBook = matchingEngine.getOrderBook("Test1");
+        this.orderBook = orderBook;
+        this.orderRequestFactory = orderBook.getOrderRequestFactory();
     }
 
     @Override
     public void run() {
-        LOGGER.info("Starting LocalTradeAgentRunner");
+        LOGGER.info("Starting LocalTradeAgentRunner for OrderBook: " + orderBook.getBookID());
         while(true) {
             IExternalRequest externalRequest = traderAgent.getNextRequest();
             if (externalRequest.getExternalRequestType() == ExternalRequestType.PLACE) {
@@ -60,7 +58,7 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
                 externalPlaceOrderRequest.getPrice(),
                 externalPlaceOrderRequest.getSide(),
                 externalPlaceOrderRequest.getVolume());
-        IPlaceOrderAckResponse placeOrderAckResponse = orderRequestFactory.createPlaceOrderAckResponse(placeOrderRequest);
+        IPlaceOrderAckResponse placeOrderAckResponse = orderRequestFactory.createPlaceOrderAckResponse(placeOrderRequest, externalPlaceOrderRequest.getTimestamp());
         responses.add(placeOrderAckResponse);
         responses.addAll(orderBook.placeOrder(placeOrderRequest));
         traderAgent.registerMessages(responses);
@@ -70,7 +68,7 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
         List<IMessage> responses = new ArrayList<>();
         ICancelOrderRequest cancelOrderRequest = orderRequestFactory.createCancelOrderRequest(externalCancelOrderRequest.getUserID(),
                 externalCancelOrderRequest.getOrderID());
-        ICancelOrderAckResponse cancelOrderAckResponse = orderRequestFactory.createCancelOrderAckResponse(cancelOrderRequest);
+        ICancelOrderAckResponse cancelOrderAckResponse = orderRequestFactory.createCancelOrderAckResponse(cancelOrderRequest, externalCancelOrderRequest.getTimestamp());
         responses.add(cancelOrderAckResponse);
         responses.add(orderBook.cancelOrder(cancelOrderRequest));
         traderAgent.registerMessages(responses);

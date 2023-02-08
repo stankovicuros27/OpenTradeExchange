@@ -14,6 +14,8 @@ import java.util.Map;
 public class MatchingEngineChartAnalytics implements Runnable {
 
     private static final int REFRESH_RATE_MS = 1000;
+    private static final int FRAME_WIDTH = 1200;
+    private static final int FRAME_HEIGHT = 600;
 
     private final IMatchingEngine matchingEngine;
     private final Map<String, JFrame> frames = new HashMap<>();
@@ -22,7 +24,10 @@ public class MatchingEngineChartAnalytics implements Runnable {
 
     public MatchingEngineChartAnalytics(IMatchingEngine matchingEngine) {
         this.matchingEngine = matchingEngine;
+        initDynamicCharts(matchingEngine);
+    }
 
+    private void initDynamicCharts(IMatchingEngine matchingEngine) {
         for (IOrderBook orderBook : matchingEngine.getAllOrderBooks()) {
             String bookID = orderBook.getBookID();
             JFrame frame = new JFrame(bookID);
@@ -30,19 +35,18 @@ public class MatchingEngineChartAnalytics implements Runnable {
             frame.setBackground(Color.DARK_GRAY);
             frame.setLayout(new GridLayout(1, 2));
 
-            DynamicChart eventDataChart = new DynamicChart("Events per Second", new String[]{"PlaceOrder", "CancelOrder", "ClosedOrder", "Trade"});
+            DynamicChart eventDataChart = new DynamicChart("Events", new String[]{"PlaceOrder", "CancelOrder", "ClosedOrder", "Trade"});
             frame.add(eventDataChart);
+            eventDataCharts.put(bookID, eventDataChart);
 
             DynamicChart tradeDataChart = new DynamicChart("Trade Data", new String[]{"Buy", "Trade", "Sell"});
             frame.add(tradeDataChart);
+            tradeDataCharts.put(bookID, tradeDataChart);
 
             frame.pack();
-            frame.setSize(700, 400);
+            frame.setSize(FRAME_WIDTH, FRAME_HEIGHT);
             frame.setVisible(true);
-
             frames.put(bookID, frame);
-            eventDataCharts.put(bookID, eventDataChart);
-            tradeDataCharts.put(bookID, tradeDataChart);
         }
     }
 
@@ -50,9 +54,9 @@ public class MatchingEngineChartAnalytics implements Runnable {
     public void run() {
         while(true) {
             try {
-                Thread.sleep(REFRESH_RATE_MS);
                 updateEventDataCharts();
                 updateTradeDataCharts();
+                Thread.sleep(REFRESH_RATE_MS);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
@@ -64,11 +68,13 @@ public class MatchingEngineChartAnalytics implements Runnable {
             String bookID = orderBook.getBookID();
             IEventDataStore eventDataStore = orderBook.getEventDataStore();
             DynamicChart eventDataChart = eventDataCharts.get(bookID);
-            eventDataChart.update(
-                    new float[] {eventDataStore.getAndResetPlaceOrderCnt(),
+            eventDataChart.update(new float[]
+                    {
+                            eventDataStore.getAndResetPlaceOrderCnt(),
                             eventDataStore.getAndResetCancelOrderCnt(),
                             eventDataStore.getAndResetClosedOrderCnt(),
-                            eventDataStore.getAndResetTradeCnt()}
+                            eventDataStore.getAndResetTradeCnt()
+                    }
             );
         }
     }

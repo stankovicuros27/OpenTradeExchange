@@ -6,6 +6,7 @@ import api.sides.Side;
 
 public class PlaceOrderRequest implements IPlaceOrderRequest {
 
+    private final String bookID;
     private final int userID;
     private final int orderID;
     private final double price;
@@ -15,7 +16,8 @@ public class PlaceOrderRequest implements IPlaceOrderRequest {
     private final int timestamp;
 
 
-    public PlaceOrderRequest(int userID, int orderID, double price, Side side, int totalVolume, int filledVolume, int timestamp) {
+    public PlaceOrderRequest(String bookID, int userID, int orderID, double price, Side side, int totalVolume, int filledVolume, int timestamp) {
+        this.bookID = bookID;
         this.userID = userID;
         this.orderID = orderID;
         this.price = price;
@@ -68,6 +70,11 @@ public class PlaceOrderRequest implements IPlaceOrderRequest {
     @Override
     public RequestType getRequestType() {
         return RequestType.PLACE;
+    }
+
+    @Override
+    public String getBookID() {
+        return bookID;
     }
 
     @Override
