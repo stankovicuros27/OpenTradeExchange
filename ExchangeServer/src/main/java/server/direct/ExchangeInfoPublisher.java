@@ -2,7 +2,7 @@ package server.direct;
 
 import api.core.IMatchingEngine;
 import api.core.IOrderBook;
-import api.messages.internal.info.IOrderBookInfo;
+import api.messages.info.IOrderBookInfo;
 
 public class ExchangeInfoPublisher implements Runnable {
 
@@ -22,7 +22,8 @@ public class ExchangeInfoPublisher implements Runnable {
             try {
                 for (IOrderBook orderBook : matchingEngine.getAllOrderBooks()) {
                     IOrderBookInfo orderBookInfo = orderBook.getInfo();
-                    broadcastService.broadcastMessages(orderBookInfo);
+                    // TODO map internal to external responses
+                    // broadcastService.broadcastMessages(orderBookInfo);
                 }
                 Thread.sleep(timeoutMs);
             } catch (InterruptedException e) {

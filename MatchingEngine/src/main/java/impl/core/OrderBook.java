@@ -1,18 +1,18 @@
 package impl.core;
 
 import api.core.*;
-import api.messages.internal.info.ILimitCollectionInfo;
-import api.messages.internal.info.IOrderBookInfo;
-import api.messages.internal.requests.ICancelOrderRequest;
-import api.messages.internal.requests.IPlaceOrderRequest;
-import api.messages.internal.responses.IOrderStatusResponse;
-import api.messages.internal.responses.IResponse;
-import api.messages.internal.responses.OrderResponseStatus;
+import api.messages.info.ILimitCollectionInfo;
+import api.messages.info.IOrderBookInfo;
+import api.messages.requests.ICancelOrderRequest;
+import api.messages.requests.IPlaceOrderRequest;
+import api.messages.responses.IOrderStatusResponse;
+import api.messages.responses.IResponse;
+import api.messages.responses.OrderResponseStatus;
 import api.core.IOrderRequestFactory;
-import api.sides.Side;
+import api.core.Side;
 import api.time.ITimestampProvider;
-import impl.messages.internal.info.OrderBookInfo;
-import impl.messages.internal.responses.OrderStatusResponse;
+import impl.messages.info.OrderBookInfo;
+import impl.messages.responses.OrderStatusResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

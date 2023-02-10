@@ -1,11 +1,11 @@
 package impl.core;
 
 import api.core.IOrder;
-import api.messages.internal.requests.IPlaceOrderRequest;
-import api.messages.internal.responses.ITradeResponse;
-import api.sides.Side;
+import api.messages.requests.IPlaceOrderRequest;
+import api.messages.responses.ITradeResponse;
+import api.core.Side;
 import api.time.ITimestampProvider;
-import impl.messages.internal.responses.TradeResponse;
+import impl.messages.responses.TradeResponse;
 
 public class Order implements IOrder {
 

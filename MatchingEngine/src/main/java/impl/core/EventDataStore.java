@@ -1,7 +1,7 @@
 package impl.core;
 
 import api.core.IEventDataStore;
-import api.messages.internal.responses.*;
+import api.messages.responses.*;
 
 import java.util.List;
 

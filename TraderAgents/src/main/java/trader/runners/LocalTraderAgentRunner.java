@@ -1,18 +1,18 @@
 package trader.runners;
 
-import api.messages.IMessage;
-import api.messages.external.ExternalRequestType;
-import api.messages.external.IExternalCancelOrderRequest;
-import api.messages.external.IExternalPlaceOrderRequest;
-import api.messages.external.IExternalRequest;
+import api.core.Side;
+import api.messages.external.ExternalSide;
+import api.messages.external.request.ExternalRequestType;
+import api.messages.external.request.IExternalRequest;
+import api.messages.external.response.IExternalResponse;
+import api.messages.external.response.IExternalResponseFactory;
+import impl.messages.external.response.ExternalResponseFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import trader.agents.ITraderAgent;
 import api.core.IOrderBook;
-import api.messages.internal.requests.ICancelOrderRequest;
-import api.messages.internal.requests.IPlaceOrderRequest;
-import api.messages.internal.responses.ICancelOrderAckResponse;
-import api.messages.internal.responses.IPlaceOrderAckResponse;
+import api.messages.requests.ICancelOrderRequest;
+import api.messages.requests.IPlaceOrderRequest;
 import api.core.IOrderRequestFactory;
 
 import java.util.ArrayList;
@@ -25,6 +25,7 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
     private final ITraderAgent traderAgent;
     private final IOrderBook orderBook;
     private final IOrderRequestFactory orderRequestFactory;
+    private final IExternalResponseFactory externalResponseFactory = new ExternalResponseFactory();
 
     public LocalTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook) {
         this.traderAgent = traderAgent;
@@ -38,11 +39,9 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
         while(true) {
             IExternalRequest externalRequest = traderAgent.getNextRequest();
             if (externalRequest.getExternalRequestType() == ExternalRequestType.PLACE) {
-                IExternalPlaceOrderRequest externalPlaceOrderRequest = (IExternalPlaceOrderRequest) externalRequest;
-                sendPlaceOrderRequest(externalPlaceOrderRequest);
+                sendPlaceOrderRequest(externalRequest);
             } else {
-                IExternalCancelOrderRequest externalCancelOrderRequest = (IExternalCancelOrderRequest) externalRequest;
-                sendCancelOrderRequest(externalCancelOrderRequest);
+                sendCancelOrderRequest(externalRequest);
             }
             try {
                 Thread.sleep((long) (Math.random() * SLEEP_TIME_MS));
@@ -52,26 +51,43 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
         }
     }
 
-    private void sendPlaceOrderRequest(IExternalPlaceOrderRequest externalPlaceOrderRequest) {
-        List<IMessage> responses = new ArrayList<>();
-        IPlaceOrderRequest placeOrderRequest = orderRequestFactory.createPlaceOrderRequest(externalPlaceOrderRequest.getUserID(),
+    private void sendPlaceOrderRequest(IExternalRequest externalPlaceOrderRequest) {
+        List<IExternalResponse> responses = new ArrayList<>();
+        Side side = externalPlaceOrderRequest.getSide() == ExternalSide.BUY ? Side.BUY : Side.SELL;
+        IPlaceOrderRequest placeOrderRequest = orderRequestFactory.createPlaceOrderRequest(
+                externalPlaceOrderRequest.getUserID(),
+                externalPlaceOrderRequest.getPrice(),
+                side,
+                externalPlaceOrderRequest.getVolume());
+        IExternalResponse externalAckResponse = externalResponseFactory.getReceivedPlaceOrderAckResponse(
+                externalPlaceOrderRequest.getBookID(),
+                externalPlaceOrderRequest.getUserID(),
                 externalPlaceOrderRequest.getPrice(),
                 externalPlaceOrderRequest.getSide(),
-                externalPlaceOrderRequest.getVolume());
-        IPlaceOrderAckResponse placeOrderAckResponse = orderRequestFactory.createPlaceOrderAckResponse(placeOrderRequest, externalPlaceOrderRequest.getTimestamp());
-        responses.add(placeOrderAckResponse);
-        responses.addAll(orderBook.placeOrder(placeOrderRequest));
-        traderAgent.registerMessages(responses);
+                externalPlaceOrderRequest.getVolume(),
+                externalPlaceOrderRequest.getExternalTimestamp());
+        responses.add(externalAckResponse);
+        //responses.addAll(orderBook.placeOrder(placeOrderRequest));
+        orderBook.placeOrder(placeOrderRequest);
+        traderAgent.registerResponses(responses);
     }
 
-    private void sendCancelOrderRequest(IExternalCancelOrderRequest externalCancelOrderRequest) {
-        List<IMessage> responses = new ArrayList<>();
+    private void sendCancelOrderRequest(IExternalRequest externalCancelOrderRequest) {
+        List<IExternalResponse> responses = new ArrayList<>();
         ICancelOrderRequest cancelOrderRequest = orderRequestFactory.createCancelOrderRequest(externalCancelOrderRequest.getUserID(),
                 externalCancelOrderRequest.getOrderID());
-        ICancelOrderAckResponse cancelOrderAckResponse = orderRequestFactory.createCancelOrderAckResponse(cancelOrderRequest, externalCancelOrderRequest.getTimestamp());
-        responses.add(cancelOrderAckResponse);
-        responses.add(orderBook.cancelOrder(cancelOrderRequest));
-        traderAgent.registerMessages(responses);
+        IExternalResponse externalAckResponse = externalResponseFactory.getReceivedCancelOrderAckResponse(
+                externalCancelOrderRequest.getBookID(),
+                externalCancelOrderRequest.getUserID(),
+                externalCancelOrderRequest.getOrderID(),
+                externalCancelOrderRequest.getPrice(),
+                externalCancelOrderRequest.getSide(),
+                externalCancelOrderRequest.getVolume(),
+                externalCancelOrderRequest.getExternalTimestamp());
+        responses.add(externalAckResponse);
+        //responses.add(orderBook.cancelOrder(cancelOrderRequest));
+        orderBook.cancelOrder(cancelOrderRequest);
+        traderAgent.registerResponses(responses);
     }
 
 }

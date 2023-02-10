@@ -1,10 +1,10 @@
 package api.core;
 
-import api.messages.internal.info.IOrderBookInfo;
-import api.messages.internal.requests.ICancelOrderRequest;
-import api.messages.internal.requests.IPlaceOrderRequest;
-import api.messages.internal.responses.IOrderStatusResponse;
-import api.messages.internal.responses.IResponse;
+import api.messages.info.IOrderBookInfo;
+import api.messages.requests.ICancelOrderRequest;
+import api.messages.requests.IPlaceOrderRequest;
+import api.messages.responses.IOrderStatusResponse;
+import api.messages.responses.IResponse;
 
 import java.util.List;
 

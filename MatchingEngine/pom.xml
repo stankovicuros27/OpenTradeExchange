@@ -36,12 +36,6 @@
             <artifactId>assertj-core</artifactId>
         </dependency>
 
-        <!--CHARTS-->
-        <dependency>
-            <groupId>org.jfree</groupId>
-            <artifactId>jfreechart</artifactId>
-        </dependency>
-
         <!--INTERNAL-->
         <dependency>
             <groupId>opentradeexchange</groupId>

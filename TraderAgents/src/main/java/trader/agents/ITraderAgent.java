@@ -1,12 +1,12 @@
 package trader.agents;
 
-import api.messages.external.IExternalRequest;
-import api.messages.IMessage;
+import api.messages.external.request.IExternalRequest;
+import api.messages.external.response.IExternalResponse;
 
 import java.util.List;
 
 public interface ITraderAgent {
     public IExternalRequest getNextRequest();
-    public void registerMessages(List<IMessage> messages);
-    public void registerMessage(IMessage message);
+    public void registerResponses(List<IExternalResponse> messages);
+    public void registerResponse(IExternalResponse message);
 }

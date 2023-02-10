@@ -1,18 +1,12 @@
 package impl.core;
 
 import api.core.IOrderRequestFactory;
-import api.messages.internal.responses.ICancelOrderAckResponse;
-import api.messages.internal.responses.IErrorAckResponse;
-import api.messages.internal.responses.IPlaceOrderAckResponse;
-import api.messages.internal.requests.ICancelOrderRequest;
-import api.messages.internal.requests.IPlaceOrderRequest;
-import api.sides.Side;
+import api.messages.requests.ICancelOrderRequest;
+import api.messages.requests.IPlaceOrderRequest;
+import api.core.Side;
 import api.time.ITimestampProvider;
-import impl.messages.internal.responses.ErrorAckResponse;
-import impl.messages.internal.responses.PlaceOrderAckResponse;
-import impl.messages.internal.requests.CancelOrderRequest;
-import impl.messages.internal.requests.PlaceOrderRequest;
-import impl.messages.internal.responses.CancelOrderAckResponse;
+import impl.messages.requests.CancelOrderRequest;
+import impl.messages.requests.PlaceOrderRequest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,31 +43,9 @@ public class OrderRequestFactory implements IOrderRequestFactory {
     }
 
     @Override
-    public synchronized IPlaceOrderAckResponse createPlaceOrderAckResponse(IPlaceOrderRequest placeOrderRequest, int clientMessageTimestamp) {
-        return new PlaceOrderAckResponse(bookID, placeOrderRequest.getUserID(),
-                placeOrderRequest.getOrderID(),
-                placeOrderRequest.getPrice(),
-                placeOrderRequest.getSide(),
-                placeOrderRequest.getTotalVolume(),
-                clientMessageTimestamp);
-    }
-
-    @Override
     public synchronized ICancelOrderRequest createCancelOrderRequest(int userID, int orderID) {
         int timestamp = timestampProvider.getTimestampNow();
         return new CancelOrderRequest(bookID, userID, orderID, timestamp);
-    }
-
-    @Override
-    public synchronized ICancelOrderAckResponse createCancelOrderAckResponse(ICancelOrderRequest cancelOrderRequest, int clientMessageTimestamp) {
-        return new CancelOrderAckResponse(bookID, cancelOrderRequest.getUserID(),
-                cancelOrderRequest.getOrderID(),
-                clientMessageTimestamp);
-    }
-
-    @Override
-    public synchronized IErrorAckResponse createErrorAckResponse(String bookID, int userID, int clientMessageTimestamp) {
-        return new ErrorAckResponse(bookID, userID, clientMessageTimestamp);
     }
 
 }

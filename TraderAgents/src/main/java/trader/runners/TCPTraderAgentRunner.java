@@ -1,8 +1,8 @@
 package trader.runners;
 
 import api.core.IOrderBook;
-import api.messages.IMessage;
-import api.messages.external.IExternalRequest;
+import api.messages.external.request.IExternalRequest;
+import api.messages.external.response.IExternalResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import trader.agents.ITraderAgent;
@@ -69,10 +69,10 @@ public class TCPTraderAgentRunner implements ITraderAgentRunner {
         @Override
         public void run() {
             try {
-                IMessage message = (IMessage) in.readObject();
-                while(message != null) {
-                    traderAgent.registerMessage(message);
-                    message = (IMessage) in.readObject();
+                IExternalResponse response = (IExternalResponse) in.readObject();
+                while(response != null) {
+                    traderAgent.registerResponse(response);
+                    response = (IExternalResponse) in.readObject();
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

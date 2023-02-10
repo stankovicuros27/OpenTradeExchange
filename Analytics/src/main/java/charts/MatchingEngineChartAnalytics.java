@@ -3,8 +3,8 @@ package charts;
 import api.core.IEventDataStore;
 import api.core.IMatchingEngine;
 import api.core.IOrderBook;
-import api.messages.internal.info.IOrderBookInfo;
-import api.sides.Side;
+import api.messages.info.IOrderBookInfo;
+import api.core.Side;
 
 import javax.swing.*;
 import java.awt.*;

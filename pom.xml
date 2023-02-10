@@ -14,6 +14,7 @@
         <module>Shared</module>
         <module>Analytics</module>
         <module>TraderAgents</module>
+        <module>MicroFIX</module>
     </modules>
 
     <properties>

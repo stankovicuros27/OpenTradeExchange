@@ -1,10 +1,10 @@
 package impl.core;
 
-import api.messages.internal.responses.ITradeResponse;
-import api.sides.Side;
+import api.messages.responses.ITradeResponse;
+import api.core.Side;
 import api.time.ITimestampProvider;
-import impl.messages.internal.requests.PlaceOrderRequest;
-import impl.messages.internal.responses.TradeResponse;
+import impl.messages.requests.PlaceOrderRequest;
+import impl.messages.responses.TradeResponse;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;

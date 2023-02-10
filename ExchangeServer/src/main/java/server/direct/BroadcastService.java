@@ -1,6 +1,6 @@
 package server.direct;
 
-import api.messages.IMessage;
+import api.messages.external.response.IExternalResponse;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -23,9 +23,9 @@ public class BroadcastService {
         connectionHandlers.remove(connectionHandler);
     }
 
-    public synchronized void broadcastMessages(IMessage message) {
+    public synchronized void broadcastMessages(IExternalResponse externalResponse) {
         for (ConnectionHandler handler : connectionHandlers) {
-            //handler.sendMessage(message);
+            handler.sendMessage(externalResponse);
         }
     }
 
