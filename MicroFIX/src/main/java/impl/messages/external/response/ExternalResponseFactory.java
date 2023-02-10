@@ -14,33 +14,33 @@ public class ExternalResponseFactory implements IExternalResponseFactory {
     private final ITimestampProvider timestampProvider = new InstantTimestampProvider();
 
     @Override
-    public IExternalResponse getPlacedOrderResponse(String bookID, int userID, int orderID, double price, ExternalSide side, int volume) {
+    public IExternalResponse getPlacedOrderResponse(String bookID, int userID, int orderID) {
         int timestamp = timestampProvider.getTimestampNow();
-        return new ExternalResponse(bookID, userID, orderID, price, side, volume, timestamp, UNUSED_FIELD_VALUE, ExternalResponseType.PLACED_ORDER);
+        return new ExternalResponse(bookID, userID, orderID, UNUSED_FIELD_VALUE, null, UNUSED_FIELD_VALUE, timestamp, UNUSED_FIELD_VALUE, ExternalResponseType.PLACED_ORDER);
     }
 
     @Override
-    public IExternalResponse getReceivedPlaceOrderAckResponse(String bookID, int userID, double price, ExternalSide side, int volume, int externalTimestamp) {
+    public IExternalResponse getReceivedPlaceOrderAckResponse(String bookID, int userID, int orderID, double price, ExternalSide side, int volume, int externalTimestamp) {
         int timestamp = timestampProvider.getTimestampNow();
-        return new ExternalResponse(bookID, userID, UNUSED_FIELD_VALUE, price, side, volume, timestamp, externalTimestamp, ExternalResponseType.RECEIVED_PLACE_ORDER_ACK);
+        return new ExternalResponse(bookID, userID, orderID, price, side, volume, timestamp, externalTimestamp, ExternalResponseType.RECEIVED_PLACE_ORDER_ACK);
     }
 
     @Override
-    public IExternalResponse getCancelledOrderResponse(String bookID, int userID, int orderID, double price, ExternalSide side, int volume) {
+    public IExternalResponse getCancelledOrderResponse(String bookID, int userID, int orderID) {
         int timestamp = timestampProvider.getTimestampNow();
-        return new ExternalResponse(bookID, userID, orderID, price, side, volume, timestamp, UNUSED_FIELD_VALUE, ExternalResponseType.CANCELLED_ORDER);
+        return new ExternalResponse(bookID, userID, orderID, UNUSED_FIELD_VALUE, null, UNUSED_FIELD_VALUE, timestamp, UNUSED_FIELD_VALUE, ExternalResponseType.CANCELLED_ORDER);
     }
 
     @Override
-    public IExternalResponse getReceivedCancelOrderAckResponse(String bookID, int userID, int orderID, double price, ExternalSide side, int volume, int externalTimestamp) {
+    public IExternalResponse getReceivedCancelOrderAckResponse(String bookID, int userID, int orderID, int externalTimestamp) {
         int timestamp = timestampProvider.getTimestampNow();
-        return new ExternalResponse(bookID, userID, orderID, price, side, volume, timestamp, externalTimestamp, ExternalResponseType.RECEIVED_CANCEL_ORDER_ACK);
+        return new ExternalResponse(bookID, userID, orderID, UNUSED_FIELD_VALUE, null, UNUSED_FIELD_VALUE, timestamp, externalTimestamp, ExternalResponseType.RECEIVED_CANCEL_ORDER_ACK);
     }
 
     @Override
-    public IExternalResponse getClosedOrderResponse(String bookID, int userID, int orderID, double price, ExternalSide side, int volume) {
+    public IExternalResponse getClosedOrderResponse(String bookID, int userID, int orderID) {
         int timestamp = timestampProvider.getTimestampNow();
-        return new ExternalResponse(bookID, userID, orderID, price, side, volume, timestamp, UNUSED_FIELD_VALUE, ExternalResponseType.CLOSED_ORDER);
+        return new ExternalResponse(bookID, userID, orderID, UNUSED_FIELD_VALUE, null, UNUSED_FIELD_VALUE, timestamp, UNUSED_FIELD_VALUE, ExternalResponseType.CLOSED_ORDER);
     }
 
     @Override
@@ -50,9 +50,15 @@ public class ExternalResponseFactory implements IExternalResponseFactory {
     }
 
     @Override
-    public IExternalResponse getErrorResponse(String bookID, int userID, double price, ExternalSide side, int volume, int externalTimestamp) {
+    public IExternalResponse getErrorAckResponse(String bookID, int userID, double price, ExternalSide side, int volume, int externalTimestamp) {
         int timestamp = timestampProvider.getTimestampNow();
         return new ExternalResponse(bookID, userID, UNUSED_FIELD_VALUE, price, side, volume, timestamp, externalTimestamp, ExternalResponseType.ERROR);
+    }
+
+    @Override
+    public IExternalResponse getErrorResponse(String bookID, int userID, int orderID) {
+        int timestamp = timestampProvider.getTimestampNow();
+        return new ExternalResponse(bookID, userID, orderID, UNUSED_FIELD_VALUE, null, UNUSED_FIELD_VALUE, timestamp, UNUSED_FIELD_VALUE, ExternalResponseType.ERROR);
     }
 
 }

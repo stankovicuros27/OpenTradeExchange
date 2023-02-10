@@ -74,9 +74,7 @@ public class TCPTraderAgentRunner implements ITraderAgentRunner {
                     traderAgent.registerResponse(response);
                     response = (IExternalResponse) in.readObject();
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }

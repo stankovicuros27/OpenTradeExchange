@@ -24,4 +24,19 @@ public class ExternalResponse extends ExternalMessage implements IExternalRespon
     public ExternalResponseType getExternalResponseType() {
         return externalResponseType;
     }
+
+    @Override
+    public String toString() {
+        return "ExternalResponse{" +
+                "externalResponseType=" + externalResponseType +
+                ", bookID='" + bookID + '\'' +
+                ", userID=" + userID +
+                ", orderID=" + orderID +
+                ", price=" + price +
+                ", side=" + side +
+                ", volume=" + volume +
+                ", timestamp=" + timestamp +
+                ", externalTimestamp=" + externalTimestamp +
+                '}';
+    }
 }

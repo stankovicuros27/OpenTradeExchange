@@ -60,11 +60,12 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
                 side,
                 externalPlaceOrderRequest.getVolume());
         IExternalResponse externalAckResponse = externalResponseFactory.getReceivedPlaceOrderAckResponse(
-                externalPlaceOrderRequest.getBookID(),
-                externalPlaceOrderRequest.getUserID(),
-                externalPlaceOrderRequest.getPrice(),
-                externalPlaceOrderRequest.getSide(),
-                externalPlaceOrderRequest.getVolume(),
+                placeOrderRequest.getBookID(),
+                placeOrderRequest.getUserID(),
+                placeOrderRequest.getOrderID(),
+                placeOrderRequest.getPrice(),
+                placeOrderRequest.getSide() == Side.BUY ? ExternalSide.BUY : ExternalSide.SELL,
+                placeOrderRequest.getTotalVolume(),
                 externalPlaceOrderRequest.getExternalTimestamp());
         responses.add(externalAckResponse);
         //responses.addAll(orderBook.placeOrder(placeOrderRequest));
@@ -77,12 +78,9 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
         ICancelOrderRequest cancelOrderRequest = orderRequestFactory.createCancelOrderRequest(externalCancelOrderRequest.getUserID(),
                 externalCancelOrderRequest.getOrderID());
         IExternalResponse externalAckResponse = externalResponseFactory.getReceivedCancelOrderAckResponse(
-                externalCancelOrderRequest.getBookID(),
-                externalCancelOrderRequest.getUserID(),
-                externalCancelOrderRequest.getOrderID(),
-                externalCancelOrderRequest.getPrice(),
-                externalCancelOrderRequest.getSide(),
-                externalCancelOrderRequest.getVolume(),
+                cancelOrderRequest.getBookID(),
+                cancelOrderRequest.getUserID(),
+                cancelOrderRequest.getOrderID(),
                 externalCancelOrderRequest.getExternalTimestamp());
         responses.add(externalAckResponse);
         //responses.add(orderBook.cancelOrder(cancelOrderRequest));

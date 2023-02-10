@@ -10,9 +10,11 @@ import api.messages.external.response.IExternalResponse;
 import api.messages.external.response.IExternalResponseFactory;
 import api.messages.requests.ICancelOrderRequest;
 import api.messages.requests.IPlaceOrderRequest;
+import api.messages.responses.IResponse;
 import impl.messages.external.response.ExternalResponseFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import server.messages.InternalToExternalResponseTranslator;
 
 import java.io.*;
 import java.net.Socket;
@@ -66,7 +68,7 @@ public class ConnectionHandler implements Runnable {
     private void handleExternalRequest(IExternalRequest externalRequest) {
         String bookID = externalRequest.getBookID();
         if (!matchingEngine.containsOrderBook(bookID)) {
-            IExternalResponse errorAckResponse = externalResponseFactory.getErrorResponse(
+            IExternalResponse errorAckResponse = externalResponseFactory.getErrorAckResponse(
                     externalRequest.getBookID(),
                     externalRequest.getUserID(),
                     externalRequest.getPrice(),
@@ -77,20 +79,20 @@ public class ConnectionHandler implements Runnable {
             sendMessage(errorAckResponse);
             return;
         }
-        List<IExternalResponse> responses = null;
+        List<IResponse> responses = null;
         if (externalRequest.getExternalRequestType() == ExternalRequestType.PLACE) {
             responses = handleExternalPlaceOrderRequest(externalRequest);
         } else if (externalRequest.getExternalRequestType() == ExternalRequestType.CANCEL) {
             responses = handleExternalCancelOrderRequest(externalRequest);
         }
         if (responses != null) {
-            for (IExternalResponse message : responses) {
-                broadcastService.broadcastMessages(message);
+            for (IResponse response : responses) {
+                broadcastService.broadcastMessages(InternalToExternalResponseTranslator.getExternalResponse(response));
             }
         }
     }
 
-    private List<IExternalResponse> handleExternalPlaceOrderRequest(IExternalRequest externalPlaceOrderRequest) {
+    private List<IResponse> handleExternalPlaceOrderRequest(IExternalRequest externalPlaceOrderRequest) {
         String bookID = externalPlaceOrderRequest.getBookID();
         IOrderBook orderBook = matchingEngine.getOrderBook(bookID);
         Side side = externalPlaceOrderRequest.getSide() == ExternalSide.BUY ? Side.BUY : Side.SELL;
@@ -100,45 +102,39 @@ public class ConnectionHandler implements Runnable {
                 side,
                 externalPlaceOrderRequest.getVolume()
         );
+        int externalTimestamp = externalPlaceOrderRequest.getExternalTimestamp();
         IExternalResponse placeOrderAckResponse = externalResponseFactory.getReceivedPlaceOrderAckResponse(
-                externalPlaceOrderRequest.getBookID(),
-                externalPlaceOrderRequest.getUserID(),
-                externalPlaceOrderRequest.getPrice(),
-                externalPlaceOrderRequest.getSide(),
-                externalPlaceOrderRequest.getVolume(),
-                externalPlaceOrderRequest.getExternalTimestamp()
+                placeOrderRequest.getBookID(),
+                placeOrderRequest.getUserID(),
+                placeOrderRequest.getOrderID(),
+                placeOrderRequest.getPrice(),
+                placeOrderRequest.getSide() == Side.BUY ? ExternalSide.BUY : ExternalSide.SELL,
+                placeOrderRequest.getTotalVolume(),
+                externalTimestamp
         );
         sendMessage(placeOrderAckResponse);
-        // TODO map internal to external responses
-        // return orderBook.placeOrder(placeOrderRequest);
-        orderBook.placeOrder(placeOrderRequest);
-        return null;
+        return orderBook.placeOrder(placeOrderRequest);
     }
 
-    private List<IExternalResponse> handleExternalCancelOrderRequest(IExternalRequest externalCancelOrderRequest) {
+    private List<IResponse> handleExternalCancelOrderRequest(IExternalRequest externalCancelOrderRequest) {
         String bookID = externalCancelOrderRequest.getBookID();
         IOrderBook orderBook = matchingEngine.getOrderBook(bookID);
         ICancelOrderRequest cancelOrderRequest = orderBook.getOrderRequestFactory().createCancelOrderRequest(
                 externalCancelOrderRequest.getUserID(),
                 externalCancelOrderRequest.getOrderID()
         );
+        int externalTimestamp = externalCancelOrderRequest.getExternalTimestamp();
         IExternalResponse cancelOrderAckResponse = externalResponseFactory.getReceivedCancelOrderAckResponse(
-                externalCancelOrderRequest.getBookID(),
-                externalCancelOrderRequest.getUserID(),
-                externalCancelOrderRequest.getOrderID(),
-                externalCancelOrderRequest.getPrice(),
-                externalCancelOrderRequest.getSide(),
-                externalCancelOrderRequest.getVolume(),
-                externalCancelOrderRequest.getExternalTimestamp()
+                cancelOrderRequest.getBookID(),
+                cancelOrderRequest.getUserID(),
+                cancelOrderRequest.getOrderID(),
+                externalTimestamp
         );
         sendMessage(cancelOrderAckResponse);
-        // TODO map internal to external responses
-        // return orderBook.placeOrder(placeOrderRequest);
-        orderBook.cancelOrder(cancelOrderRequest);
-        return null;
+        return List.of(orderBook.cancelOrder(cancelOrderRequest));
     }
 
-    public void sendMessage(IExternalResponse externalResponse) {
+    public synchronized void sendMessage(IExternalResponse externalResponse) {
         try {
             out.writeObject(externalResponse);
             out.flush();

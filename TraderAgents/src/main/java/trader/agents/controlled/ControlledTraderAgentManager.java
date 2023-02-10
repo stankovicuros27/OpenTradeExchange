@@ -5,7 +5,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import trader.agents.ITraderAgentManager;
 import trader.runners.ITraderAgentRunner;
-import trader.runners.TCPTraderAgentRunner;
+import trader.runners.LocalTraderAgentRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,7 +42,7 @@ public class ControlledTraderAgentManager implements ITraderAgentManager {
             double priceDeviation = PRICE_DEVIATION_FACTOR * basePrice * random.nextDouble();
             ControlledTraderAgent traderAgent = new ControlledAgentLiquidityProvider(orderBook.getBookID(), basePrice, priceDeviation, BASE_VOLUME, VOLUME_DEVIATION, MAX_ORDERS);
             controlledTraderAgents.add(traderAgent);
-            ITraderAgentRunner traderAgentRunner = new TCPTraderAgentRunner(traderAgent, orderBook);
+            ITraderAgentRunner traderAgentRunner = new LocalTraderAgentRunner(traderAgent, orderBook);
             threadPool.execute(traderAgentRunner);
         }
 

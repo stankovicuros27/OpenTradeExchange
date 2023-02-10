@@ -46,6 +46,7 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
         if (externalResponse.getUserID() != id) {
             return;
         }
+        System.out.println(externalResponse);   // TODO delete
         if (externalResponse.getExternalResponseType() == ExternalResponseType.RECEIVED_PLACE_ORDER_ACK) {
             activeOrderIDs.add(externalResponse.getOrderID());
         } else if (externalResponse.getExternalResponseType() == ExternalResponseType.RECEIVED_CANCEL_ORDER_ACK) {

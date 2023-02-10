@@ -23,9 +23,11 @@ public class BroadcastService {
         connectionHandlers.remove(connectionHandler);
     }
 
-    public synchronized void broadcastMessages(IExternalResponse externalResponse) {
+    public synchronized void broadcastMessages(List<IExternalResponse> externalResponses) {
         for (ConnectionHandler handler : connectionHandlers) {
-            handler.sendMessage(externalResponse);
+            for (IExternalResponse externalResponse : externalResponses) {
+                handler.sendMessage(externalResponse);
+            }
         }
     }
 
