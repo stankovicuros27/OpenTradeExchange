@@ -14,7 +14,6 @@ public class OrderStatusResponse implements IOrderStatusResponse {
     private final OrderResponseStatus status;
     private final int timestamp;
 
-
     public OrderStatusResponse(String bookID, int userID, int orderID, OrderResponseStatus status, int timestamp) {
         this.bookID = bookID;
         this.userID = userID;
