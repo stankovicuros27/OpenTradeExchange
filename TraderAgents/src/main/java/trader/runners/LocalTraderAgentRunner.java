@@ -1,12 +1,12 @@
 package trader.runners;
 
 import api.core.Side;
-import api.messages.external.ExternalSide;
-import api.messages.external.request.ExternalRequestType;
-import api.messages.external.request.IExternalRequest;
-import api.messages.external.response.IExternalResponse;
-import api.messages.external.response.IExternalResponseFactory;
-import impl.messages.external.response.ExternalResponseFactory;
+import api.messages.trading.MicroFIXSide;
+import api.messages.trading.request.MicroFIXRequestType;
+import api.messages.trading.request.IMicroFIXRequest;
+import api.messages.trading.response.IMicroFIXResponse;
+import api.messages.trading.response.IMicroFIXResponseFactory;
+import impl.messages.trading.response.MicroFIXResponseFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import trader.agents.ITraderAgent;
@@ -25,7 +25,7 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
     private final ITraderAgent traderAgent;
     private final IOrderBook orderBook;
     private final IOrderRequestFactory orderRequestFactory;
-    private final IExternalResponseFactory externalResponseFactory = new ExternalResponseFactory();
+    private final IMicroFIXResponseFactory externalResponseFactory = new MicroFIXResponseFactory();
 
     public LocalTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook) {
         this.traderAgent = traderAgent;
@@ -37,8 +37,8 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
     public void run() {
         LOGGER.info("Starting LocalTradeAgentRunner for OrderBook: " + orderBook.getBookID());
         while(true) {
-            IExternalRequest externalRequest = traderAgent.getNextRequest();
-            if (externalRequest.getExternalRequestType() == ExternalRequestType.PLACE) {
+            IMicroFIXRequest externalRequest = traderAgent.getNextRequest();
+            if (externalRequest.getExternalRequestType() == MicroFIXRequestType.PLACE) {
                 sendPlaceOrderRequest(externalRequest);
             } else {
                 sendCancelOrderRequest(externalRequest);
@@ -51,20 +51,20 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
         }
     }
 
-    private void sendPlaceOrderRequest(IExternalRequest externalPlaceOrderRequest) {
-        List<IExternalResponse> responses = new ArrayList<>();
-        Side side = externalPlaceOrderRequest.getSide() == ExternalSide.BUY ? Side.BUY : Side.SELL;
+    private void sendPlaceOrderRequest(IMicroFIXRequest externalPlaceOrderRequest) {
+        List<IMicroFIXResponse> responses = new ArrayList<>();
+        Side side = externalPlaceOrderRequest.getSide() == MicroFIXSide.BUY ? Side.BUY : Side.SELL;
         IPlaceOrderRequest placeOrderRequest = orderRequestFactory.createPlaceOrderRequest(
                 externalPlaceOrderRequest.getUserID(),
                 externalPlaceOrderRequest.getPrice(),
                 side,
                 externalPlaceOrderRequest.getVolume());
-        IExternalResponse externalAckResponse = externalResponseFactory.getReceivedPlaceOrderAckResponse(
+        IMicroFIXResponse externalAckResponse = externalResponseFactory.getReceivedPlaceOrderAckResponse(
                 placeOrderRequest.getBookID(),
                 placeOrderRequest.getUserID(),
                 placeOrderRequest.getOrderID(),
                 placeOrderRequest.getPrice(),
-                placeOrderRequest.getSide() == Side.BUY ? ExternalSide.BUY : ExternalSide.SELL,
+                placeOrderRequest.getSide() == Side.BUY ? MicroFIXSide.BUY : MicroFIXSide.SELL,
                 placeOrderRequest.getTotalVolume(),
                 externalPlaceOrderRequest.getExternalTimestamp());
         responses.add(externalAckResponse);
@@ -73,11 +73,11 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
         traderAgent.registerResponses(responses);
     }
 
-    private void sendCancelOrderRequest(IExternalRequest externalCancelOrderRequest) {
-        List<IExternalResponse> responses = new ArrayList<>();
+    private void sendCancelOrderRequest(IMicroFIXRequest externalCancelOrderRequest) {
+        List<IMicroFIXResponse> responses = new ArrayList<>();
         ICancelOrderRequest cancelOrderRequest = orderRequestFactory.createCancelOrderRequest(externalCancelOrderRequest.getUserID(),
                 externalCancelOrderRequest.getOrderID());
-        IExternalResponse externalAckResponse = externalResponseFactory.getReceivedCancelOrderAckResponse(
+        IMicroFIXResponse externalAckResponse = externalResponseFactory.getReceivedCancelOrderAckResponse(
                 cancelOrderRequest.getBookID(),
                 cancelOrderRequest.getUserID(),
                 cancelOrderRequest.getOrderID(),

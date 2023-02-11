@@ -3,36 +3,49 @@ package server.direct;
 import api.core.IMatchingEngine;
 import charts.MatchingEngineChartAnalytics;
 import server.ExchangeServerContext;
+import server.direct.multicast.L1MarketDataMulticastService;
 
+import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class ExchangeServerManager {
 
-    // TODO move port, broadcast and other properties to ExchangeServerContext
-    private static final int EXCHANGE_SERVER_PORT = 9999;
-    private static final int INFO_BROADCAST_TIMEOUT_MS = 1000;
-
     private final ExchangeServer exchangeServer;
-    private final ExchangeInfoPublisher exchangeInfoPublisher;
+    private final L1MarketDataMulticastService l1MarketDataMulticastService;
     private final MatchingEngineChartAnalytics matchingEngineChartAnalytics;
+    private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     public ExchangeServerManager(ExchangeServerContext exchangeServerContext) {
+
+        // Exchange server
         IMatchingEngine matchingEngine = exchangeServerContext.getMatchingEngine();
-        ExecutorService threadPool = Executors.newCachedThreadPool();
-        BroadcastService broadcastService = new BroadcastService();
-        exchangeServer = new ExchangeServer(matchingEngine, threadPool, EXCHANGE_SERVER_PORT, broadcastService);
-        exchangeInfoPublisher = new ExchangeInfoPublisher(matchingEngine, broadcastService, INFO_BROADCAST_TIMEOUT_MS);
+        int exchangeServerPort = exchangeServerContext.getTcpExchangePort();
+        ResponseSenderService responseSenderService = new ResponseSenderService();
+        exchangeServer = new ExchangeServer(matchingEngine, exchangeServerPort, responseSenderService);
+
+        // L1 Broadcast
+        try {
+            String multicastIpAddress = exchangeServerContext.getMulticastIp();
+            int l1DataPort = exchangeServerContext.getL1DataMulticastPort();
+            int l1TimeoutMs = exchangeServerContext.getL1DataTimeoutMs();
+            l1MarketDataMulticastService = new L1MarketDataMulticastService(matchingEngine, multicastIpAddress, l1DataPort, l1TimeoutMs);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+
+        // Analytics
         matchingEngineChartAnalytics = new MatchingEngineChartAnalytics(ExchangeServerContext.getInstance().getMatchingEngine());
+
     }
 
     public void startDirectExchangeServer() {
         Thread exchangeServerThread = new Thread(exchangeServer);
-        exchangeServerThread.start();
-        Thread exchangeInfoPublisherThread = new Thread(exchangeInfoPublisher);
-        exchangeInfoPublisherThread.start();
+        Thread exchangeInfoPublisherThread = new Thread(l1MarketDataMulticastService);
         Thread matchingEngineChartAnalyticsThread = new Thread(matchingEngineChartAnalytics);
-        matchingEngineChartAnalyticsThread.start();
+        threadPool.execute(exchangeServerThread);
+        threadPool.execute(exchangeInfoPublisherThread);
+        threadPool.execute(matchingEngineChartAnalyticsThread);
     }
 
 }

@@ -1,20 +1,20 @@
-package impl.messages.external;
+package impl.messages.trading;
 
-import api.messages.external.ExternalSide;
-import api.messages.external.IExternalMessage;
+import api.messages.trading.MicroFIXSide;
+import api.messages.trading.IMicroFIXMessage;
 
-public abstract class ExternalMessage implements IExternalMessage {
+public abstract class MicroFIXMessage implements IMicroFIXMessage {
 
     protected final String bookID;
     protected final int userID;
     protected final int orderID;
     protected final double price;
-    protected final ExternalSide side;
+    protected final MicroFIXSide side;
     protected final int volume;
     protected final int timestamp;
     protected final int externalTimestamp;
 
-    protected ExternalMessage(String bookID, int userID, int orderID, double price, ExternalSide side, int volume, int timestamp, int externalTimestamp) {
+    protected MicroFIXMessage(String bookID, int userID, int orderID, double price, MicroFIXSide side, int volume, int timestamp, int externalTimestamp) {
         this.bookID = bookID;
         this.userID = userID;
         this.orderID = orderID;
@@ -46,7 +46,7 @@ public abstract class ExternalMessage implements IExternalMessage {
     }
 
     @Override
-    public ExternalSide getSide() {
+    public MicroFIXSide getSide() {
         return side;
     }
 

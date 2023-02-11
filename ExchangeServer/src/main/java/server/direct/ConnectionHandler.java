@@ -3,15 +3,19 @@ package server.direct;
 import api.core.IMatchingEngine;
 import api.core.IOrderBook;
 import api.core.Side;
-import api.messages.external.ExternalSide;
-import api.messages.external.request.ExternalRequestType;
-import api.messages.external.request.IExternalRequest;
-import api.messages.external.response.IExternalResponse;
-import api.messages.external.response.IExternalResponseFactory;
+import api.messages.authentication.IMicroFIXAuthenticationMessageFactory;
+import api.messages.authentication.IMicroFIXAuthenticationRequest;
+import api.messages.authentication.IMicroFIXAuthenticationResponse;
+import api.messages.trading.MicroFIXSide;
+import api.messages.trading.request.MicroFIXRequestType;
+import api.messages.trading.request.IMicroFIXRequest;
+import api.messages.trading.response.IMicroFIXResponse;
+import api.messages.trading.response.IMicroFIXResponseFactory;
 import api.messages.requests.ICancelOrderRequest;
 import api.messages.requests.IPlaceOrderRequest;
 import api.messages.responses.IResponse;
-import impl.messages.external.response.ExternalResponseFactory;
+import impl.messages.authentication.MicroFIXAuthenticationMessageFactory;
+import impl.messages.trading.response.MicroFIXResponseFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import server.messages.InternalToExternalResponseTranslator;
@@ -24,19 +28,22 @@ public class ConnectionHandler implements Runnable {
 
     private static final Logger LOGGER = LogManager.getLogger(ConnectionHandler.class);
 
-    private final IExternalResponseFactory externalResponseFactory = new ExternalResponseFactory();
     private final IMatchingEngine matchingEngine;
     private final Socket clientSocket;
     private final String clientIpAddress;
-    private final BroadcastService broadcastService;
+    private final ResponseSenderService responseSenderService;
     private ObjectInputStream in;
     private ObjectOutputStream out;
+    private int userID;
 
-    public ConnectionHandler(IMatchingEngine matchingEngine, Socket clientSocket, String clientIpAddress, BroadcastService broadcastService) {
+    private final IMicroFIXResponseFactory externalResponseFactory = new MicroFIXResponseFactory();
+    private final IMicroFIXAuthenticationMessageFactory microFIXAuthenticationMessageFactory = new MicroFIXAuthenticationMessageFactory();
+
+    public ConnectionHandler(IMatchingEngine matchingEngine, Socket clientSocket, String clientIpAddress, ResponseSenderService responseSenderService) {
         this.matchingEngine = matchingEngine;
         this.clientSocket = clientSocket;
         this.clientIpAddress = clientIpAddress;
-        this.broadcastService = broadcastService;
+        this.responseSenderService = responseSenderService;
     }
 
     @Override
@@ -45,30 +52,54 @@ public class ConnectionHandler implements Runnable {
             LOGGER.info("Starting client connection at IP address: " + clientIpAddress);
             in = new ObjectInputStream(clientSocket.getInputStream());
             out = new ObjectOutputStream(clientSocket.getOutputStream());
-            IExternalRequest externalRequest = (IExternalRequest) in.readObject();
+            if (!authenticateUser()) {
+                return;
+            }
+            responseSenderService.registerConnectionHandler(this);
+            IMicroFIXRequest externalRequest = (IMicroFIXRequest) in.readObject();
             while (externalRequest != null) {
                 handleExternalRequest(externalRequest);
-                externalRequest = (IExternalRequest) in.readObject();
+                externalRequest = (IMicroFIXRequest) in.readObject();
             }
         } catch (IOException | ClassNotFoundException e) {
-            LOGGER.info(e);
+            throw new RuntimeException(e);
         } finally {
-            LOGGER.info("Closing client connection at IP address: " + clientIpAddress);
-            broadcastService.removeBrokerConnectionHandler(this);
-            try {
-                in.close();
-                out.close();
-                clientSocket.close();
-            } catch (IOException e) {
-                LOGGER.error(e);
-            }
+            closeConnection();
         }
     }
 
-    private void handleExternalRequest(IExternalRequest externalRequest) {
+    private boolean authenticateUser() {
+        try {
+            IMicroFIXAuthenticationRequest microFIXAuthenticationRequest = (IMicroFIXAuthenticationRequest) in.readObject();
+            userID = microFIXAuthenticationRequest.getUserID();
+            String passwordHash = microFIXAuthenticationRequest.getPasswordHash();
+            // TODO check
+            LOGGER.info("Authenticated userID: " + userID);
+            IMicroFIXAuthenticationResponse microFIXAuthenticationResponse = microFIXAuthenticationMessageFactory.getAuthenticationResponse(userID, true);
+            out.writeObject(microFIXAuthenticationResponse);
+            out.flush();
+            return true;
+        } catch (IOException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private void closeConnection() {
+        LOGGER.info("Closing client connection at IP address: " + clientIpAddress + ", with userID: " + userID);
+        responseSenderService.removeConnectionHandler(this);
+        try {
+            in.close();
+            out.close();
+            clientSocket.close();
+        } catch (IOException e) {
+            LOGGER.error(e);
+        }
+    }
+
+    private void handleExternalRequest(IMicroFIXRequest externalRequest) {
         String bookID = externalRequest.getBookID();
         if (!matchingEngine.containsOrderBook(bookID)) {
-            IExternalResponse errorAckResponse = externalResponseFactory.getErrorAckResponse(
+            IMicroFIXResponse errorAckResponse = externalResponseFactory.getErrorAckResponse(
                     externalRequest.getBookID(),
                     externalRequest.getUserID(),
                     externalRequest.getPrice(),
@@ -80,22 +111,22 @@ public class ConnectionHandler implements Runnable {
             return;
         }
         List<IResponse> responses = null;
-        if (externalRequest.getExternalRequestType() == ExternalRequestType.PLACE) {
+        if (externalRequest.getExternalRequestType() == MicroFIXRequestType.PLACE) {
             responses = handleExternalPlaceOrderRequest(externalRequest);
-        } else if (externalRequest.getExternalRequestType() == ExternalRequestType.CANCEL) {
+        } else if (externalRequest.getExternalRequestType() == MicroFIXRequestType.CANCEL) {
             responses = handleExternalCancelOrderRequest(externalRequest);
         }
         if (responses != null) {
             for (IResponse response : responses) {
-                broadcastService.broadcastMessages(InternalToExternalResponseTranslator.getExternalResponse(response));
+                responseSenderService.distributeMessages(InternalToExternalResponseTranslator.getExternalResponse(response));
             }
         }
     }
 
-    private List<IResponse> handleExternalPlaceOrderRequest(IExternalRequest externalPlaceOrderRequest) {
+    private List<IResponse> handleExternalPlaceOrderRequest(IMicroFIXRequest externalPlaceOrderRequest) {
         String bookID = externalPlaceOrderRequest.getBookID();
         IOrderBook orderBook = matchingEngine.getOrderBook(bookID);
-        Side side = externalPlaceOrderRequest.getSide() == ExternalSide.BUY ? Side.BUY : Side.SELL;
+        Side side = externalPlaceOrderRequest.getSide() == MicroFIXSide.BUY ? Side.BUY : Side.SELL;
         IPlaceOrderRequest placeOrderRequest = orderBook.getOrderRequestFactory().createPlaceOrderRequest(
                 externalPlaceOrderRequest.getUserID(),
                 externalPlaceOrderRequest.getPrice(),
@@ -103,12 +134,12 @@ public class ConnectionHandler implements Runnable {
                 externalPlaceOrderRequest.getVolume()
         );
         int externalTimestamp = externalPlaceOrderRequest.getExternalTimestamp();
-        IExternalResponse placeOrderAckResponse = externalResponseFactory.getReceivedPlaceOrderAckResponse(
+        IMicroFIXResponse placeOrderAckResponse = externalResponseFactory.getReceivedPlaceOrderAckResponse(
                 placeOrderRequest.getBookID(),
                 placeOrderRequest.getUserID(),
                 placeOrderRequest.getOrderID(),
                 placeOrderRequest.getPrice(),
-                placeOrderRequest.getSide() == Side.BUY ? ExternalSide.BUY : ExternalSide.SELL,
+                placeOrderRequest.getSide() == Side.BUY ? MicroFIXSide.BUY : MicroFIXSide.SELL,
                 placeOrderRequest.getTotalVolume(),
                 externalTimestamp
         );
@@ -116,7 +147,7 @@ public class ConnectionHandler implements Runnable {
         return orderBook.placeOrder(placeOrderRequest);
     }
 
-    private List<IResponse> handleExternalCancelOrderRequest(IExternalRequest externalCancelOrderRequest) {
+    private List<IResponse> handleExternalCancelOrderRequest(IMicroFIXRequest externalCancelOrderRequest) {
         String bookID = externalCancelOrderRequest.getBookID();
         IOrderBook orderBook = matchingEngine.getOrderBook(bookID);
         ICancelOrderRequest cancelOrderRequest = orderBook.getOrderRequestFactory().createCancelOrderRequest(
@@ -124,7 +155,7 @@ public class ConnectionHandler implements Runnable {
                 externalCancelOrderRequest.getOrderID()
         );
         int externalTimestamp = externalCancelOrderRequest.getExternalTimestamp();
-        IExternalResponse cancelOrderAckResponse = externalResponseFactory.getReceivedCancelOrderAckResponse(
+        IMicroFIXResponse cancelOrderAckResponse = externalResponseFactory.getReceivedCancelOrderAckResponse(
                 cancelOrderRequest.getBookID(),
                 cancelOrderRequest.getUserID(),
                 cancelOrderRequest.getOrderID(),
@@ -134,7 +165,7 @@ public class ConnectionHandler implements Runnable {
         return List.of(orderBook.cancelOrder(cancelOrderRequest));
     }
 
-    public synchronized void sendMessage(IExternalResponse externalResponse) {
+    public synchronized void sendMessage(IMicroFIXResponse externalResponse) {
         try {
             out.writeObject(externalResponse);
             out.flush();
@@ -143,8 +174,12 @@ public class ConnectionHandler implements Runnable {
         }
     }
 
-    public String getClientIpAddress() {
+    public synchronized String getClientIpAddress() {
         return clientIpAddress;
+    }
+
+    public synchronized int getUserID() {
+        return userID;
     }
 
 }

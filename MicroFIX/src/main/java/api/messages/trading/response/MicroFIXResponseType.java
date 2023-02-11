@@ -1,6 +1,6 @@
-package api.messages.external.response;
+package api.messages.trading.response;
 
-public enum ExternalResponseType {
+public enum MicroFIXResponseType {
     PLACED_ORDER,
     RECEIVED_PLACE_ORDER_ACK,
     CANCELLED_ORDER,

@@ -1,12 +1,13 @@
 package trader.agents;
 
-import api.messages.external.request.IExternalRequest;
-import api.messages.external.response.IExternalResponse;
+import api.messages.trading.request.IMicroFIXRequest;
+import api.messages.trading.response.IMicroFIXResponse;
 
 import java.util.List;
 
 public interface ITraderAgent {
-    public IExternalRequest getNextRequest();
-    public void registerResponses(List<IExternalResponse> messages);
-    public void registerResponse(IExternalResponse message);
+    public int getUserID();
+    public IMicroFIXRequest getNextRequest();
+    public void registerResponses(List<IMicroFIXResponse> messages);
+    public void registerResponse(IMicroFIXResponse message);
 }

@@ -1,12 +1,12 @@
 package trader.agents.controlled;
 
-import api.messages.external.ExternalSide;
-import api.messages.external.request.IExternalRequest;
-import api.messages.external.request.IExternalRequestFactory;
-import api.messages.external.response.ExternalResponseType;
-import api.messages.external.response.IExternalResponse;
+import api.messages.trading.MicroFIXSide;
+import api.messages.trading.request.IMicroFIXRequest;
+import api.messages.trading.request.IMicroFIXRequestFactory;
+import api.messages.trading.response.MicroFIXResponseType;
+import api.messages.trading.response.IMicroFIXResponse;
 import api.time.ITimestampProvider;
-import impl.messages.external.request.ExternalRequestFactory;
+import impl.messages.trading.request.MicroFIXRequestFactory;
 import impl.time.InstantTimestampProvider;
 
 import java.util.ArrayList;
@@ -18,14 +18,19 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
     private final Random random = new Random(System.currentTimeMillis());
     private final List<Integer> activeOrderIDs = new ArrayList<>();
     private final ITimestampProvider timestampProvider = new InstantTimestampProvider();
-    private final IExternalRequestFactory externalRequestFactory = new ExternalRequestFactory();
+    private final IMicroFIXRequestFactory externalRequestFactory = new MicroFIXRequestFactory();
 
     public ControlledAgentLiquidityProvider(String bookID, double priceBase, double priceDeviation, int volumeBase, int volumeDeviation, int maxOrders) {
         super(bookID, priceBase, priceDeviation, volumeBase, volumeDeviation, maxOrders);
     }
 
     @Override
-    public IExternalRequest getNextRequest() {
+    public int getUserID() {
+        return id;
+    }
+
+    @Override
+    public IMicroFIXRequest getNextRequest() {
         int randInt = random.nextInt(maxOrders) + 1;
         if (randInt > activeOrderIDs.size()) {
             return getExternalPlaceOrderRequest();
@@ -35,40 +40,39 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
     }
 
     @Override
-    public void registerResponses(List<IExternalResponse> messages) {
-        for (IExternalResponse message : messages) {
+    public void registerResponses(List<IMicroFIXResponse> messages) {
+        for (IMicroFIXResponse message : messages) {
             registerResponse(message);
         }
     }
 
     @Override
-    public void registerResponse(IExternalResponse externalResponse) {
+    public void registerResponse(IMicroFIXResponse externalResponse) {
         if (externalResponse.getUserID() != id) {
             return;
         }
-        System.out.println(externalResponse);   // TODO delete
-        if (externalResponse.getExternalResponseType() == ExternalResponseType.RECEIVED_PLACE_ORDER_ACK) {
+        if (externalResponse.getExternalResponseType() == MicroFIXResponseType.RECEIVED_PLACE_ORDER_ACK) {
             activeOrderIDs.add(externalResponse.getOrderID());
-        } else if (externalResponse.getExternalResponseType() == ExternalResponseType.RECEIVED_CANCEL_ORDER_ACK) {
+        } else if (externalResponse.getExternalResponseType() == MicroFIXResponseType.RECEIVED_CANCEL_ORDER_ACK) {
             activeOrderIDs.remove(Integer.valueOf(externalResponse.getOrderID()));
         }
     }
 
-    private IExternalRequest getExternalPlaceOrderRequest() {
+    private IMicroFIXRequest getExternalPlaceOrderRequest() {
         double price = getNextPrice();
-        ExternalSide side = getNextSide();
+        MicroFIXSide side = getNextSide();
         int volume = getNextVolume();
         return externalRequestFactory.getPlaceOrderRequest(bookID, id, price, side, volume, timestampProvider.getTimestampNow());
     }
 
-    private IExternalRequest getExternalCancelOrderRequest() {
+    private IMicroFIXRequest getExternalCancelOrderRequest() {
         int randIndex = random.nextInt(activeOrderIDs.size());
         int orderID = activeOrderIDs.get(randIndex);
         return externalRequestFactory.getCancelOrderRequest(bookID, id, orderID, timestampProvider.getTimestampNow());
     }
 
-    private ExternalSide getNextSide() {
-        return random.nextDouble() > 0.5 ? ExternalSide.BUY : ExternalSide.SELL;
+    private MicroFIXSide getNextSide() {
+        return random.nextDouble() > 0.5 ? MicroFIXSide.BUY : MicroFIXSide.SELL;
     }
 
     private double getNextPrice() {
