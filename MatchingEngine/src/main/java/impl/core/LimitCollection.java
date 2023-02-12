@@ -19,7 +19,7 @@ import java.util.TreeMap;
 
 public class LimitCollection implements ILimitCollection {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LimitCollection.class);
 
     private final String bookID;
     private final Side side;

@@ -14,7 +14,7 @@ import java.util.concurrent.Executors;
 
 public class ExchangeServer implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeServer.class);
 
     private final IMatchingEngine matchingEngine;
     private final int port;

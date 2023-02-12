@@ -5,6 +5,8 @@ import api.core.IMatchingEngine;
 import api.core.IOrderBook;
 import api.messages.info.IOrderBookInfo;
 import api.core.Side;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,6 +14,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class MatchingEngineChartAnalytics implements Runnable {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngineChartAnalytics.class);
 
     private static final int REFRESH_RATE_MS = 1000;
     private static final int FRAME_WIDTH = 1200;
@@ -28,6 +32,7 @@ public class MatchingEngineChartAnalytics implements Runnable {
     }
 
     private void initDynamicCharts(IMatchingEngine matchingEngine) {
+        LOGGER.info("Initializing MatchingEngine Analytics");
         for (IOrderBook orderBook : matchingEngine.getAllOrderBooks()) {
             String bookID = orderBook.getBookID();
             JFrame frame = new JFrame(bookID);

@@ -20,7 +20,7 @@ import java.net.*;
 
 public class L1MarketDataMulticastService implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(L1MarketDataMulticastService.class);
 
     private final IMatchingEngine matchingEngine;
     private final InetAddress multicastInetAddress;

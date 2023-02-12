@@ -27,7 +27,7 @@ import java.util.List;
 
 public class ConnectionHandler implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
 
     private final IMatchingEngine matchingEngine;
     private final Socket clientSocket;

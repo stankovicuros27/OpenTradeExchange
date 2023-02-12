@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class OrderLookupCache implements IOrderLookupCache {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderLookupCache.class);
 
     private final Map<Integer, Map<Integer, IOrder>> userOrderCache = new HashMap<>();
 

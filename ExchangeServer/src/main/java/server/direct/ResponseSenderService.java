@@ -11,7 +11,7 @@ import java.util.Map;
 
 public class ResponseSenderService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ResponseSenderService.class);
 
     private final Map<Integer, ConnectionHandler> connectionHandlers = new HashMap<>();
 

@@ -35,7 +35,7 @@ public class ExchangeServerManager {
         }
 
         // Analytics
-        matchingEngineChartAnalytics = new MatchingEngineChartAnalytics(ExchangeServerContext.getInstance().getMatchingEngine());
+        matchingEngineChartAnalytics = new MatchingEngineChartAnalytics(matchingEngine);
 
     }
 

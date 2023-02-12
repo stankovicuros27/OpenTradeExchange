@@ -7,21 +7,28 @@ public class ExchangeServerContext {
 
     private static ExchangeServerContext instance = null;
 
-    // TODO read from config
-    private final int tcpExchangePort = 9999;
-    private final String multicastIp = "225.4.5.6";
-    private final int l1DataMulticastPort = 9998;
-    private final int l1TimeoutMS = 200;
-    private final int l2DataMulticastPort = 9997;
-    private final int l2TimeoutMS = 1000;
+    private final int tcpExchangePort;
+    private final String multicastIp;
+    private final int l1DataMulticastPort;
+    private final int l1TimeoutMS;
+    private final int l2DataMulticastPort;
+    private final int l2TimeoutMS;
 
     private final MatchingEngine matchingEngine;
 
-    public static void initialize(IMatchingEngineConfiguration matchingEngineConfiguration) {
+    public static void initialize(IMatchingEngineConfiguration matchingEngineConfiguration, int tcpExchangePort, String multicastIp, int l1DataMulticastPort, int l1TimeoutMS, int l2DataMulticastPort, int l2TimeoutMS) {
         if (instance != null) {
             throw new IllegalStateException();
         }
-        instance = new ExchangeServerContext(matchingEngineConfiguration);
+        instance = new ExchangeServerContext(
+                matchingEngineConfiguration,
+                tcpExchangePort,
+                multicastIp,
+                l1DataMulticastPort,
+                l1TimeoutMS,
+                l2DataMulticastPort,
+                l2TimeoutMS
+        );
     }
 
     public static ExchangeServerContext getInstance() {
@@ -31,8 +38,14 @@ public class ExchangeServerContext {
         return instance;
     }
 
-    private ExchangeServerContext(IMatchingEngineConfiguration matchingEngineConfiguration) {
+    private ExchangeServerContext(IMatchingEngineConfiguration matchingEngineConfiguration, int tcpExchangePort, String multicastIp, int l1DataMulticastPort, int l1TimeoutMS, int l2DataMulticastPort, int l2TimeoutMS) {
         matchingEngine = new MatchingEngine(matchingEngineConfiguration);
+        this.tcpExchangePort = tcpExchangePort;
+        this.multicastIp = multicastIp;
+        this.l1DataMulticastPort = l1DataMulticastPort;
+        this.l1TimeoutMS = l1TimeoutMS;
+        this.l2DataMulticastPort = l2DataMulticastPort;
+        this.l2TimeoutMS = l2TimeoutMS;
     }
 
     public MatchingEngine getMatchingEngine() {

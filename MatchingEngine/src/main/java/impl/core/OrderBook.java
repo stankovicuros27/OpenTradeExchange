@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class OrderBook implements IOrderBook {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderBook.class);
 
     private final String bookID;
     private final IOrderRequestFactory orderRequestFactory;

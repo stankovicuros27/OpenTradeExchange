@@ -7,11 +7,15 @@ import api.core.Side;
 import api.time.ITimestampProvider;
 import impl.messages.requests.CancelOrderRequest;
 import impl.messages.requests.PlaceOrderRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class OrderRequestFactory implements IOrderRequestFactory {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OrderRequestFactory.class);
 
     private final String bookID;
     private final ITimestampProvider timestampProvider;
@@ -19,6 +23,7 @@ public class OrderRequestFactory implements IOrderRequestFactory {
     private final Map<Integer, Integer> userOrderIDs = new HashMap<>();
 
     public OrderRequestFactory(String bookID, ITimestampProvider timestampProvider, int roundDecimalPlaces) {
+        LOGGER.info("Creating OrderRequestFactory for: " + bookID + ", price decimal places: " + roundDecimalPlaces);
         this.bookID = bookID;
         this.timestampProvider = timestampProvider;
         this.roundDecimalPlaces = roundDecimalPlaces;
