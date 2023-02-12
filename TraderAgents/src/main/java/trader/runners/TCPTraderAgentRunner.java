@@ -5,11 +5,12 @@ import api.messages.authentication.IMicroFIXAuthenticationMessageFactory;
 import api.messages.authentication.IMicroFIXAuthenticationRequest;
 import api.messages.authentication.IMicroFIXAuthenticationResponse;
 import api.messages.data.IMicroFIXL1DataMessage;
+import api.messages.data.MicroFIXDataMessageConstants;
 import api.messages.trading.request.IMicroFIXRequest;
 import api.messages.trading.response.IMicroFIXResponse;
 import impl.messages.authentication.MicroFIXAuthenticationMessageFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import trader.agents.ITraderAgent;
 
 import java.io.*;
@@ -19,7 +20,7 @@ import java.util.concurrent.Executors;
 
 public class TCPTraderAgentRunner implements ITraderAgentRunner {
 
-    private static final Logger LOGGER = LogManager.getLogger(TCPTraderAgentRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(TCPTraderAgentRunner.class);
     private static final String EXCHANGE_SERVER_IP = "localhost";
     private static final int EXCHANGE_SERVER_SOCKET = 9999;
 
@@ -117,7 +118,7 @@ public class TCPTraderAgentRunner implements ITraderAgentRunner {
 
                 while (true) {
                     // Receive the information and print it.
-                    byte[] buf = new byte[5000];
+                    byte[] buf = new byte[MicroFIXDataMessageConstants.L1_MARKET_DATA_MESSAGE_MAX_SIZE_BYTES];
                     DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
                     clientSocket.receive(msgPacket);
                     ByteArrayInputStream byteStream = new
@@ -125,7 +126,7 @@ public class TCPTraderAgentRunner implements ITraderAgentRunner {
                     ObjectInputStream is = new
                             ObjectInputStream(new BufferedInputStream(byteStream));
                     IMicroFIXL1DataMessage microFIXL1DataMessage = (IMicroFIXL1DataMessage) is.readObject();
-                    System.out.println(microFIXL1DataMessage);
+                    //System.out.println(microFIXL1DataMessage);
                 }
             } catch (IOException ex) {
                 ex.printStackTrace();

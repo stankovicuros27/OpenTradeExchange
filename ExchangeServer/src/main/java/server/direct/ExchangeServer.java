@@ -1,8 +1,9 @@
 package server.direct;
 
 import api.core.IMatchingEngine;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import impl.core.MatchingEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,7 +14,7 @@ import java.util.concurrent.Executors;
 
 public class ExchangeServer implements Runnable {
 
-    private static final Logger LOGGER = LogManager.getLogger(ExchangeServer.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
 
     private final IMatchingEngine matchingEngine;
     private final int port;
@@ -40,7 +41,7 @@ public class ExchangeServer implements Runnable {
                 threadPool.execute(handler);
             }
         } catch (IOException e) {
-            LOGGER.error(e);
+            LOGGER.error(e.toString());
         } finally {
             LOGGER.info("Closing ExchangeServer at port: " + port);
             threadPool.shutdown();

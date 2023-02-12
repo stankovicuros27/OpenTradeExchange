@@ -7,8 +7,8 @@ import api.messages.trading.request.IMicroFIXRequest;
 import api.messages.trading.response.IMicroFIXResponse;
 import api.messages.trading.response.IMicroFIXResponseFactory;
 import impl.messages.trading.response.MicroFIXResponseFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import trader.agents.ITraderAgent;
 import api.core.IOrderBook;
 import api.messages.requests.ICancelOrderRequest;
@@ -20,7 +20,7 @@ import java.util.List;
 
 public class LocalTraderAgentRunner implements ITraderAgentRunner {
 
-    private static final Logger LOGGER = LogManager.getLogger(LocalTraderAgentRunner.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LocalTraderAgentRunner.class);
 
     private final ITraderAgent traderAgent;
     private final IOrderBook orderBook;

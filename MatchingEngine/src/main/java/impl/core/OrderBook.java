@@ -13,8 +13,8 @@ import api.core.Side;
 import api.time.ITimestampProvider;
 import impl.messages.info.OrderBookInfo;
 import impl.messages.responses.OrderStatusResponse;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +22,7 @@ import java.util.Map;
 
 public class OrderBook implements IOrderBook {
 
-    private static final Logger LOGGER = LogManager.getLogger(OrderBook.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
 
     private final String bookID;
     private final IOrderRequestFactory orderRequestFactory;

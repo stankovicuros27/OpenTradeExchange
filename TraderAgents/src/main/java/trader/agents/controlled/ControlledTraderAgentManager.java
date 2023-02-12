@@ -1,8 +1,8 @@
 package trader.agents.controlled;
 
 import api.core.IOrderBook;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import trader.agents.ITraderAgentManager;
 import trader.runners.ITraderAgentRunner;
 import trader.runners.TCPTraderAgentRunner;
@@ -14,7 +14,7 @@ import java.util.concurrent.ExecutorService;
 
 public class ControlledTraderAgentManager implements ITraderAgentManager {
 
-    private static final Logger LOGGER = LogManager.getLogger(ControlledTraderAgentManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ControlledTraderAgentManager.class);
 
     private static final int NUMBER_OF_TRADER_AGENTS = 5;
     private static final int PRICE_ADJUSTMENT_SLEEP_TIME_MS = 1000;

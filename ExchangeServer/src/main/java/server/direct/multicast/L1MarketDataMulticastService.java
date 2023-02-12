@@ -5,10 +5,12 @@ import api.core.IOrderBook;
 import api.core.Side;
 import api.messages.data.IMicroFIXDataMessageFactory;
 import api.messages.data.IMicroFIXL1DataMessage;
+import api.messages.data.MicroFIXDataMessageConstants;
 import api.messages.info.IOrderBookInfo;
+import impl.core.MatchingEngine;
 import impl.messages.data.MicroFIXDataMessageFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -18,7 +20,7 @@ import java.net.*;
 
 public class L1MarketDataMulticastService implements Runnable {
 
-    private static final Logger LOGGER = LogManager.getLogger(L1MarketDataMulticastService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
 
     private final IMatchingEngine matchingEngine;
     private final InetAddress multicastInetAddress;
@@ -62,7 +64,7 @@ public class L1MarketDataMulticastService implements Runnable {
     }
 
     private void sendDatagramPacket(DatagramSocket socket, IMicroFIXL1DataMessage message) throws IOException {
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(message.getSizeInBytes() * 2);
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(MicroFIXDataMessageConstants.L1_MARKET_DATA_MESSAGE_MAX_SIZE_BYTES);
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(new BufferedOutputStream(byteArrayOutputStream));
         objectOutputStream.flush();
         objectOutputStream.writeObject(message);

@@ -1,8 +1,9 @@
 package server.direct;
 
 import api.messages.trading.response.IMicroFIXResponse;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import impl.core.MatchingEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,7 +11,7 @@ import java.util.Map;
 
 public class ResponseSenderService {
 
-    private static final Logger LOGGER = LogManager.getLogger(ResponseSenderService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
 
     private final Map<Integer, ConnectionHandler> connectionHandlers = new HashMap<>();
 

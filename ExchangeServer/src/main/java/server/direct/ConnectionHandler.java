@@ -14,10 +14,11 @@ import api.messages.trading.response.IMicroFIXResponseFactory;
 import api.messages.requests.ICancelOrderRequest;
 import api.messages.requests.IPlaceOrderRequest;
 import api.messages.responses.IResponse;
+import impl.core.MatchingEngine;
 import impl.messages.authentication.MicroFIXAuthenticationMessageFactory;
 import impl.messages.trading.response.MicroFIXResponseFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import server.messages.InternalToExternalResponseTranslator;
 
 import java.io.*;
@@ -26,7 +27,7 @@ import java.util.List;
 
 public class ConnectionHandler implements Runnable {
 
-    private static final Logger LOGGER = LogManager.getLogger(ConnectionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
 
     private final IMatchingEngine matchingEngine;
     private final Socket clientSocket;
@@ -92,7 +93,7 @@ public class ConnectionHandler implements Runnable {
             out.close();
             clientSocket.close();
         } catch (IOException e) {
-            LOGGER.error(e);
+            LOGGER.error(e.toString());
         }
     }
 
@@ -170,7 +171,7 @@ public class ConnectionHandler implements Runnable {
             out.writeObject(externalResponse);
             out.flush();
         } catch (IOException e) {
-            LOGGER.info(e);
+            LOGGER.info(e.toString());
         }
     }
 

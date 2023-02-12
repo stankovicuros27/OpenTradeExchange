@@ -4,6 +4,8 @@ import api.messages.data.IMicroFIXL1DataMessage;
 
 public class MicroFIXL1DataMessage implements IMicroFIXL1DataMessage {
 
+    private static final int MAX_SERIALIZED_MESSAGE_SIZE_IN_BYTES = 500;
+
     private final String bookID;
     private final int timestamp;
     private final double bestBuyPrice;
@@ -30,11 +32,6 @@ public class MicroFIXL1DataMessage implements IMicroFIXL1DataMessage {
     @Override
     public int getTimestamp() {
         return timestamp;
-    }
-
-    @Override
-    public int getSizeInBytes() {
-        return bookID.length() * 2 + 4 + 8 + 4 + 8 + 4 + 8;
     }
 
     @Override

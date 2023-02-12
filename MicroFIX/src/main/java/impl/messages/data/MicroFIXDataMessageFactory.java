@@ -2,6 +2,7 @@ package impl.messages.data;
 
 import api.messages.data.IMicroFIXDataMessageFactory;
 import api.messages.data.IMicroFIXL1DataMessage;
+import api.messages.data.IMicroFIXL2DataMessage;
 import api.time.ITimestampProvider;
 import impl.time.InstantTimestampProvider;
 
@@ -13,6 +14,11 @@ public class MicroFIXDataMessageFactory implements IMicroFIXDataMessageFactory {
     public IMicroFIXL1DataMessage getL1DataMessage(String bookID, double bestBuyPrice, int totalBuyVolume, double bestSellPrice, int totalSellVolume, double lastTradePrice) {
         int timestamp = timestampProvider.getTimestampNow();
         return new MicroFIXL1DataMessage(bookID, timestamp, bestBuyPrice, totalBuyVolume, bestSellPrice, totalSellVolume, lastTradePrice);
+    }
+
+    @Override
+    public IMicroFIXL2DataMessage getL2DataMessage() {
+        throw new RuntimeException();   // TODO
     }
 
 }

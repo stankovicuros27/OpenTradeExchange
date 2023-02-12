@@ -2,15 +2,15 @@ package impl.core;
 
 import api.core.IOrder;
 import api.core.IOrderLookupCache;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class OrderLookupCache implements IOrderLookupCache {
 
-    private static final Logger LOGGER = LogManager.getLogger(OrderLookupCache.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
 
     private final Map<Integer, Map<Integer, IOrder>> userOrderCache = new HashMap<>();
 

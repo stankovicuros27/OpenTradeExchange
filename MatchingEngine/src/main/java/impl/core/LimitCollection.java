@@ -9,8 +9,8 @@ import api.messages.responses.IResponse;
 import api.core.Side;
 import api.time.ITimestampProvider;
 import impl.messages.info.LimitCollectionInfo;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ import java.util.TreeMap;
 
 public class LimitCollection implements ILimitCollection {
 
-    private static final Logger LOGGER = LogManager.getLogger(LimitCollection.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MatchingEngine.class);
 
     private final String bookID;
     private final Side side;
