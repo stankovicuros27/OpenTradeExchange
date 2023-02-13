@@ -7,16 +7,16 @@ public class ExchangeServerContext {
 
     private static ExchangeServerContext instance = null;
 
+    private final MatchingEngine matchingEngine;
     private final int tcpExchangePort;
     private final String multicastIp;
     private final int l1DataMulticastPort;
     private final int l1TimeoutMS;
     private final int l2DataMulticastPort;
     private final int l2TimeoutMS;
+    private final boolean analyticsEnabled;
 
-    private final MatchingEngine matchingEngine;
-
-    public static void initialize(IMatchingEngineConfiguration matchingEngineConfiguration, int tcpExchangePort, String multicastIp, int l1DataMulticastPort, int l1TimeoutMS, int l2DataMulticastPort, int l2TimeoutMS) {
+    public static void initialize(IMatchingEngineConfiguration matchingEngineConfiguration, int tcpExchangePort, String multicastIp, int l1DataMulticastPort, int l1TimeoutMS, int l2DataMulticastPort, int l2TimeoutMS, boolean analyticsEnabled) {
         if (instance != null) {
             throw new IllegalStateException();
         }
@@ -27,8 +27,8 @@ public class ExchangeServerContext {
                 l1DataMulticastPort,
                 l1TimeoutMS,
                 l2DataMulticastPort,
-                l2TimeoutMS
-        );
+                l2TimeoutMS,
+                analyticsEnabled);
     }
 
     public static ExchangeServerContext getInstance() {
@@ -38,7 +38,7 @@ public class ExchangeServerContext {
         return instance;
     }
 
-    private ExchangeServerContext(IMatchingEngineConfiguration matchingEngineConfiguration, int tcpExchangePort, String multicastIp, int l1DataMulticastPort, int l1TimeoutMS, int l2DataMulticastPort, int l2TimeoutMS) {
+    private ExchangeServerContext(IMatchingEngineConfiguration matchingEngineConfiguration, int tcpExchangePort, String multicastIp, int l1DataMulticastPort, int l1TimeoutMS, int l2DataMulticastPort, int l2TimeoutMS, boolean analyticsEnabled) {
         matchingEngine = new MatchingEngine(matchingEngineConfiguration);
         this.tcpExchangePort = tcpExchangePort;
         this.multicastIp = multicastIp;
@@ -46,6 +46,7 @@ public class ExchangeServerContext {
         this.l1TimeoutMS = l1TimeoutMS;
         this.l2DataMulticastPort = l2DataMulticastPort;
         this.l2TimeoutMS = l2TimeoutMS;
+        this.analyticsEnabled = analyticsEnabled;
     }
 
     public MatchingEngine getMatchingEngine() {
@@ -74,6 +75,10 @@ public class ExchangeServerContext {
 
     public int getL2DataTimeoutMs() {
         return l2TimeoutMS;
+    }
+
+    public boolean isAnalyticsEnabled() {
+        return analyticsEnabled;
     }
 
 }

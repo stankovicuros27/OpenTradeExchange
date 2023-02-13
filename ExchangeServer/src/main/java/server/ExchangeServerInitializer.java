@@ -14,12 +14,11 @@ import java.util.concurrent.Executors;
 
 public class ExchangeServerInitializer {
 
-    private static final String SERVER_CONFIG_PROPERTIES_PATH = "ExchangeServer/server-config.properties";
+    private static final String SERVER_CONFIG_PROPERTIES_PATH = "server-config.properties";
 
     public static void initialize() {
         initializeContextFromProperties();
-        ExchangeServerManager exchangeServerManager = new ExchangeServerManager(ExchangeServerContext.getInstance());
-        exchangeServerManager.startDirectExchangeServer();
+        startExchangeServer();
 
         // Start dummy traders
         for (IOrderBook orderBook : ExchangeServerContext.getInstance().getMatchingEngine().getAllOrderBooks()) {
@@ -46,11 +45,17 @@ public class ExchangeServerInitializer {
                     exchangeServerConfigPropertiesReader.getL1DataMulticastPort(),
                     exchangeServerConfigPropertiesReader.getL1TimeoutMs(),
                     exchangeServerConfigPropertiesReader.getL2DataMulticastPort(),
-                    exchangeServerConfigPropertiesReader.getL2TimeoutMs()
+                    exchangeServerConfigPropertiesReader.getL2TimeoutMs(),
+                    exchangeServerConfigPropertiesReader.isAnalyticsEnabled()
             );
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    private static void startExchangeServer() {
+        ExchangeServerManager exchangeServerManager = new ExchangeServerManager(ExchangeServerContext.getInstance());
+        exchangeServerManager.startDirectExchangeServer();
     }
 
 }

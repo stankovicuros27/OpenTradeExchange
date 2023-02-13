@@ -28,7 +28,6 @@ public class MatchingEngineChartAnalytics implements Runnable {
 
     public MatchingEngineChartAnalytics(IMatchingEngine matchingEngine) {
         this.matchingEngine = matchingEngine;
-        initDynamicCharts(matchingEngine);
     }
 
     private void initDynamicCharts(IMatchingEngine matchingEngine) {
@@ -57,6 +56,7 @@ public class MatchingEngineChartAnalytics implements Runnable {
 
     @Override
     public void run() {
+        initDynamicCharts(matchingEngine);
         while(true) {
             try {
                 updateEventDataCharts();

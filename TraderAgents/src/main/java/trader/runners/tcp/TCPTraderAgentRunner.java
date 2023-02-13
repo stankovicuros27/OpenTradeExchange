@@ -1,4 +1,4 @@
-package trader.runners;
+package trader.runners.tcp;
 
 import api.core.IOrderBook;
 import api.messages.authentication.IMicroFIXAuthenticationMessageFactory;
@@ -12,52 +12,59 @@ import impl.messages.authentication.MicroFIXAuthenticationMessageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import trader.agents.ITraderAgent;
+import trader.runners.TraderAgentRunner;
 
 import java.io.*;
 import java.net.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class TCPTraderAgentRunner implements ITraderAgentRunner {
+public class TCPTraderAgentRunner extends TraderAgentRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TCPTraderAgentRunner.class);
-    private static final String EXCHANGE_SERVER_IP = "localhost";
-    private static final int EXCHANGE_SERVER_SOCKET = 9999;
 
-    private static final String MULTICAST_IP_ADDRESS = "225.4.5.6";
-    private static final int L1_DATA_MULTICAST_PORT = 9998;
-
-    private final ITraderAgent traderAgent;
-    private final IOrderBook orderBook;
+    private final String exchangeServerIp;
+    private final int exchangeServerSocket;
+    private final String multicastIp;
+    private final int l1MarketDataMulticastPort;
+    private final int l2MarketDataMulticastPort;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
     private final IMicroFIXAuthenticationMessageFactory microFIXAuthenticationMessageFactory = new MicroFIXAuthenticationMessageFactory();
 
     private ObjectInputStream in;
     private ObjectOutputStream out;
-    private ResponseListenerThread responseListenerThread;
 
-    public TCPTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook) {
-        this.traderAgent = traderAgent;
-        this.orderBook = orderBook;
+    public TCPTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook, int timeoutMs, String exchangeServerIp, int exchangeServerSocket, String multicastIp, int l1MarketDataMulticastPort, int l2MarketDataMulticastPort) {
+        super(traderAgent, orderBook, timeoutMs);
+        this.exchangeServerIp = exchangeServerIp;
+        this.exchangeServerSocket = exchangeServerSocket;
+        this.multicastIp = multicastIp;
+        this.l1MarketDataMulticastPort = l1MarketDataMulticastPort;
+        this.l2MarketDataMulticastPort = l2MarketDataMulticastPort;
     }
 
     @Override
     public void run() {
         LOGGER.info("Starting TCPTraderAgentRunner for book: " + orderBook.getBookID());
-        try (Socket client = new Socket(EXCHANGE_SERVER_IP, EXCHANGE_SERVER_SOCKET)) {
+        try (Socket client = new Socket(exchangeServerIp, exchangeServerSocket)) {
             out = new ObjectOutputStream(client.getOutputStream());
             in = new ObjectInputStream(client.getInputStream());
-            authenticate();
-            responseListenerThread = new ResponseListenerThread(traderAgent, in);
+            if (!authenticate()) {
+                LOGGER.info("User: " + traderAgent.getUserID() + " not authenticated!");
+                return;
+            }
+            ResponseListenerThread responseListenerThread = new ResponseListenerThread(traderAgent, in);
             threadPool.execute(responseListenerThread);
-            L1MarketDataListenerThread l1MarketDataListenerThread = new L1MarketDataListenerThread();
+            L1MarketDataListenerThread l1MarketDataListenerThread = new L1MarketDataListenerThread(traderAgent, multicastIp, l1MarketDataMulticastPort);
             threadPool.execute(l1MarketDataListenerThread);
             while(true) {
                 IMicroFIXRequest externalRequest = traderAgent.getNextRequest();
-                out.writeObject(externalRequest);
-                out.flush();
+                if (externalRequest != null) {
+                    out.writeObject(externalRequest);
+                    out.flush();
+                }
                 try {
-                    Thread.sleep((long) (Math.random() * SLEEP_TIME_MS));
+                    Thread.sleep((long) (Math.random() * timeoutMs));
                 } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
@@ -67,11 +74,12 @@ public class TCPTraderAgentRunner implements ITraderAgentRunner {
         }
     }
 
-    private void authenticate() {
+    private boolean authenticate() {
         try {
             IMicroFIXAuthenticationRequest microFIXAuthenticationRequest = microFIXAuthenticationMessageFactory.getAuthenticationRequest(traderAgent.getUserID(), "dummyPassHash");
             out.writeObject(microFIXAuthenticationRequest);
             IMicroFIXAuthenticationResponse microFIXAuthenticationResponse = (IMicroFIXAuthenticationResponse) in.readObject();
+            return microFIXAuthenticationResponse.isAccepted();
         } catch (IOException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
@@ -103,34 +111,31 @@ public class TCPTraderAgentRunner implements ITraderAgentRunner {
 
     private static class L1MarketDataListenerThread implements Runnable {
 
+        private final ITraderAgent traderAgent;
+        private final String multicastIp;
+        private final int l1MarketDataMulticastPort;
+
+        private L1MarketDataListenerThread(ITraderAgent traderAgent, String multicastIp, int l1MarketDataMulticastPort) {
+            this.traderAgent = traderAgent;
+            this.multicastIp = multicastIp;
+            this.l1MarketDataMulticastPort = l1MarketDataMulticastPort;
+        }
+
         @Override
         public void run() {
-            InetAddress address = null;
-            try {
-                address = InetAddress.getByName(MULTICAST_IP_ADDRESS);
-            } catch (UnknownHostException e) {
-                throw new RuntimeException(e);
-            }
-
-            try (MulticastSocket clientSocket = new MulticastSocket(L1_DATA_MULTICAST_PORT)){
-                //Joint the Multicast group.
-                clientSocket.joinGroup(address);
-
+            try (MulticastSocket clientSocket = new MulticastSocket(l1MarketDataMulticastPort)) {
+                InetAddress multicastAddress = InetAddress.getByName(multicastIp);
+                clientSocket.joinGroup(multicastAddress);
                 while (true) {
-                    // Receive the information and print it.
-                    byte[] buf = new byte[MicroFIXDataMessageConstants.L1_MARKET_DATA_MESSAGE_MAX_SIZE_BYTES];
-                    DatagramPacket msgPacket = new DatagramPacket(buf, buf.length);
-                    clientSocket.receive(msgPacket);
-                    ByteArrayInputStream byteStream = new
-                            ByteArrayInputStream(buf);
-                    ObjectInputStream is = new
-                            ObjectInputStream(new BufferedInputStream(byteStream));
-                    IMicroFIXL1DataMessage microFIXL1DataMessage = (IMicroFIXL1DataMessage) is.readObject();
-                    //System.out.println(microFIXL1DataMessage);
+                    byte[] objectBuffer = new byte[MicroFIXDataMessageConstants.L1_MARKET_DATA_MESSAGE_MAX_SIZE_BYTES];
+                    DatagramPacket datagramPacket = new DatagramPacket(objectBuffer, objectBuffer.length);
+                    clientSocket.receive(datagramPacket);
+                    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(objectBuffer);
+                    ObjectInputStream objectInputStream = new ObjectInputStream(new BufferedInputStream(byteArrayInputStream));
+                    IMicroFIXL1DataMessage microFIXL1DataMessage = (IMicroFIXL1DataMessage) objectInputStream.readObject();
+                    traderAgent.registerL1MarketDataUpdate(microFIXL1DataMessage);
                 }
-            } catch (IOException ex) {
-                ex.printStackTrace();
-            } catch (ClassNotFoundException e) {
+            } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
         }

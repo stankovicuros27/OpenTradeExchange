@@ -15,6 +15,7 @@ public class ExchangeServerConfigPropertiesReader {
     private static final String L1_TIMEOUT_MS_KEY = "l1TimeoutMS";
     private static final String L2_DATA_MULTICAST_PORT_KEY = "l2DataMulticastPort";
     private static final String L2_TIMEOUT_MS_KEY = "l2TimeoutMS";
+    private static final String EXCHANGE_ANALYTICS_ENABLED = "analyticsEnabled";
 
     private final Properties properties;
 
@@ -57,6 +58,10 @@ public class ExchangeServerConfigPropertiesReader {
 
     public int getL2TimeoutMs() {
         return Integer.parseInt(properties.getProperty(L2_TIMEOUT_MS_KEY));
+    }
+
+    public boolean isAnalyticsEnabled() {
+        return Boolean.parseBoolean(properties.getProperty(EXCHANGE_ANALYTICS_ENABLED));
     }
 
 }

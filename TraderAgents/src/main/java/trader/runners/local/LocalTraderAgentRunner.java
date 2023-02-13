@@ -1,4 +1,4 @@
-package trader.runners;
+package trader.runners.local;
 
 import api.core.Side;
 import api.messages.trading.MicroFIXSide;
@@ -14,22 +14,20 @@ import api.core.IOrderBook;
 import api.messages.requests.ICancelOrderRequest;
 import api.messages.requests.IPlaceOrderRequest;
 import api.core.IOrderRequestFactory;
+import trader.runners.TraderAgentRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocalTraderAgentRunner implements ITraderAgentRunner {
+public class LocalTraderAgentRunner extends TraderAgentRunner {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(LocalTraderAgentRunner.class);
 
-    private final ITraderAgent traderAgent;
-    private final IOrderBook orderBook;
     private final IOrderRequestFactory orderRequestFactory;
     private final IMicroFIXResponseFactory externalResponseFactory = new MicroFIXResponseFactory();
 
-    public LocalTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook) {
-        this.traderAgent = traderAgent;
-        this.orderBook = orderBook;
+    public LocalTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook, int timeoutMs) {
+        super(traderAgent, orderBook, timeoutMs);
         this.orderRequestFactory = orderBook.getOrderRequestFactory();
     }
 
@@ -38,13 +36,15 @@ public class LocalTraderAgentRunner implements ITraderAgentRunner {
         LOGGER.info("Starting LocalTradeAgentRunner for OrderBook: " + orderBook.getBookID());
         while(true) {
             IMicroFIXRequest externalRequest = traderAgent.getNextRequest();
-            if (externalRequest.getExternalRequestType() == MicroFIXRequestType.PLACE) {
-                sendPlaceOrderRequest(externalRequest);
-            } else {
-                sendCancelOrderRequest(externalRequest);
+            if (externalRequest != null) {
+                if (externalRequest.getExternalRequestType() == MicroFIXRequestType.PLACE) {
+                    sendPlaceOrderRequest(externalRequest);
+                } else if (externalRequest.getExternalRequestType() == MicroFIXRequestType.CANCEL) {
+                    sendCancelOrderRequest(externalRequest);
+                }
             }
             try {
-                Thread.sleep((long) (Math.random() * SLEEP_TIME_MS));
+                Thread.sleep((long) (Math.random() * timeoutMs));
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }

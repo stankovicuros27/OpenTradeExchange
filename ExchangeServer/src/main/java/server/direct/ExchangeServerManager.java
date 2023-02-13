@@ -11,12 +11,14 @@ import java.util.concurrent.Executors;
 
 public class ExchangeServerManager {
 
+    private final ExchangeServerContext exchangeServerContext;
     private final ExchangeServer exchangeServer;
     private final L1MarketDataMulticastService l1MarketDataMulticastService;
     private final MatchingEngineChartAnalytics matchingEngineChartAnalytics;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
     public ExchangeServerManager(ExchangeServerContext exchangeServerContext) {
+        this.exchangeServerContext = exchangeServerContext;
 
         // Exchange server
         IMatchingEngine matchingEngine = exchangeServerContext.getMatchingEngine();
@@ -45,7 +47,9 @@ public class ExchangeServerManager {
         Thread matchingEngineChartAnalyticsThread = new Thread(matchingEngineChartAnalytics);
         threadPool.execute(exchangeServerThread);
         threadPool.execute(exchangeInfoPublisherThread);
-        threadPool.execute(matchingEngineChartAnalyticsThread);
+        if (exchangeServerContext.isAnalyticsEnabled()) {
+            threadPool.execute(matchingEngineChartAnalyticsThread);
+        }
     }
 
 }

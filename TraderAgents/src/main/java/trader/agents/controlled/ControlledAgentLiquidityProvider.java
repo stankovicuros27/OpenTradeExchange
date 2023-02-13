@@ -1,5 +1,6 @@
 package trader.agents.controlled;
 
+import api.messages.data.IMicroFIXL1DataMessage;
 import api.messages.trading.MicroFIXSide;
 import api.messages.trading.request.IMicroFIXRequest;
 import api.messages.trading.request.IMicroFIXRequestFactory;
@@ -56,6 +57,11 @@ public class ControlledAgentLiquidityProvider extends ControlledTraderAgent {
         } else if (externalResponse.getExternalResponseType() == MicroFIXResponseType.RECEIVED_CANCEL_ORDER_ACK) {
             activeOrderIDs.remove(Integer.valueOf(externalResponse.getOrderID()));
         }
+    }
+
+    @Override
+    public void registerL1MarketDataUpdate(IMicroFIXL1DataMessage microFIXL1DataMessage) {
+        // TODO
     }
 
     private IMicroFIXRequest getExternalPlaceOrderRequest() {
