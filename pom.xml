@@ -15,6 +15,7 @@
         <module>Analytics</module>
         <module>TraderAgents</module>
         <module>MicroFIX</module>
+        <module>AuthenticationDB</module>
     </modules>
 
     <properties>
@@ -76,7 +77,15 @@
                 <artifactId>jakarta.servlet-api</artifactId>
                 <version>6.0.0</version>
             </dependency>
+
+            <!-- MYSQL DATABASE -->
+            <dependency>
+                <groupId>com.mysql</groupId>
+                <artifactId>mysql-connector-j</artifactId>
+                <version>8.0.31</version>
+            </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <build>

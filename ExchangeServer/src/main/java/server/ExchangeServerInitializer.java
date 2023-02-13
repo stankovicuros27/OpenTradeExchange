@@ -1,6 +1,7 @@
 package server;
 
 import api.core.IOrderBook;
+import connection.AuthenticationDBConnection;
 import server.direct.ExchangeServerManager;
 import trader.agents.ITraderAgentManager;
 import trader.agents.controlled.ControlledTraderAgentManager;
@@ -17,6 +18,10 @@ public class ExchangeServerInitializer {
     private static final String SERVER_CONFIG_PROPERTIES_PATH = "server-config.properties";
 
     public static void initialize() {
+
+        AuthenticationDBConnection authenticationDBConnection = new AuthenticationDBConnection();
+        authenticationDBConnection.connect();
+
         initializeContextFromProperties();
         startExchangeServer();
 

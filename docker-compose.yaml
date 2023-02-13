@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+
+  # MySql exchange user authentication DB
+  authenticationDB:
+    image: mysql
+    cap_add:
+      - SYS_NICE
+    environment:
+      - MYSQL_DATABASE=authenticationdb
+      - MYSQL_ROOT_PASSWORD=root
+    healthcheck:
+        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+        timeout: 10s
+        retries: 10
+    ports:
+      - "3306:3306"
+    networks:
+      - exchangenetwork
+
+  # Exchange Server
+  exchangeServer:
+    image: stankovicuros27/opentradeexchange
+    environment:
+      - AUTH_DB_URL=authenticationDB
+    depends_on:
+      - authenticationDB
+    ports:
+      - "9999:9999"
+      - "9998:9998"
+      - "9997:9997"
+    networks:
+      - exchangenetwork
+
+networks:
+  exchangenetwork:
