@@ -5,12 +5,12 @@ import api.messages.authentication.IMicroFIXAuthenticationRequest;
 public class MicroFIXAuthenticationRequest implements IMicroFIXAuthenticationRequest {
 
     private final int userID;
-    private final String passwordHash;
+    private final String password;
     private final int timestamp;
 
-    MicroFIXAuthenticationRequest(int userID, String passwordHash, int timestamp) {
+    MicroFIXAuthenticationRequest(int userID, String password, int timestamp) {
         this.userID = userID;
-        this.passwordHash = passwordHash;
+        this.password = password;
         this.timestamp = timestamp;
     }
 
@@ -20,8 +20,8 @@ public class MicroFIXAuthenticationRequest implements IMicroFIXAuthenticationReq
     }
 
     @Override
-    public String getPasswordHash() {
-        return passwordHash;
+    public String getPassword() {
+        return password;
     }
 
     @Override

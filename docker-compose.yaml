@@ -11,9 +11,9 @@ services:
       - MYSQL_DATABASE=authenticationdb
       - MYSQL_ROOT_PASSWORD=root
     healthcheck:
-        test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
-        timeout: 10s
-        retries: 10
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
+      timeout: 10s
+      retries: 10
     ports:
       - "3306:3306"
     networks:

@@ -1,4 +1,4 @@
-package server.direct;
+package server.direct.core;
 
 import api.core.IMatchingEngine;
 import org.slf4j.Logger;
@@ -17,14 +17,14 @@ public class ExchangeServer implements Runnable {
 
     private final IMatchingEngine matchingEngine;
     private final int port;
-    private final ResponseSenderService responseSenderService;
+    private final ExchangeResponseSenderService exchangeResponseSenderService;
     private final ExecutorService threadPool = Executors.newCachedThreadPool();
 
-    public ExchangeServer(IMatchingEngine matchingEngine, int port, ResponseSenderService responseSenderService) {
+    public ExchangeServer(IMatchingEngine matchingEngine, int port, ExchangeResponseSenderService exchangeResponseSenderService) {
         LOGGER.info("Creating ExchangeServer at port: " + port);
         this.matchingEngine = matchingEngine;
         this.port = port;
-        this.responseSenderService = responseSenderService;
+        this.exchangeResponseSenderService = exchangeResponseSenderService;
     }
 
     @Override
@@ -34,9 +34,9 @@ public class ExchangeServer implements Runnable {
             while(true) {
                 Socket clientSocket = serverSocket.accept();
                 InetSocketAddress brokerSocketAddress = (InetSocketAddress) clientSocket.getRemoteSocketAddress();
-                String brokerIpAddress = brokerSocketAddress.getAddress().getHostAddress();
-                LOGGER.info("Accepting broker connection at IP address: " + brokerIpAddress);
-                ConnectionHandler handler = new ConnectionHandler(matchingEngine, clientSocket, brokerIpAddress, responseSenderService);
+                String clientIpAddress = brokerSocketAddress.getAddress().getHostAddress();
+                LOGGER.info("Accepting client connection at IP address: " + clientIpAddress);
+                ExchangeConnectionHandler handler = new ExchangeConnectionHandler(matchingEngine, clientSocket, clientIpAddress, exchangeResponseSenderService);
                 threadPool.execute(handler);
             }
         } catch (IOException e) {

@@ -1,4 +1,4 @@
-package server.direct;
+package server.direct.core;
 
 import api.core.IMatchingEngine;
 import api.core.IOrderBook;
@@ -14,7 +14,7 @@ import api.messages.trading.response.IMicroFIXResponseFactory;
 import api.messages.requests.ICancelOrderRequest;
 import api.messages.requests.IPlaceOrderRequest;
 import api.messages.responses.IResponse;
-import impl.core.MatchingEngine;
+import authenticationdb.AuthenticationDBConnection;
 import impl.messages.authentication.MicroFIXAuthenticationMessageFactory;
 import impl.messages.trading.response.MicroFIXResponseFactory;
 import org.slf4j.Logger;
@@ -23,16 +23,17 @@ import server.messages.InternalToExternalResponseTranslator;
 
 import java.io.*;
 import java.net.Socket;
+import java.sql.SQLException;
 import java.util.List;
 
-public class ConnectionHandler implements Runnable {
+public class ExchangeConnectionHandler implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ConnectionHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeConnectionHandler.class);
 
     private final IMatchingEngine matchingEngine;
     private final Socket clientSocket;
     private final String clientIpAddress;
-    private final ResponseSenderService responseSenderService;
+    private final ExchangeResponseSenderService exchangeResponseSenderService;
     private ObjectInputStream in;
     private ObjectOutputStream out;
     private int userID;
@@ -40,11 +41,11 @@ public class ConnectionHandler implements Runnable {
     private final IMicroFIXResponseFactory externalResponseFactory = new MicroFIXResponseFactory();
     private final IMicroFIXAuthenticationMessageFactory microFIXAuthenticationMessageFactory = new MicroFIXAuthenticationMessageFactory();
 
-    public ConnectionHandler(IMatchingEngine matchingEngine, Socket clientSocket, String clientIpAddress, ResponseSenderService responseSenderService) {
+    public ExchangeConnectionHandler(IMatchingEngine matchingEngine, Socket clientSocket, String clientIpAddress, ExchangeResponseSenderService exchangeResponseSenderService) {
         this.matchingEngine = matchingEngine;
         this.clientSocket = clientSocket;
         this.clientIpAddress = clientIpAddress;
-        this.responseSenderService = responseSenderService;
+        this.exchangeResponseSenderService = exchangeResponseSenderService;
     }
 
     @Override
@@ -56,7 +57,7 @@ public class ConnectionHandler implements Runnable {
             if (!authenticateUser()) {
                 return;
             }
-            responseSenderService.registerConnectionHandler(this);
+            exchangeResponseSenderService.registerConnectionHandler(this);
             IMicroFIXRequest externalRequest = (IMicroFIXRequest) in.readObject();
             while (externalRequest != null) {
                 handleExternalRequest(externalRequest);
@@ -73,21 +74,27 @@ public class ConnectionHandler implements Runnable {
         try {
             IMicroFIXAuthenticationRequest microFIXAuthenticationRequest = (IMicroFIXAuthenticationRequest) in.readObject();
             userID = microFIXAuthenticationRequest.getUserID();
-            String passwordHash = microFIXAuthenticationRequest.getPasswordHash();
-            // TODO check
+            String password = microFIXAuthenticationRequest.getPassword();
+            if (AuthenticationDBConnection.getInstance().getUserType(userID, password) == -1) {
+                LOGGER.info("Error authenticating userID: " + userID);
+                IMicroFIXAuthenticationResponse microFIXAuthenticationResponse = microFIXAuthenticationMessageFactory.getAuthenticationResponse(userID, false);
+                out.writeObject(microFIXAuthenticationResponse);
+                out.flush();
+                return false;
+            }
             LOGGER.info("Authenticated userID: " + userID);
             IMicroFIXAuthenticationResponse microFIXAuthenticationResponse = microFIXAuthenticationMessageFactory.getAuthenticationResponse(userID, true);
             out.writeObject(microFIXAuthenticationResponse);
             out.flush();
             return true;
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException | SQLException e) {
             throw new RuntimeException(e);
         }
     }
 
     private void closeConnection() {
         LOGGER.info("Closing client connection at IP address: " + clientIpAddress + ", with userID: " + userID);
-        responseSenderService.removeConnectionHandler(this);
+        exchangeResponseSenderService.removeConnectionHandler(this);
         try {
             in.close();
             out.close();
@@ -119,7 +126,7 @@ public class ConnectionHandler implements Runnable {
         }
         if (responses != null) {
             for (IResponse response : responses) {
-                responseSenderService.distributeMessages(InternalToExternalResponseTranslator.getExternalResponse(response));
+                exchangeResponseSenderService.distributeMessages(InternalToExternalResponseTranslator.getExternalResponse(response));
             }
         }
     }

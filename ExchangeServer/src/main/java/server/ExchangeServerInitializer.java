@@ -1,14 +1,15 @@
 package server;
 
 import api.core.IOrderBook;
-import connection.AuthenticationDBConnection;
-import server.direct.ExchangeServerManager;
+import authenticationdb.AuthenticationDBConnection;
+import server.direct.ServerManager;
 import trader.agents.ITraderAgentManager;
 import trader.agents.controlled.ControlledTraderAgentManager;
 
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,8 +20,12 @@ public class ExchangeServerInitializer {
 
     public static void initialize() {
 
-        AuthenticationDBConnection authenticationDBConnection = new AuthenticationDBConnection();
-        authenticationDBConnection.connect();
+        try {
+            AuthenticationDBConnection.initialize();
+        } catch (SQLException | ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+
 
         initializeContextFromProperties();
         startExchangeServer();
@@ -47,10 +52,13 @@ public class ExchangeServerInitializer {
                     exchangeServerConfigPropertiesReader.getMatchingEngineConfiguration(),
                     exchangeServerConfigPropertiesReader.getExchangeTCPPort(),
                     exchangeServerConfigPropertiesReader.getExchangeMulticastIp(),
+                    exchangeServerConfigPropertiesReader.getL1DataTCPPort(),
                     exchangeServerConfigPropertiesReader.getL1DataMulticastPort(),
                     exchangeServerConfigPropertiesReader.getL1TimeoutMs(),
+                    exchangeServerConfigPropertiesReader.getL2DataTCPPort(),
                     exchangeServerConfigPropertiesReader.getL2DataMulticastPort(),
                     exchangeServerConfigPropertiesReader.getL2TimeoutMs(),
+                    exchangeServerConfigPropertiesReader.isMulticastEnabled(),
                     exchangeServerConfigPropertiesReader.isAnalyticsEnabled()
             );
         } catch (IOException e) {
@@ -59,8 +67,8 @@ public class ExchangeServerInitializer {
     }
 
     private static void startExchangeServer() {
-        ExchangeServerManager exchangeServerManager = new ExchangeServerManager(ExchangeServerContext.getInstance());
-        exchangeServerManager.startDirectExchangeServer();
+        ServerManager serverManager = new ServerManager(ExchangeServerContext.getInstance());
+        serverManager.startDirectExchangeServer();
     }
 
 }

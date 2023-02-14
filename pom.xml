@@ -85,7 +85,6 @@
                 <version>8.0.31</version>
             </dependency>
         </dependencies>
-
     </dependencyManagement>
 
     <build>

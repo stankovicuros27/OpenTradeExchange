@@ -7,7 +7,6 @@ import api.messages.data.IMicroFIXDataMessageFactory;
 import api.messages.data.IMicroFIXL1DataMessage;
 import api.messages.data.MicroFIXDataMessageConstants;
 import api.messages.info.IOrderBookInfo;
-import impl.core.MatchingEngine;
 import impl.messages.data.MicroFIXDataMessageFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,9 +17,9 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.*;
 
-public class L1MarketDataMulticastService implements Runnable {
+public class L1MarketDataMulticastServer implements Runnable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(L1MarketDataMulticastService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(L1MarketDataMulticastServer.class);
 
     private final IMatchingEngine matchingEngine;
     private final InetAddress multicastInetAddress;
@@ -29,7 +28,7 @@ public class L1MarketDataMulticastService implements Runnable {
 
     private final IMicroFIXDataMessageFactory microFIXDataMessageFactory = new MicroFIXDataMessageFactory();
 
-    public L1MarketDataMulticastService(IMatchingEngine matchingEngine, String multicastIpAddress, int l1DataMulticastPort, int l1TimeoutMS) throws UnknownHostException {
+    public L1MarketDataMulticastServer(IMatchingEngine matchingEngine, String multicastIpAddress, int l1DataMulticastPort, int l1TimeoutMS) throws UnknownHostException {
         this.matchingEngine = matchingEngine;
         this.multicastInetAddress = InetAddress.getByName(multicastIpAddress);
         this.l1DataMulticastPort = l1DataMulticastPort;
