@@ -5,6 +5,8 @@ import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
+import static authenticationdb.UserTypeConstants.USER_TYPE_ADMIN;
+
 public class AuthenticationDBUsersInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationDBUsersInitializer.class);
@@ -21,7 +23,7 @@ public class AuthenticationDBUsersInitializer {
 
     private static final String INSERT_ADMIN_QUERY =
             "INSERT INTO users (username, password, userType)\n" +
-            "VALUES ('admin', 'adminPassword', '2');";
+            "VALUES ('admin', 'adminPassword', '" + USER_TYPE_ADMIN + "');";
 
     static void initializeUsersTable(AuthenticationDBConnection authenticationDBConnection) {
         try {

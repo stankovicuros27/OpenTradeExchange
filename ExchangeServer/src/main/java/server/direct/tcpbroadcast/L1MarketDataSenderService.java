@@ -10,7 +10,7 @@ import java.util.Map;
 
 public class L1MarketDataSenderService {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ExchangeResponseSenderService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(L1MarketDataSenderService.class);
 
     private final Map<Integer, L1MarketDataSubscriptionHandler> subscriptionHandlers = new HashMap<>();
 

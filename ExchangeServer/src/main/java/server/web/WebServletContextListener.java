@@ -9,8 +9,8 @@ import server.ExchangeServerInitializer;
 public class WebServletContextListener implements ServletContextListener {
 
     @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        ServletContextListener.super.contextInitialized(sce);
+    public void contextInitialized(ServletContextEvent servletContextEvent) {
+        ServletContextListener.super.contextInitialized(servletContextEvent);
         ExchangeServerInitializer.initialize();
     }
 

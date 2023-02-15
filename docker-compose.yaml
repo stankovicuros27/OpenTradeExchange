@@ -16,6 +16,8 @@ services:
       retries: 10
     ports:
       - "3306:3306"
+    volumes:
+      - authenticationdbdata:/var/lib/mysql
     networks:
       - exchangenetwork
 
@@ -30,8 +32,12 @@ services:
       - "9999:9999"
       - "9998:9998"
       - "9997:9997"
+      - "8080:8080"
     networks:
       - exchangenetwork
 
 networks:
   exchangenetwork:
+
+volumes:
+  authenticationdbdata:
