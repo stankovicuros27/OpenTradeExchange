@@ -44,74 +44,78 @@ public class AuthenticationDBConnection {
     }
 
     public synchronized void registerUser(String username, String password) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "INSERT INTO users (username, password, userType) VALUES (?, ?, ?)"
-        );
-        preparedStatement.setString(1, username);
-        preparedStatement.setString(2, password);
-        preparedStatement.setInt(3, UserTypeConstants.USER_TYPE_NOT_ACCEPTED);
-        preparedStatement.executeUpdate();
+        String sql = "INSERT INTO users (username, password, userType) VALUES (?, ?, ?)";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, username);
+            preparedStatement.setString(2, password);
+            preparedStatement.setInt(3, UserTypeConstants.USER_TYPE_NOT_ACCEPTED);
+            preparedStatement.executeUpdate();
+        }
     }
 
     public synchronized void deleteUser(int userID) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "DELETE FROM users WHERE userID = ?"
-        );
-        preparedStatement.setInt(1, userID);
-        preparedStatement.executeUpdate();
+        String sql = "DELETE FROM users WHERE userID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, userID);
+            preparedStatement.executeUpdate();
+        }
     }
 
     public synchronized int getUserType(int userID, String password) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "SELECT * FROM users WHERE userID = ? and password = ?"
-        );
-        preparedStatement.setInt(1, userID);
-        preparedStatement.setString(2, password);
-        ResultSet rs = preparedStatement.executeQuery();
-        if (!rs.next()) {
-            return UserTypeConstants.USER_NOT_FOUND;
+        String sql = "SELECT * FROM users WHERE userID = ? and password = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, userID);
+            preparedStatement.setString(2, password);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                if (!rs.next()) {
+                    return UserTypeConstants.USER_NOT_FOUND;
+                }
+                return rs.getInt("userType");
+            }
         }
-        return rs.getInt("userType");
     }
 
     public synchronized void setUserType(int userID, int userType) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "UPDATE users SET userType = ? WHERE userID = ?"
-        );
-        preparedStatement.setInt(1, userType);
-        preparedStatement.setInt(2, userID);
-        preparedStatement.executeUpdate();
+        String sql = "UPDATE users SET userType = ? WHERE userID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, userType);
+            preparedStatement.setInt(2, userID);
+            preparedStatement.executeUpdate();
+        }
     }
 
     public synchronized boolean isUsernameExists(String username) throws SQLException {
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "SELECT * FROM users WHERE username = ?"
-        );
-        preparedStatement.setString(1, username);
-        ResultSet rs = preparedStatement.executeQuery();
-        return rs.next();
+        String sql = "SELECT * FROM users WHERE username = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setString(1, username);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                return rs.next();
+            }
+        }
     }
 
     public synchronized List<User> getAllUsers() throws SQLException {
         List<User> users = new ArrayList<>();
-        PreparedStatement preparedStatement = connection.prepareStatement(
-                "SELECT * FROM users"
-        );
-        ResultSet rs = preparedStatement.executeQuery();
-        while(rs.next()) {
-            users.add(new User(
-                    rs.getInt(1),
-                    rs.getString(2),
-                    rs.getString(3),
-                    rs.getInt(4)
-            ));
+        String sql = "SELECT * FROM users";
+        try (Statement statement = connection.createStatement()) {
+            try (ResultSet rs = statement.executeQuery(sql)) {
+                while(rs.next()) {
+                    users.add(new User(
+                            rs.getInt(1),
+                            rs.getString(2),
+                            rs.getString(3),
+                            rs.getInt(4)
+                    ));
+                }
+            }
         }
         return users;
     }
 
     synchronized void executeUpdate(String update) throws SQLException {
-        Statement statement = connection.createStatement();
-        statement.executeUpdate(update);
+        try (Statement statement = connection.createStatement()) {
+            statement.executeUpdate(update);
+        }
     }
 
 }

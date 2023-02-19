@@ -8,6 +8,7 @@ import api.messages.data.IMicroFIXL1DataMessage;
 import api.messages.info.IOrderBookInfo;
 import api.messages.trading.response.IMicroFIXResponseFactory;
 import authenticationdb.AuthenticationDBConnection;
+import authenticationdb.UserTypeConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import impl.messages.data.MicroFIXDataMessageFactory;
@@ -35,7 +36,7 @@ public class L1MarketDataWebServlet extends HttpServlet {
         ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
         WebGetL1DataRequest webGetL1DataRequest = objectMapper.readValue(requestString, WebGetL1DataRequest.class);
         try {
-            if (AuthenticationDBConnection.getInstance().getUserType(webGetL1DataRequest.userID, webGetL1DataRequest.password()) == -1) {
+            if (AuthenticationDBConnection.getInstance().getUserType(webGetL1DataRequest.userID, webGetL1DataRequest.password()) <= UserTypeConstants.USER_TYPE_PREMIUM) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }

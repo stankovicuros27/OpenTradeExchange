@@ -11,14 +11,14 @@ public class AuthenticationDBUsersInitializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AuthenticationDBUsersInitializer.class);
 
-    private static final String CREATE_USER_TABLE_QUERY =
+    private static final String CREATE_USERS_TABLE_QUERY =
             "CREATE TABLE IF NOT EXISTS `users` (\n" +
-            "\t`userID` INT unsigned NOT NULL AUTO_INCREMENT,\n" +
-            "\t`username` VARCHAR(64) NOT NULL,\n" +
-            "\t`password` VARCHAR(64) NOT NULL,\n" +
-            "\t`userType` INT unsigned NOT NULL,\n" +
-            "\tUNIQUE (`username`),\n" +
-            "\tPRIMARY KEY (`userID`)\n" +
+            "`userID` INT unsigned NOT NULL AUTO_INCREMENT,\n" +
+            "`username` VARCHAR(64) NOT NULL,\n" +
+            "`password` VARCHAR(64) NOT NULL,\n" +
+            "`userType` INT unsigned NOT NULL,\n" +
+            "UNIQUE (`username`),\n" +
+            "PRIMARY KEY (`userID`)\n" +
             ");";
 
     private static final String INSERT_ADMIN_QUERY =
@@ -28,7 +28,7 @@ public class AuthenticationDBUsersInitializer {
     static void initializeUsersTable(AuthenticationDBConnection authenticationDBConnection) {
         try {
             LOGGER.info("Initializing AuthenticationDB users table");
-            authenticationDBConnection.executeUpdate(CREATE_USER_TABLE_QUERY);
+            authenticationDBConnection.executeUpdate(CREATE_USERS_TABLE_QUERY);
             authenticationDBConnection.executeUpdate(INSERT_ADMIN_QUERY);
         } catch (SQLException e) {
             LOGGER.info(e.toString());

@@ -26,7 +26,6 @@ public class ExchangeServerInitializer {
             throw new RuntimeException(e);
         }
 
-
         initializeContextFromProperties();
         startExchangeServer();
 
@@ -41,6 +40,7 @@ public class ExchangeServerInitializer {
                 throw new RuntimeException(e);
             }
         }
+
     }
 
     private static void initializeContextFromProperties() {

@@ -8,6 +8,7 @@ import api.messages.trading.MicroFIXSide;
 import api.messages.trading.response.IMicroFIXResponse;
 import api.messages.trading.response.IMicroFIXResponseFactory;
 import authenticationdb.AuthenticationDBConnection;
+import authenticationdb.UserTypeConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import impl.messages.trading.response.MicroFIXResponseFactory;
@@ -33,12 +34,17 @@ public class PlaceOrderWebServlet extends HttpServlet {
         ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);;
         WebPlaceOrderRequest webPlaceOrderRequest = objectMapper.readValue(requestString, WebPlaceOrderRequest.class);
         try {
-            if (AuthenticationDBConnection.getInstance().getUserType(webPlaceOrderRequest.userID, webPlaceOrderRequest.password()) == -1) {
+            if (AuthenticationDBConnection.getInstance().getUserType(webPlaceOrderRequest.userID, webPlaceOrderRequest.password()) <= UserTypeConstants.USER_TYPE_PREMIUM) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+        IMatchingEngine matchingEngine = ExchangeServerContext.getInstance().getMatchingEngine();
+        if (!matchingEngine.containsOrderBook(webPlaceOrderRequest.bookID)) {
+            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "BookID doesn't exist!");
+            return;
         }
         IMicroFIXResponse microFIXResponse = sendPlaceOrderRequest(webPlaceOrderRequest);
         objectMapper.writeValue(response.getWriter(), microFIXResponse);
@@ -46,21 +52,11 @@ public class PlaceOrderWebServlet extends HttpServlet {
 
     private IMicroFIXResponse sendPlaceOrderRequest(WebPlaceOrderRequest webPlaceOrderRequest) {
         IMatchingEngine matchingEngine = ExchangeServerContext.getInstance().getMatchingEngine();
-        MicroFIXSide microFIXSide = null;
+        MicroFIXSide microFIXSide;
         try {
             microFIXSide = MicroFIXSide.fromString(webPlaceOrderRequest.side);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-        if (!matchingEngine.containsOrderBook(webPlaceOrderRequest.bookID)) {
-            return externalResponseFactory.getErrorAckResponse(
-                    webPlaceOrderRequest.bookID,
-                    webPlaceOrderRequest.userID,
-                    webPlaceOrderRequest.price,
-                    microFIXSide,
-                    webPlaceOrderRequest.volume,
-                    webPlaceOrderRequest.externalTimestamp
-            );
         }
         IOrderBook orderBook = matchingEngine.getOrderBook(webPlaceOrderRequest.bookID);
         Side side = microFIXSide == MicroFIXSide.BUY ? Side.BUY : Side.SELL;
