@@ -26,15 +26,11 @@ public class RegisterUserWebServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Username already exists!");
                 return;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        try {
             AuthenticationDBConnection.getInstance().registerUser(webRegisterUserRequest.username, webRegisterUserRequest.password);
+            objectMapper.writeValue(response.getWriter(), "User submitted!");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        objectMapper.writeValue(response.getWriter(), "User submitted!");
     }
 
     private record WebRegisterUserRequest(String username, String password) { }

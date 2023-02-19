@@ -27,15 +27,15 @@ public class SetUserTypeWebServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        try {
+            if (!AuthenticationDBConnection.getInstance().isUserIDExists(webSetUserTypeRequest.userIDToSet)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "User doesn't exist!");
+                return;
+            }
             AuthenticationDBConnection.getInstance().setUserType(webSetUserTypeRequest.userIDToSet, webSetUserTypeRequest.userType);
+            objectMapper.writeValue(response.getWriter(), "User type changed!");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        objectMapper.writeValue(response.getWriter(), "User type changed!");
     }
 
     private record WebSetUserTypeRequest(int userID, String password, int userIDToSet, int userType) { }

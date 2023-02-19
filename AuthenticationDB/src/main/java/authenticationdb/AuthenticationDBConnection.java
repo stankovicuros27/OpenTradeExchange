@@ -94,6 +94,16 @@ public class AuthenticationDBConnection {
         }
     }
 
+    public synchronized boolean isUserIDExists(int userID) throws SQLException {
+        String sql = "SELECT * FROM users WHERE userID = ?";
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            preparedStatement.setInt(1, userID);
+            try (ResultSet rs = preparedStatement.executeQuery()) {
+                return rs.next();
+            }
+        }
+    }
+
     public synchronized List<User> getAllUsers() throws SQLException {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM users";

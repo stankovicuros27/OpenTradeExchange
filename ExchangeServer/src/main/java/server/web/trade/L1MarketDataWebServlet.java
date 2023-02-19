@@ -36,21 +36,21 @@ public class L1MarketDataWebServlet extends HttpServlet {
         ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
         WebGetL1DataRequest webGetL1DataRequest = objectMapper.readValue(requestString, WebGetL1DataRequest.class);
         try {
-            if (AuthenticationDBConnection.getInstance().getUserType(webGetL1DataRequest.userID, webGetL1DataRequest.password()) <= UserTypeConstants.USER_TYPE_PREMIUM) {
+            if (AuthenticationDBConnection.getInstance().getUserType(webGetL1DataRequest.userID, webGetL1DataRequest.password()) <= UserTypeConstants.USER_TYPE_NOT_ACCEPTED) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
+            IMatchingEngine matchingEngine = ExchangeServerContext.getInstance().getMatchingEngine();
+            if (!matchingEngine.containsOrderBook(webGetL1DataRequest.bookID)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "BookID doesn't exist!");
+                return;
+            }
+            IOrderBook orderBook = matchingEngine.getOrderBook(webGetL1DataRequest.bookID);
+            IMicroFIXL1DataMessage microFIXL1DataMessage = getL1DataMessage(orderBook);
+            objectMapper.writeValue(response.getWriter(), microFIXL1DataMessage);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        IMatchingEngine matchingEngine = ExchangeServerContext.getInstance().getMatchingEngine();
-        if (!matchingEngine.containsOrderBook(webGetL1DataRequest.bookID)) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "BookID doesn't exist!");
-            return;
-        }
-        IOrderBook orderBook = matchingEngine.getOrderBook(webGetL1DataRequest.bookID);
-        IMicroFIXL1DataMessage microFIXL1DataMessage = getL1DataMessage(orderBook);
-        objectMapper.writeValue(response.getWriter(), microFIXL1DataMessage);
     }
 
     private IMicroFIXL1DataMessage getL1DataMessage(IOrderBook orderBook) {

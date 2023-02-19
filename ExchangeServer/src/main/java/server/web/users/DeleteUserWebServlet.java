@@ -27,15 +27,15 @@ public class DeleteUserWebServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        try {
+            if (!AuthenticationDBConnection.getInstance().isUserIDExists(webDeleteUserRequest.userIDToDelete)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "User doesn't exist!");
+                return;
+            }
             AuthenticationDBConnection.getInstance().deleteUser(webDeleteUserRequest.userIDToDelete);
+            objectMapper.writeValue(response.getWriter(), "User deleted!");
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        objectMapper.writeValue(response.getWriter(), "User deleted!");
     }
 
     private record WebDeleteUserRequest(int userID, String password, int userIDToDelete) { }

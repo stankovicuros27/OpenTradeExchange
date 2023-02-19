@@ -29,16 +29,11 @@ public class GetAllUsersWebServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
+            List<User> allUsers = AuthenticationDBConnection.getInstance().getAllUsers();
+            objectMapper.writeValue(response.getWriter(), allUsers);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        List<User> allUsers;
-        try {
-            allUsers = AuthenticationDBConnection.getInstance().getAllUsers();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        objectMapper.writeValue(response.getWriter(), allUsers);
     }
 
     private record WebGetAllUsersRequest(int userID, String password) { }

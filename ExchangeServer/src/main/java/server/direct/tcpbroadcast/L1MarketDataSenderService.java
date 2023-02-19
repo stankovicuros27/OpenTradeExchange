@@ -3,7 +3,6 @@ package server.direct.tcpbroadcast;
 import api.messages.data.IMicroFIXL1DataMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import server.direct.core.ExchangeResponseSenderService;
 
 import java.util.HashMap;
 import java.util.Map;

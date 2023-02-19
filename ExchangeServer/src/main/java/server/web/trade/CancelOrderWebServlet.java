@@ -35,20 +35,20 @@ public class CancelOrderWebServlet extends HttpServlet {
         ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
         WebCancelOrderRequest webCancelOrderRequest = objectMapper.readValue(requestString, WebCancelOrderRequest.class);
         try {
-            if (AuthenticationDBConnection.getInstance().getUserType(webCancelOrderRequest.userID, webCancelOrderRequest.password()) <= UserTypeConstants.USER_TYPE_PREMIUM) {
+            if (AuthenticationDBConnection.getInstance().getUserType(webCancelOrderRequest.userID, webCancelOrderRequest.password()) <= UserTypeConstants.USER_TYPE_NOT_ACCEPTED) {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
+            IMatchingEngine matchingEngine = ExchangeServerContext.getInstance().getMatchingEngine();
+            if (!matchingEngine.containsOrderBook(webCancelOrderRequest.bookID)) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "BookID doesn't exist!");
+                return;
+            }
+            IMicroFIXResponse microFIXResponse = sendCancelOrderRequest(webCancelOrderRequest);
+            objectMapper.writeValue(response.getWriter(), microFIXResponse);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        IMatchingEngine matchingEngine = ExchangeServerContext.getInstance().getMatchingEngine();
-        if (!matchingEngine.containsOrderBook(webCancelOrderRequest.bookID)) {
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, "BookID doesn't exist!");
-            return;
-        }
-        IMicroFIXResponse microFIXResponse = sendCancelOrderRequest(webCancelOrderRequest);
-        objectMapper.writeValue(response.getWriter(), microFIXResponse);
     }
 
     private IMicroFIXResponse sendCancelOrderRequest(WebCancelOrderRequest webCancelOrderRequest) {
