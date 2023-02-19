@@ -31,6 +31,12 @@
             <version>1.0-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>opentradeexchange</groupId>
+            <artifactId>TradingDataDB</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>compile</scope>
+        </dependency>
 
         <!--JETTY SERVER-->
         <dependency>

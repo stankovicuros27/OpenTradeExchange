@@ -15,7 +15,7 @@ public class AuthenticationDBConnection {
     private static final String SQL_DB_URL_FORMAT = "jdbc:mysql://%s/authenticationdb";
     private static final String SQL_DB_USERNAME = "root";
     private static final String SQL_DB_PASSWORD = "root";
-    private static final String AUTH_DB_URL = System.getenv("AUTH_DB_URL");
+    private static final String AUTH_DB_ADDRESS = System.getenv("AUTH_DB_URL");
 
     private static AuthenticationDBConnection instance = null;
 
@@ -23,7 +23,7 @@ public class AuthenticationDBConnection {
 
     private AuthenticationDBConnection() throws ClassNotFoundException, SQLException {
         Class.forName(JDBC_DRIVER);
-        String sqlDbUrl = String.format(SQL_DB_URL_FORMAT, AUTH_DB_URL);
+        String sqlDbUrl = String.format(SQL_DB_URL_FORMAT, AUTH_DB_ADDRESS);
         connection = DriverManager.getConnection(sqlDbUrl, SQL_DB_USERNAME, SQL_DB_PASSWORD);
     }
 

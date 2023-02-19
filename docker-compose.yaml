@@ -8,8 +8,8 @@ services:
     cap_add:
       - SYS_NICE
     environment:
-      - MYSQL_DATABASE=authenticationdb
-      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE = authenticationdb
+      - MYSQL_ROOT_PASSWORD = root
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       timeout: 10s
@@ -21,13 +21,37 @@ services:
     networks:
       - exchangenetwork
 
+  # Mongo exchange trading data DB
+  tradingDataDB:
+    image: mongo
+    environment:
+      - MONGO_INITDB_DATABASE = tradingdatadb
+      - MONGO_INITDB_ROOT_USERNAME = root
+      - MONGO_INITDB_ROOT_PASSWORD = root
+    command: mongod --quiet --logpath /dev/null
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/productiondb --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+    depends_on:
+      - authenticationDB
+    ports:
+      - "27017:27017"
+    volumes:
+      - tradingdbdata:/data/db
+    networks:
+      - exchangenetwork
+
   # Exchange Server
   exchangeServer:
     image: stankovicuros27/opentradeexchange
     environment:
       - AUTH_DB_URL=authenticationDB
+      - TRADE_DATA_DB_URL=tradingDataDB
     depends_on:
-      - authenticationDB
+      - tradingDataDB
     ports:
       - "9999:9999"
       - "9998:9998"
@@ -41,3 +65,4 @@ networks:
 
 volumes:
   authenticationdbdata:
+  tradingdbdata:

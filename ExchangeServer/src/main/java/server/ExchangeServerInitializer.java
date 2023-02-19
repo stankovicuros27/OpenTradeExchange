@@ -5,6 +5,7 @@ import authenticationdb.AuthenticationDBConnection;
 import server.direct.ServerManager;
 import trader.agents.ITraderAgentManager;
 import trader.agents.controlled.ControlledTraderAgentManager;
+import tradingdatadb.TradingDataDBConnection;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -28,6 +29,8 @@ public class ExchangeServerInitializer {
 
         initializeContextFromProperties();
         startExchangeServer();
+        
+        testMongoDB();
 
         // Start dummy traders
         for (IOrderBook orderBook : ExchangeServerContext.getInstance().getMatchingEngine().getAllOrderBooks()) {
@@ -41,6 +44,16 @@ public class ExchangeServerInitializer {
             }
         }
 
+    }
+
+    private static void testMongoDB() {
+        TradingDataDBConnection.initialize();
+        TradingDataDBConnection.getInstance().testDB();
+        try {
+            Thread.sleep(100000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     private static void initializeContextFromProperties() {

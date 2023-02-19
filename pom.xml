@@ -16,6 +16,7 @@
         <module>TraderAgents</module>
         <module>MicroFIX</module>
         <module>AuthenticationDB</module>
+        <module>TradingDataDB</module>
     </modules>
 
     <properties>
@@ -83,6 +84,13 @@
                 <groupId>com.mysql</groupId>
                 <artifactId>mysql-connector-j</artifactId>
                 <version>8.0.31</version>
+            </dependency>
+
+            <!-- MONGO DATABASE -->
+            <dependency>
+                <groupId>org.mongodb</groupId>
+                <artifactId>mongo-java-driver</artifactId>
+                <version>3.12.12</version>
             </dependency>
 
             <!-- JSON -->
