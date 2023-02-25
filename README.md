@@ -1,6 +1,6 @@
 ## Open Trade Exchange
 
-![OpenTradeExchange](https://imgur.com/wWzKpGJ)
+![OpenTradeExchange](https://i.imgur.com/wWzKpGJ.jpg)
 
 ### Simple financial electronic exchange system
 
