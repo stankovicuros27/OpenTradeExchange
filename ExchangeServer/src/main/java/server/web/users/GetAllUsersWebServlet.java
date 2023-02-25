@@ -1,7 +1,7 @@
 package server.web.users;
 
 import authenticationdb.AuthenticationDBConnection;
-import authenticationdb.User;
+import authenticationdb.UserModel;
 import authenticationdb.UserTypeConstants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -29,8 +29,8 @@ public class GetAllUsersWebServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
-            List<User> allUsers = AuthenticationDBConnection.getInstance().getAllUsers();
-            objectMapper.writeValue(response.getWriter(), allUsers);
+            List<UserModel> allUserModels = AuthenticationDBConnection.getInstance().getAllUsers();
+            objectMapper.writeValue(response.getWriter(), allUserModels);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

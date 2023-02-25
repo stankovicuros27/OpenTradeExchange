@@ -104,13 +104,13 @@ public class AuthenticationDBConnection {
         }
     }
 
-    public synchronized List<User> getAllUsers() throws SQLException {
-        List<User> users = new ArrayList<>();
+    public synchronized List<UserModel> getAllUsers() throws SQLException {
+        List<UserModel> userModels = new ArrayList<>();
         String sql = "SELECT * FROM users";
         try (Statement statement = connection.createStatement()) {
             try (ResultSet rs = statement.executeQuery(sql)) {
                 while(rs.next()) {
-                    users.add(new User(
+                    userModels.add(new UserModel(
                             rs.getInt(1),
                             rs.getString(2),
                             rs.getString(3),
@@ -119,7 +119,7 @@ public class AuthenticationDBConnection {
                 }
             }
         }
-        return users;
+        return userModels;
     }
 
     synchronized void executeUpdate(String update) throws SQLException {

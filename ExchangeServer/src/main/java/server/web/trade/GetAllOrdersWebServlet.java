@@ -9,8 +9,8 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.bson.Document;
 import server.web.WebServletsShared;
+import tradingdatadb.OrderModel;
 import tradingdatadb.TradingDataDBConnection;
 
 import java.io.IOException;
@@ -30,8 +30,8 @@ public class GetAllOrdersWebServlet extends HttpServlet {
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
                 return;
             }
-            List<Document> orderDocuments = TradingDataDBConnection.getInstance().getAllOrders(webGetAllOrdersRequest.userID);
-            objectMapper.writeValue(response.getWriter(), orderDocuments);
+            List<OrderModel> orders = TradingDataDBConnection.getInstance().getAllOrders(webGetAllOrdersRequest.userID);
+            objectMapper.writeValue(response.getWriter(), orders);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

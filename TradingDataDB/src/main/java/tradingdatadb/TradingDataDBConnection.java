@@ -34,6 +34,8 @@ public class TradingDataDBConnection {
     private TradingDataDBConnection() {
         mongoClient = new MongoClient(MONGODB_TRADE_DB_ADDRESS, MONGODB_CLIENT_PORT);
         mongoDatabase = mongoClient.getDatabase(MONGODB_DATABASE);
+        mongoDatabase.getCollection(ORDER_COLLECTION).drop();
+        mongoDatabase.createCollection(ORDER_COLLECTION);
     }
 
     public static void initialize() {
@@ -51,15 +53,27 @@ public class TradingDataDBConnection {
         return instance;
     }
 
-    public List<Document> getAllOrders(int userID) {
+    public List<OrderModel> getAllOrders(int userID) {
         MongoCollection<Document> orderCollection = mongoDatabase.getCollection(ORDER_COLLECTION);
         FindIterable<Document> orders = orderCollection.find(Filters.eq("userID", userID));
         Iterator iterator = orders.iterator();
-        List<Document> orderDocuments = new ArrayList<>();
+        List<OrderModel> orderModels = new ArrayList<>();
         while(iterator.hasNext()) {
-            orderDocuments.add((Document) iterator.next());
+            Document orderDocument = (Document) iterator.next();
+            OrderModel orderModel = new OrderModel(
+                    orderDocument.getString("bookID"),
+                    orderDocument.getInteger("userID"),
+                    orderDocument.getInteger("orderID"),
+                    orderDocument.getDouble("price"),
+                    orderDocument.getString("side"),
+                    orderDocument.getInteger("volume"),
+                    orderDocument.getInteger("filledVolume"),
+                    orderDocument.getInteger("timestamp"),
+                    orderDocument.getString("status")
+            );
+            orderModels.add(orderModel);
         }
-        return orderDocuments;
+        return orderModels;
     }
 
     public void insertPlaceOrder(IMicroFIXResponse placeOrderAckResponse) {
@@ -73,7 +87,7 @@ public class TradingDataDBConnection {
         orderDocument.append("volume", placeOrderAckResponse.getVolume());
         orderDocument.append("filledVolume", 0);
         orderDocument.append("timestamp", placeOrderAckResponse.getTimestamp());
-        orderDocument.append("status", "active");
+        orderDocument.append("status", OrderStatusConstants.ACTIVE);
         orderCollection.insertOne(orderDocument);
     }
 
@@ -89,7 +103,7 @@ public class TradingDataDBConnection {
         String bookID = tradeResponse.getBookID();
         int userID = tradeResponse.getUserID();
         int orderID = tradeResponse.getOrderID();
-        updateOrderStatus(bookID, userID, orderID, "closed");
+        updateOrderStatus(bookID, userID, orderID, OrderStatusConstants.CLOSED);
     }
 
     private void updateOrderVolume(String bookID, int userID, int orderID, int filledVolume) {
@@ -98,13 +112,14 @@ public class TradingDataDBConnection {
         orderCollection.updateOne(filters, Updates.inc("filledVolume", filledVolume));
         Document order = orderCollection.find(filters).iterator().next();
         if (Objects.equals(order.getInteger("filledVolume"), order.getInteger("volume"))) {
-            updateOrderStatus(bookID, userID, orderID, "closed");
+            updateOrderStatus(bookID, userID, orderID, OrderStatusConstants.CLOSED);
         }
     }
 
-    private void updateOrderStatus(String bookID, int userID, int orderID, String orderStatus) {
+    private void updateOrderStatus(String bookID, int userID, int orderID, OrderStatusConstants orderStatus) {
         MongoCollection<Document> orderCollection = mongoDatabase.getCollection(ORDER_COLLECTION);
         Bson filters = Filters.and(Filters.eq("bookID", bookID), Filters.eq("userID", userID), Filters.eq("orderID", orderID));
         orderCollection.updateOne(filters, Updates.set("status", orderStatus));
     }
+
 }
