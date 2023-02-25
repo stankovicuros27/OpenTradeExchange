@@ -1,8 +1,10 @@
 package server.direct.core;
 
 import api.messages.trading.response.IMicroFIXResponse;
+import api.messages.trading.response.MicroFIXResponseType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import tradingdatadb.TradingDataDBConnection;
 
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +32,9 @@ public class ExchangeResponseSenderService {
 
     public synchronized void distributeMessages(List<IMicroFIXResponse> microFIXResponses) {
         for (IMicroFIXResponse microFIXResponse : microFIXResponses) {
+            if (microFIXResponse.getExternalResponseType() == MicroFIXResponseType.TRADE) {
+                TradingDataDBConnection.getInstance().insertTrade(microFIXResponse);
+            }
             connectionHandlers.get(microFIXResponse.getUserID()).sendMessage(microFIXResponse);
         }
     }

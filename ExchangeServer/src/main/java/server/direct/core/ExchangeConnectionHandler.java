@@ -20,6 +20,7 @@ import impl.messages.trading.response.MicroFIXResponseFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import server.messages.InternalToExternalResponseTranslator;
+import tradingdatadb.TradingDataDBConnection;
 
 import java.io.*;
 import java.net.Socket;
@@ -126,7 +127,7 @@ public class ExchangeConnectionHandler implements Runnable {
         }
         if (responses != null) {
             for (IResponse response : responses) {
-                exchangeResponseSenderService.distributeMessages(InternalToExternalResponseTranslator.getExternalResponse(response));
+                exchangeResponseSenderService.distributeMessages(InternalToExternalResponseTranslator.getExternalResponses(response));
             }
         }
     }
@@ -151,6 +152,7 @@ public class ExchangeConnectionHandler implements Runnable {
                 placeOrderRequest.getTotalVolume(),
                 externalTimestamp
         );
+        TradingDataDBConnection.getInstance().insertPlaceOrder(placeOrderAckResponse);
         sendMessage(placeOrderAckResponse);
         return orderBook.placeOrder(placeOrderRequest);
     }
@@ -169,6 +171,7 @@ public class ExchangeConnectionHandler implements Runnable {
                 cancelOrderRequest.getOrderID(),
                 externalTimestamp
         );
+        TradingDataDBConnection.getInstance().insertCancelOrder(cancelOrderAckResponse);
         sendMessage(cancelOrderAckResponse);
         return List.of(orderBook.cancelOrder(cancelOrderRequest));
     }

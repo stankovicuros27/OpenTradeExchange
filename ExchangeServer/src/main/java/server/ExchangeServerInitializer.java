@@ -23,14 +23,13 @@ public class ExchangeServerInitializer {
 
         try {
             AuthenticationDBConnection.initialize();
+            TradingDataDBConnection.initialize();
         } catch (SQLException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
 
         initializeContextFromProperties();
         startExchangeServer();
-        
-        testMongoDB();
 
         // Start dummy traders
         for (IOrderBook orderBook : ExchangeServerContext.getInstance().getMatchingEngine().getAllOrderBooks()) {
@@ -44,16 +43,6 @@ public class ExchangeServerInitializer {
             }
         }
 
-    }
-
-    private static void testMongoDB() {
-        TradingDataDBConnection.initialize();
-        TradingDataDBConnection.getInstance().testDB();
-        try {
-            Thread.sleep(100000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     private static void initializeContextFromProperties() {

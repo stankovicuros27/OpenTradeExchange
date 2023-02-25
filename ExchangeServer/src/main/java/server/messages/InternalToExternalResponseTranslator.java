@@ -17,7 +17,7 @@ public enum InternalToExternalResponseTranslator {
 
     private static final IMicroFIXResponseFactory externalResponseFactory = new MicroFIXResponseFactory();
 
-    public static List<IMicroFIXResponse> getExternalResponse(IResponse internalResponse) {
+    public static List<IMicroFIXResponse> getExternalResponses(IResponse internalResponse) {
         if (internalResponse.getType() == ResponseType.OrderStatusResponse) {
             IOrderStatusResponse orderStatusInternalResponse = (IOrderStatusResponse) internalResponse;
             return List.of(getExternalResponseFromOrderStatusInternalResponse(orderStatusInternalResponse));

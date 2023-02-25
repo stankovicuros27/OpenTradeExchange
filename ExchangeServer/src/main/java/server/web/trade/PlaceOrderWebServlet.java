@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import server.ExchangeServerContext;
 import server.web.WebServletsShared;
+import tradingdatadb.TradingDataDBConnection;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -68,7 +69,7 @@ public class PlaceOrderWebServlet extends HttpServlet {
         );
         int externalTimestamp = webPlaceOrderRequest.externalTimestamp;
         orderBook.placeOrder(placeOrderRequest);
-        return externalResponseFactory.getReceivedPlaceOrderAckResponse(
+        IMicroFIXResponse placeOrderAckResponse = externalResponseFactory.getReceivedPlaceOrderAckResponse(
                 placeOrderRequest.getBookID(),
                 placeOrderRequest.getUserID(),
                 placeOrderRequest.getOrderID(),
@@ -77,6 +78,8 @@ public class PlaceOrderWebServlet extends HttpServlet {
                 placeOrderRequest.getTotalVolume(),
                 externalTimestamp
         );
+        TradingDataDBConnection.getInstance().insertPlaceOrder(placeOrderAckResponse);
+        return placeOrderAckResponse;
     }
 
     private record WebPlaceOrderRequest(int userID, String password, String bookID, double price, String side, int volume, int externalTimestamp) { }

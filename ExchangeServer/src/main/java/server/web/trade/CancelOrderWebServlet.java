@@ -19,6 +19,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import server.ExchangeServerContext;
 import server.web.WebServletsShared;
+import tradingdatadb.TradingDataDBConnection;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -67,12 +68,14 @@ public class CancelOrderWebServlet extends HttpServlet {
                     webCancelOrderRequest.orderID
             );
         }
-        return externalResponseFactory.getReceivedCancelOrderAckResponse(
+        IMicroFIXResponse cancelOrderAckResponse = externalResponseFactory.getReceivedCancelOrderAckResponse(
                 cancelOrderRequest.getBookID(),
                 cancelOrderRequest.getUserID(),
                 cancelOrderRequest.getOrderID(),
                 externalTimestamp
         );
+        TradingDataDBConnection.getInstance().insertCancelOrder(cancelOrderAckResponse);
+        return cancelOrderAckResponse;
     }
 
     private record WebCancelOrderRequest(int userID, String password, String bookID, int orderID, int externalTimestamp) { }
