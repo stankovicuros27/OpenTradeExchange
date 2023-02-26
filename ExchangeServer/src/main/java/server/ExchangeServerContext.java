@@ -18,6 +18,8 @@ public class ExchangeServerContext {
     private final int l2TimeoutMS;
     private final boolean multicastEnabled;
     private final boolean analyticsEnabled;
+    private final boolean authenticationDbEnabled;
+    private final boolean tradingDbEnabled;
 
     public static void initialize(
             IMatchingEngineConfiguration matchingEngineConfiguration,
@@ -30,7 +32,9 @@ public class ExchangeServerContext {
             int l2DataMulticastPort,
             int l2TimeoutMS,
             boolean multicastEnabled,
-            boolean analyticsEnabled
+            boolean analyticsEnabled,
+            boolean authenticationDbEnabled,
+            boolean tradingDbEnabled
     ) {
         if (instance != null) {
             throw new IllegalStateException();
@@ -46,7 +50,9 @@ public class ExchangeServerContext {
                 l2DataMulticastPort,
                 l2TimeoutMS,
                 multicastEnabled,
-                analyticsEnabled);
+                analyticsEnabled,
+                authenticationDbEnabled,
+                tradingDbEnabled);
     }
 
     public static ExchangeServerContext getInstance() {
@@ -56,7 +62,7 @@ public class ExchangeServerContext {
         return instance;
     }
 
-    private ExchangeServerContext(IMatchingEngineConfiguration matchingEngineConfiguration, int tcpExchangePort, String multicastIp, int l1DataTcpPort, int l1DataMulticastPort, int l1TimeoutMS, int l2DataTcpPort, int l2DataMulticastPort, int l2TimeoutMS, boolean multicastEnabled, boolean analyticsEnabled) {
+    private ExchangeServerContext(IMatchingEngineConfiguration matchingEngineConfiguration, int tcpExchangePort, String multicastIp, int l1DataTcpPort, int l1DataMulticastPort, int l1TimeoutMS, int l2DataTcpPort, int l2DataMulticastPort, int l2TimeoutMS, boolean multicastEnabled, boolean analyticsEnabled, boolean authenticationDbEnabled, boolean tradingDbEnabled) {
         matchingEngine = new MatchingEngine(matchingEngineConfiguration);
         this.tcpExchangePort = tcpExchangePort;
         this.multicastIp = multicastIp;
@@ -68,6 +74,8 @@ public class ExchangeServerContext {
         this.l2TimeoutMS = l2TimeoutMS;
         this.multicastEnabled = multicastEnabled;
         this.analyticsEnabled = analyticsEnabled;
+        this.authenticationDbEnabled = authenticationDbEnabled;
+        this.tradingDbEnabled = tradingDbEnabled;
     }
 
     public MatchingEngine getMatchingEngine() {
@@ -113,5 +121,14 @@ public class ExchangeServerContext {
     public boolean isAnalyticsEnabled() {
         return analyticsEnabled;
     }
+
+    public boolean isAuthenticationDbEnabled() {
+        return authenticationDbEnabled;
+    }
+
+    public boolean isTradingDbEnabled() {
+        return tradingDbEnabled;
+    }
+
 
 }

@@ -42,7 +42,7 @@ public class ControlledTraderAgentManager implements ITraderAgentManager {
             double priceDeviation = PRICE_DEVIATION_FACTOR * basePrice * random.nextDouble();
             ControlledTraderAgent traderAgent = new ControlledAgentLiquidityProvider(orderBook.getBookID(), basePrice, priceDeviation, BASE_VOLUME, VOLUME_DEVIATION, MAX_ORDERS);
             controlledTraderAgents.add(traderAgent);
-            TraderAgentRunner traderAgentRunner = new LocalTraderAgentRunner(traderAgent, orderBook, 1000);
+            TraderAgentRunner traderAgentRunner = new LocalTraderAgentRunner(traderAgent, orderBook, 0, false);
             threadPool.execute(traderAgentRunner);
         }
 

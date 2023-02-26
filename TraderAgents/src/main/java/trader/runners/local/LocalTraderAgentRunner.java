@@ -25,10 +25,12 @@ public class LocalTraderAgentRunner extends TraderAgentRunner {
 
     private final IOrderRequestFactory orderRequestFactory;
     private final IMicroFIXResponseFactory externalResponseFactory = new MicroFIXResponseFactory();
+    private final boolean shouldSleep;
 
-    public LocalTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook, int timeoutMs) {
+    public LocalTraderAgentRunner(ITraderAgent traderAgent, IOrderBook orderBook, int timeoutMs, boolean shouldSleep) {
         super(traderAgent, orderBook, timeoutMs);
         this.orderRequestFactory = orderBook.getOrderRequestFactory();
+        this.shouldSleep = shouldSleep;
     }
 
     @Override
@@ -43,10 +45,12 @@ public class LocalTraderAgentRunner extends TraderAgentRunner {
                     sendCancelOrderRequest(externalRequest);
                 }
             }
-            try {
-                Thread.sleep((long) (Math.random() * timeoutMs));
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+            if (shouldSleep) {
+                try {
+                    Thread.sleep((long) (Math.random() * timeoutMs));
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
     }

@@ -21,13 +21,6 @@ public class ExchangeServerInitializer {
 
     public static void initialize() {
 
-        try {
-            AuthenticationDBConnection.initialize();
-            TradingDataDBConnection.initialize();
-        } catch (SQLException | ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
-
         initializeContextFromProperties();
         startExchangeServer();
 
@@ -50,6 +43,16 @@ public class ExchangeServerInitializer {
             Properties properties = new Properties();
             properties.load(input);
             ExchangeServerConfigPropertiesReader exchangeServerConfigPropertiesReader = new ExchangeServerConfigPropertiesReader(properties);
+            if (exchangeServerConfigPropertiesReader.isAuthenticationDbEnabled()) {
+                try {
+                    AuthenticationDBConnection.initialize();
+                } catch (SQLException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+            if (exchangeServerConfigPropertiesReader.isTradingDbEnabled()) {
+                TradingDataDBConnection.initialize();
+            }
             ExchangeServerContext.initialize(
                     exchangeServerConfigPropertiesReader.getMatchingEngineConfiguration(),
                     exchangeServerConfigPropertiesReader.getExchangeTCPPort(),
@@ -61,7 +64,9 @@ public class ExchangeServerInitializer {
                     exchangeServerConfigPropertiesReader.getL2DataMulticastPort(),
                     exchangeServerConfigPropertiesReader.getL2TimeoutMs(),
                     exchangeServerConfigPropertiesReader.isMulticastEnabled(),
-                    exchangeServerConfigPropertiesReader.isAnalyticsEnabled()
+                    exchangeServerConfigPropertiesReader.isAnalyticsEnabled(),
+                    exchangeServerConfigPropertiesReader.isAuthenticationDbEnabled(),
+                    exchangeServerConfigPropertiesReader.isTradingDbEnabled()
             );
         } catch (IOException e) {
             throw new RuntimeException(e);

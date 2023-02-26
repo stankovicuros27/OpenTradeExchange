@@ -19,6 +19,10 @@ public class ExchangeServerConfigPropertiesReader {
     private static final String L2_TIMEOUT_MS_KEY = "l2TimeoutMS";
     private static final String MULTICAST_ENABLED_KEY = "multicastEnabled";
     private static final String EXCHANGE_ANALYTICS_ENABLED = "analyticsEnabled";
+    private static final String AUTHENTICATION_DB_ENABLED = "authenticationDbEnabled";
+    private static final String TRADING_DB_ENABLED = "tradingDbEnabled";
+
+
 
     private final Properties properties;
 
@@ -77,6 +81,14 @@ public class ExchangeServerConfigPropertiesReader {
 
     public boolean isAnalyticsEnabled() {
         return Boolean.parseBoolean(properties.getProperty(EXCHANGE_ANALYTICS_ENABLED));
+    }
+
+    public boolean isAuthenticationDbEnabled() {
+        return Boolean.parseBoolean(properties.getProperty(AUTHENTICATION_DB_ENABLED));
+    }
+
+    public boolean isTradingDbEnabled() {
+        return Boolean.parseBoolean(properties.getProperty(TRADING_DB_ENABLED));
     }
 
 }
