@@ -108,3 +108,39 @@
 - Trader Agents module contains individual (dummy) trading strategies which are using both TCP and HTTP requests to communicate with the exchange.
 - Trader Agents are used for internal testing and performance testing.
 - Code from this module can be used as an example on how to make custom new trading strategies, as well as how to connect to the exchange & receive exchange data.
+
+</br>
+
+## Configuration & starting the exchange
+- In order to configure the exchange, change the server-config.properties file in the root folder.
+  - Default config:
+	```
+	exchangeServer.ip=localhost
+	matchingEngine.orderBooks=test1:1;test2:2;test3:3;test4:4
+	exchangeTcpPort=9999
+	exchangeMulticastIp=225.4.5.6
+	l1DataTCPPort=9998
+	l1DataMulticastPort=9997
+	l1TimeoutMS=500
+	l2DataTCPPort=9996
+	l2DataMulticastPort=9995
+	l2TimeoutMS=2500
+	multicastEnabled=true
+	analyticsEnabled=true
+	authenticationDbEnabled=true
+	tradingDbEnabled=true
+
+	```
+
+- In order to run the application, first create the exchange Docker image
+  - Inside project root folder run:
+	```
+	docker build -t stankovicuros27/opentradeexchange .
+	```
+
+  - Then, run 
+  ```
+  docker-compose up 
+  ```
+  which runs the docker-compose.yaml
+
