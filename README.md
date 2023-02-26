@@ -76,7 +76,6 @@
   - Web server: handles HTTP requests (higher latency, authentication on every message)
   - Direct server: handles direct TCP port connections with users (low latency, once the authentication is completed and connection established, TCP port communication is continous)
 - Both parts share the same databases and MatchingEngine, just providing different APIs for users to communicate with the system
-</br>
 - Web Server
   - Implemented as a set of Servlets, using Java Servlet features ([JakartaEE](https://jakarta.ee/ "JakartaEE")).
   - Running on [Jetty](https://www.eclipse.org/jetty/ "Jetty") server/servlet container (Jetty is run as a Maven plugin).
