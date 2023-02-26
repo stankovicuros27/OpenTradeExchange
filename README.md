@@ -53,10 +53,10 @@
 - Matching Engine is the core module of every electronic exchange, which is used to store (usually in memory) and match buy and sell orders for a given financial instrument. 
 - When buy and sell orders are matched, trade takes place which triggers a sequence of events (such as persisting trade data, updating orders & order book, notifying users...).
 - Matching Engine is usually the most critical part of trading systems when performance is considered, since each action must be performed sequentially (concurrency is not possible since strict order sequencing must be guaranteed).
- <img src="https://i.imgur.com/nXrAc8h.jpg" width="350" height="300">
+- <img src="https://i.imgur.com/nXrAc8h.jpg" width="350" height="300">
 - In this implementation, MatchingEngine is used as a container for multiple OrderBooks. OrderBooks of the same group (arbitrary) should be places inside one MatchingEngine (in future, it might be possible to add support for more complex order types including atomic orders for multiple OrderBooks inside the same MatchingEngine).
 - OrderBook is used for all trading action related to one instrument, identified by bookID. It contains all BUY orders grouped on the one side, and all SELL orders on the other side. Orders are sorted based on priority (it's usually price-time priority). OrderBook knows how to handle new requests (PlaceOrder, CancelOrder etc.) and match orders (generate Trade events).
- <img src="https://i.imgur.com/4HwbBRG.jpg">
+- <img src="https://i.imgur.com/4HwbBRG.jpg">
 - Each OrderBook contains two LimitCollections - one for BUY side, and one for SELL side. The [spread](https://www.investopedia.com/terms/s/spread.asp "spread") is calculated as difference between the best (highest) buy order and the best (lowest) sell order. Besides spread, other important information include Volume (BUY, SELL), Number of orders (BUY, SELL), [Market depth](https://www.investopedia.com/terms/m/marketdepth.asp#:~:text=Market%20depth%20refers%20to%20a,trading%20within%20an%20individual%20security. "Market depth") (number of orders at each price level - limit) and others.
   - LimitCollections are implemented as sorted maps of Limits, providing most operations to run in O(1) and some in O(logN) complexity.
 - Limits are essentially lists of Orders that share the same price (and inherently side). List is usually sorted based on some constraint. Here we have time priority - Orders which have been submitted earlier have greater priority to be matched. 
@@ -66,7 +66,7 @@
 
 #### Analytics
 - Analytics module is used to measure the performance of MatchingEngine. It shows the current state of each of the OrderBooks inside the given MatchingEngine (buy price, sell price, last trade price, volumes, number of orders...), but also the number of events taking place each second for different event types, per OrderBook.
-<img src="https://i.imgur.com/cutnIAt.jpg">
+- <img src="https://i.imgur.com/cutnIAt.jpg">
 - In the picture above, MatchingEngine has 4 independent OrderBooks (instruments), with 5 users trading each instrument. Total number of events at each of the OrderBooks reaches **~2M/s**, with capabilities of **handling ~550k/s new PlaceOrder requests**.
 - Performance testing was conducted on MacBook Pro with M1 chip (2022), showing **very good MatchingEngine performance** (even comparable with professional electronic exchange systems, but with far less robustness and functionalities).
 
@@ -87,7 +87,7 @@
   - After each TCP request sent by user is processed, Server returns the corresponding response (user action status, trade data, etc.). Communication remains open until user disconnects.
   - Along with sending responses for user requests, server also sends information about events and changes in user's orders (personalized message, sent only to affected participants). This keeps TCP connected users updated at all times.
   - Furthermore, Server broadcasts L1 and L2 market data using UDP Multicast protocol (ports and IP addresses configurable in configuration file, as well as timeout between sending data batches).
-</br>
+- </br>
 - All Server messages use MicroFIX protocol templates (separate Module that defines message structure and constraints).
 - Server updates databases after every action.
 
