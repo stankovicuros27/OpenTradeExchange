@@ -61,7 +61,7 @@ public class CancelOrderWebServlet extends HttpServlet {
         );
         int externalTimestamp = webCancelOrderRequest.externalTimestamp;
         IOrderStatusResponse orderStatusResponse = orderBook.cancelOrder(cancelOrderRequest);
-        if (orderStatusResponse.getStatus() == OrderResponseStatus.NULL_ORDER || orderStatusResponse.getStatus() == OrderResponseStatus.NULL_ORDER) {
+        if (orderStatusResponse.getStatus() == OrderResponseStatus.NULL_ORDER || orderStatusResponse.getStatus() == OrderResponseStatus.ERROR_ORDER) {
             return externalResponseFactory.getErrorResponse(
                     webCancelOrderRequest.bookID,
                     webCancelOrderRequest.userID,

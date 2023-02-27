@@ -128,7 +128,6 @@
 	analyticsEnabled=true
 	authenticationDbEnabled=true
 	tradingDbEnabled=true
-
 	```
 
 - In order to run the application, first create the exchange Docker image
@@ -138,8 +137,8 @@
 	```
 
   - Then, run 
-  ```
-  docker-compose up 
-  ```
+	```
+	docker-compose up 
+	```
   which runs the docker-compose.yaml
 

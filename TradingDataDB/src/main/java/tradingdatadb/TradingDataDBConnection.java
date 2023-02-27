@@ -53,13 +53,13 @@ public class TradingDataDBConnection {
         return instance;
     }
 
-    public List<OrderModel> getAllOrders(int userID) {
+    public synchronized List<OrderModel> getAllOrders(int userID) {
         MongoCollection<Document> orderCollection = mongoDatabase.getCollection(ORDER_COLLECTION);
         FindIterable<Document> orders = orderCollection.find(Filters.eq("userID", userID));
-        Iterator iterator = orders.iterator();
+        Iterator<Document> iterator = orders.iterator();
         List<OrderModel> orderModels = new ArrayList<>();
         while(iterator.hasNext()) {
-            Document orderDocument = (Document) iterator.next();
+            Document orderDocument = iterator.next();
             OrderModel orderModel = new OrderModel(
                     orderDocument.getString("bookID"),
                     orderDocument.getInteger("userID"),
@@ -76,7 +76,7 @@ public class TradingDataDBConnection {
         return orderModels;
     }
 
-    public void insertPlaceOrder(IMicroFIXResponse placeOrderAckResponse) {
+    public synchronized void insertPlaceOrder(IMicroFIXResponse placeOrderAckResponse) {
         MongoCollection<Document> orderCollection = mongoDatabase.getCollection(ORDER_COLLECTION);
         Document orderDocument = new Document();
         orderDocument.append("bookID", placeOrderAckResponse.getBookID());
@@ -91,7 +91,7 @@ public class TradingDataDBConnection {
         orderCollection.insertOne(orderDocument);
     }
 
-    public void insertTrade(IMicroFIXResponse tradeResponse) {
+    public synchronized void insertTrade(IMicroFIXResponse tradeResponse) {
         String bookID = tradeResponse.getBookID();
         int userID = tradeResponse.getUserID();
         int orderID = tradeResponse.getOrderID();
@@ -99,7 +99,7 @@ public class TradingDataDBConnection {
         updateOrderVolume(bookID, userID, orderID, filledVolume);
     }
 
-    public void insertCancelOrder(IMicroFIXResponse tradeResponse) {
+    public synchronized void insertCancelOrder(IMicroFIXResponse tradeResponse) {
         String bookID = tradeResponse.getBookID();
         int userID = tradeResponse.getUserID();
         int orderID = tradeResponse.getOrderID();
